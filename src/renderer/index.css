@@ -848,3 +848,143 @@ select:focus {
   font-size: 12px;
   font-style: italic;
 }
+
+/* ========== 移动端响应式布局 ========== */
+
+/* 平板及以下 (<=768px) */
+@media (max-width: 768px) {
+  /* 首页 */
+  .app-container {
+    padding: 20px 12px;
+  }
+
+  .app-header {
+    padding: 0 12px;
+    margin-bottom: 24px;
+  }
+
+  .app-title {
+    font-size: 28px;
+  }
+
+  /* 样式网格：单列 */
+  .style-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 8px;
+  }
+
+  /* 编辑器 */
+  .preview-area {
+    padding: 16px;
+    padding-bottom: 100px; /* 为底部按钮预留空间 */
+    padding-right: 16px;
+  }
+
+  .frame-wrapper img {
+    max-height: calc(100vh - 160px);
+  }
+
+  /* 浮动按钮：底部水平排列 */
+  .float-actions {
+    position: fixed;
+    right: auto;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    top: auto;
+    transform: none;
+    flex-direction: row;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background: rgba(17, 17, 17, 0.95);
+    border-top: 1px solid #333;
+    z-index: 10;
+  }
+
+  .float-btn {
+    width: 60px;
+    height: 52px;
+    border-radius: 12px;
+    font-size: 10px;
+  }
+
+  .float-btn i {
+    font-size: 20px;
+    margin-bottom: 2px;
+  }
+
+  .float-btn span {
+    font-size: 9px;
+  }
+
+  /* 编辑面板：全屏 */
+  .edit-panel {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #222;
+  }
+
+  .logo-grid {
+    grid-template-columns: repeat(5, 36px);
+    grid-auto-rows: 36px;
+  }
+
+  .logo-grid-item {
+    width: 36px;
+    height: 36px;
+  }
+}
+
+/* 手机 (<=480px) */
+@media (max-width: 480px) {
+  .app-container {
+    padding: 12px 8px;
+  }
+
+  .app-header {
+    padding: 0 8px;
+    margin-bottom: 16px;
+  }
+
+  .app-title {
+    font-size: 24px;
+  }
+
+  .style-grid {
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 4px;
+  }
+
+  .preview-area {
+    padding: 8px;
+    padding-bottom: 90px;
+  }
+
+  .float-btn {
+    width: 52px;
+    height: 48px;
+    border-radius: 10px;
+  }
+
+  .float-btn i {
+    font-size: 18px;
+  }
+
+  .float-btn span {
+    font-size: 8px;
+  }
+
+  .logo-grid {
+    grid-template-columns: repeat(4, 32px);
+    grid-auto-rows: 32px;
+    gap: 4px;
+  }
+
+  .logo-grid-item {
+    width: 32px;
+    height: 32px;
+  }
+}
