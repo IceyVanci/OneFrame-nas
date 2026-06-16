@@ -1,0 +1,131 @@
+/**
+ * Type A 样式
+ * 边框预览布局
+ */
+
+/* Type A 样式 - 原始 flex 布局 */
+/* 注意：排除 type-b 和 type-e，它们使用自己的布局 */
+.frame-wrapper.type-a,
+.frame-wrapper:not(.type-b):not(.type-e) {
+  max-width: 900px;
+  width: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* 边框内容容器 - Type A 样式 */
+/* 使用 bottom: 0 定位，JS 会限制高度等于 photoFooter 高度 */
+.border-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.border-content-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* 边框内容区域 - 使用百分比定位，相对于 border-content */
+.border-logo,
+.border-info,
+.border-focal,
+.border-right {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.border-logo {
+  left: 2.5%;
+  width: 12.5%;
+}
+
+.border-logo img {
+  max-height: 60%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+/* Logo 颜色反转 - 深色背景时将深色 logo 转为白色 */
+.border-logo img.logo-invert {
+  filter: brightness(0) invert(1);
+}
+
+.border-info {
+  left: 17.5%;
+  right: 50%;
+  justify-content: flex-end;
+}
+
+.border-info-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+  padding-right: 5%;
+}
+
+.border-focal {
+  left: 52.5%;
+  right: 20%;
+  justify-content: flex-start;
+}
+
+.border-right {
+  left: 82.5%;
+  right: 2.5%;
+  justify-content: flex-end;
+}
+
+.border-right-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+}
+
+/* 文字样式 - 基础字号 */
+.border-text {
+  font-size: 12px;
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+/* 机型 - 使用 medium (500)，参数 - 使用 normal (400)，署名 - 使用 semibold (600) */
+.border-model {
+  font-weight: 500;
+}
+
+.border-params {
+  font-weight: normal;
+}
+
+.border-signature {
+  font-weight: 600;
+}
+
+/* 时间 - 使用 normal */
+.border-time {
+  font-weight: normal;
+}
+
+/* 焦距 - 大号字体 Medium */
+.border-focal-text {
+  font-size: 24px;
+  font-weight: 500;
+}

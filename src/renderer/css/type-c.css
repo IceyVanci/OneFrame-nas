@@ -1,0 +1,135 @@
+/**
+ * Type C 样式
+ * 边框预览布局
+ * 
+ * 布局调整：
+ * - 左下：时间 + 署名
+ * - 中间：Logo
+ * - 右下：机型 + 参数
+ */
+
+/* Type C 样式 - 原始 flex 布局 */
+.frame-wrapper.type-c {
+  max-width: 900px;
+  width: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* 边框内容容器 - Type C 样式 */
+.frame-wrapper.type-c .border-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.frame-wrapper.type-c .border-content-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+/* 边框内容区域 - 使用百分比定位，相对于 border-content */
+.frame-wrapper.type-c .border-logo,
+.frame-wrapper.type-c .border-info,
+.frame-wrapper.type-c .border-focal,
+.frame-wrapper.type-c .border-left {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+/* 左下：时间 + 署名 (原来的 logo 位置) */
+.frame-wrapper.type-c .border-left {
+  left: 2.5%;
+  width: 17.5%;
+  justify-content: flex-start;
+}
+
+.frame-wrapper.type-c .border-left-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 2px;
+}
+
+/* 中间：Logo (中心在横向 65% 处，宽度 12.5%) */
+.frame-wrapper.type-c .border-logo {
+  left: 58.75%;
+  width: 12.5%;
+  justify-content: center;
+}
+
+.frame-wrapper.type-c .border-logo img {
+  max-height: 60%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+/* Logo 颜色反转 - 深色背景时将深色 logo 转为白色 */
+.frame-wrapper.type-c .border-logo img.logo-invert {
+  filter: brightness(0) invert(1);
+}
+
+/* 右下：机型 + 参数 (参数包含焦距) */
+.frame-wrapper.type-c .border-info {
+  left: 77.5%;
+  right: 2.5%;
+  justify-content: flex-end;
+}
+
+.frame-wrapper.type-c .border-info-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+  width: 100%;
+}
+
+/* 隐藏焦距区域 */
+.frame-wrapper.type-c .border-focal {
+  display: none;
+}
+
+/* 文字样式 - 基础字号 */
+.frame-wrapper.type-c .border-text {
+  font-size: 12px;
+  font-weight: normal;
+  white-space: nowrap;
+}
+
+/* 机型 - 使用 medium (500)，参数 - 使用 normal (400)，署名 - 使用 semibold (600) */
+.frame-wrapper.type-c .border-model {
+  font-weight: 500;
+}
+
+.frame-wrapper.type-c .border-params {
+  font-weight: normal;
+}
+
+.frame-wrapper.type-c .border-signature {
+  font-weight: 600;
+}
+
+/* 时间 - 使用 normal */
+.frame-wrapper.type-c .border-time {
+  font-weight: normal;
+}
+
+/* 焦距 - 大号字体 Medium (已隐藏) */
+.frame-wrapper.type-c .border-focal-text {
+  font-size: 24px;
+  font-weight: 500;
+}

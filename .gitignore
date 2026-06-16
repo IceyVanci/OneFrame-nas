@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+*.tgz
+
+# Project management docs
+implementation_plan.md
+
+# Redundant docker ignore
+docker/.dockerignore
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary files
+*.tmp
+*.bak

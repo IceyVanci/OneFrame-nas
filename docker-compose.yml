@@ -1,0 +1,9 @@
+services:
+  oneframe:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: oneframe-web
+    ports:
+      - "8888:80"
+    restart: unless-stopped

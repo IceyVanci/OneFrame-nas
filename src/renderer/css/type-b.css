@@ -1,0 +1,23 @@
+/**
+ * Type B 样式
+ * 正方形画布，图片居左，右侧白色区域显示内容
+ */
+
+/* Type B 样式 - 正方形画布 */
+.frame-wrapper.type-b {
+  display: block;
+  position: relative;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+/* Type B: 边框内容不受 overflow 影响 */
+#frameWrapper.type-b #borderContent {
+  overflow: visible !important;
+  z-index: 10;
+}
+
+/* Type B: photoFooter 只覆盖右侧区域 */
+#frameWrapper.type-b #photoFooter {
+  background-color: #ffffff !important;
+}

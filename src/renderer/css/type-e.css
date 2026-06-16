@@ -1,0 +1,149 @@
+/**
+ * Type E 样式
+ * 布局：3:2 纵向画布，顶部 1:1 正方形显示图片，底部白色区域显示参数
+ */
+
+/* Type E 样式 - 3:2 纵向画布 */
+.frame-wrapper.type-e {
+  display: block !important;
+  position: relative !important;
+  background-color: #ffffff !important;
+  overflow: hidden !important;
+  max-width: none !important;
+  min-width: 0 !important;
+}
+
+/* 覆盖全局 .frame-wrapper img 样式 */
+/* 让 JS 控制的 width: 807px 生效 */
+/* 注意：object-position 不设置 !important，让 JS 可以动态控制 */
+.frame-wrapper.type-e img {
+  max-width: none !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  flex-shrink: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  cursor: grab;
+}
+
+.frame-wrapper.type-e img:active {
+  cursor: grabbing;
+}
+
+/* Type E: 边框内容不受 overflow 影响 */
+.frame-wrapper.type-e .border-content {
+  overflow: visible !important;
+  z-index: 10;
+}
+
+/* Type E 内容布局 - 左右两列 */
+.type-e-content-wrapper {
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 5% 5%;
+  box-sizing: border-box;
+}
+
+/* 左侧：日期 + Logo */
+.type-e-left {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+/* 日期区域 */
+.type-e-date {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 月份 - 大字，高度是其他的2倍 */
+.type-e-month {
+  font-family: 'MiSans', 'Segoe UI', sans-serif;
+  font-size: 48px;
+  font-weight: 500;
+  color: #000000;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+/* 年份 */
+.type-e-year {
+  font-family: 'MiSans', 'Segoe UI', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: #FF6B00;
+  line-height: 1;
+}
+
+/* Logo - 固定在底部，距离白色区域下边缘 5% */
+.type-e-logo {
+  position: absolute;
+  bottom: 5%;
+  left: 5%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  /* 确保 Logo 不会超出白色区域 */
+  max-width: 90%;
+}
+
+.type-e-logo img {
+  /* Logo 尺寸由 JS 动态设置，使用 !important 确保覆盖 */
+  object-fit: contain !important;
+}
+
+/* 右侧：参数 */
+.type-e-right {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-end;
+  /* 初始位置在顶部，后续由 JS 设置 margin-top 与年份底部对齐 */
+}
+
+/* 右侧参数容器 */
+.type-e-params {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* 参数行 - 字体缩小 25%（从 24px 改为 18px） */
+.type-e-param-line {
+  font-family: 'MiSans', 'Segoe UI', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: #000000;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+/* 机型 */
+.type-e-model {
+  color: #666666;
+}
+
+/* 署名 */
+.type-e-signature {
+  color: #888888;
+}
+
+/* 拖动提示文字 - 位于画布外部 */
+.type-e-drag-hint {
+  display: block;
+  text-align: center;
+  font-size: 10px;
+  color: rgba(136, 136, 136, 0.6);
+  pointer-events: none;
+  margin-top: 4px;
+}

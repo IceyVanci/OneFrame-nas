@@ -1,0 +1,11 @@
+node_modules
+.git
+src/main
+package.json
+README.md
+implementation_plan.md
+docs
+docker/.dockerignore
+*.tgz
+*.md
+src/renderer/assets/package

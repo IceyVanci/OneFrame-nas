@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OneFrame</title>
+  <link rel="stylesheet" href="index.css">
+  <link rel="stylesheet" href="css/type-c.css">
+  <link rel="stylesheet" href="css/type-d.css">
+  <link rel="stylesheet" href="css/type-e.css">
+  <link rel="stylesheet" href="assets/font-awesome/css/all.min.css">
+  <script src="assets/opentype.min.js"></script>
+  <script src="assets/piexif.js"></script>
+  <script src="assets/exifreader.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- 顶部标题栏 -->
+    <header class="app-header">
+      <h1 class="app-title">OneFrame</h1>
+      <button class="about-btn" id="aboutBtn">关于</button>
+    </header>
+
+    <!-- 边框样式图片墙 -->
+    <main class="style-gallery">
+      
+      <div class="tab-bar">
+        <button class="tab-btn active" data-tab="params">参数</button>
+        <button class="tab-btn" data-tab="poster">海报</button>
+      </div>
+      <div class="style-grid">
+        <!-- 样式卡片 1: 白色下边框 -->
+        <div class="style-card" data-style="type-a" data-category="params">
+          <div class="style-preview">
+            <div class="frame-container">
+              <img src="TypeA-sample_compressed.jpeg" alt="示例图片" class="preview-image">
+              <div class="photo-footer"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 样式卡片 2: 黑色下边框 -->
+        <div class="style-card" data-style="type-b" data-category="poster">
+          <div class="style-preview">
+            <div class="frame-container style-b">
+              <img src="TypeB-sample_compressed.jpeg" alt="示例图片" class="preview-image">
+              <div class="photo-footer"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 样式卡片 3: Type C 样式 -->
+        <div class="style-card" data-style="type-c" data-category="params">
+          <div class="style-preview">
+            <div class="frame-container">
+              <img src="TypeC-sample_compressed.jpeg" alt="示例图片" class="preview-image">
+              <div class="photo-footer"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 更多样式卡片 -->
+        <div class="style-card" data-style="type-d" data-category="params">
+          <div class="style-preview">
+            <div class="frame-container">
+              <img src="TypeD-sample_compressed.jpeg" alt="示例图片" class="preview-image">
+              <div class="photo-footer"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 样式卡片 5: Type E 样式 -->
+        <div class="style-card" data-style="type-e" data-category="poster">
+          <div class="style-preview">
+            <div class="frame-container">
+              <img src="TypeE-sample_compressed.jpeg" alt="示例图片" class="preview-image">
+              <div class="photo-footer"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- 底部操作区 -->
+    <footer class="app-footer">
+      <p class="footer-hint">💡 点击样式卡片，然后选择要处理的图片</p>
+    </footer>
+  </div>
+
+  <!-- 编辑器视图 -->
+  <div id="editor-view" class="editor-view hidden">
+    <!-- 主预览区 -->
+    <div class="preview-area">
+      <div class="frame-wrapper" id="frameWrapper">
+        <img id="userImage" src="" alt="用户图片">
+        <div class="photo-footer" id="photoFooter"></div>
+        <!-- 边框内容预览 - 放在 photoFooter 外面以便覆盖 -->
+        <div class="border-content" id="borderContent">
+          <div class="border-content-inner">
+            <!-- 默认 Type A 布局 - 各样式会通过 reset() 覆盖 -->
+            <div class="border-logo" id="borderLogo"></div>
+            <div class="border-info">
+              <div class="border-info-inner">
+                <div class="border-text border-model" id="borderModel"></div>
+                <div class="border-text border-params" id="borderParams"></div>
+              </div>
+            </div>
+            <div class="border-focal">
+              <div class="border-text border-focal-text" id="borderFocal"></div>
+            </div>
+            <div class="border-right">
+              <div class="border-right-inner">
+                <div class="border-text border-signature" id="borderSignature"></div>
+                <div class="border-text" id="borderTime"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 右侧浮动图标按钮 -->
+    <div class="float-actions">
+      <button class="float-btn" id="btnTemplate" title="换个模板">
+        <i class="fas fa-th-large"></i>
+        <span>换个模板</span>
+      </button>
+      <button class="float-btn" id="btnReselect" title="重选照片">
+        <i class="fas fa-image"></i>
+        <span>重选照片</span>
+      </button>
+      <button class="float-btn" id="btnEdit" title="编辑">
+        <i class="fas fa-sliders-h"></i>
+        <span>编辑</span>
+      </button>
+      <button class="float-btn" id="btnSave" title="保存">
+        <i class="fas fa-save"></i>
+        <span>保存</span>
+      </button>
+    </div>
+
+    <!-- 编辑面板 -->
+    <div class="edit-panel" id="editPanel">
+      <div class="panel-header">
+        <button class="panel-close" id="btnClosePanel">←</button>
+        <span class="panel-title">图片设置</span>
+        <button class="btn-export-top" id="btnExportTop">
+          <i class="fas fa-download"></i>
+          导出
+        </button>
+      </div>
+
+      <!-- 比例设置 -->
+      <div class="edit-section" id="aspectRatioSection">
+        <div class="section-title"><i class="fas fa-crop"></i> 比例</div>
+        <div class="control-group">
+          <label>输出比例</label>
+          <select id="aspectRatio">
+            <option value="default" selected>默认</option>
+            <option value="original">原始比例</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 边框设置 -->
+      <div class="edit-section">
+        <div class="section-title"><i class="fas fa-border-all"></i> 边框</div>
+        <div class="control-group">
+          <label>边框颜色</label>
+          <div class="color-preset-group">
+            <button class="color-preset white active" data-color="#ffffff">白</button>
+            <button class="color-preset black" data-color="#000000">黑</button>
+            <input type="color" id="borderColor" value="#ffffff" class="color-input">
+          </div>
+        </div>
+        <div class="control-group">
+          <label>边框高度 <span class="value-display" id="borderHeightLabel">12%</span></label>
+          <input type="range" id="borderHeight" min="5" max="30" value="12">
+        </div>
+      </div>
+
+      <!-- Logo 设置 -->
+      <div class="edit-section">
+        <div class="section-title"><i class="fas fa-camera"></i> Logo</div>
+        <div class="control-group">
+          <div class="switch-group">
+            <label>显示相机 Logo</label>
+            <div class="switch active" id="switchLogo"></div>
+          </div>
+        </div>
+        <!-- Logo 网格选择器 -->
+        <div class="logo-grid" id="logoGrid"></div>
+        <div class="logo-preview" id="logoPreview"></div>
+      </div>
+
+      <!-- 设备型号 -->
+      <div class="edit-section">
+        <div class="section-title"><i class="fas fa-mobile-alt"></i> 设备型号</div>
+        <input type="hidden" id="switchModel" class="switch active">
+        <div class="control-group">
+          <label>设备型号</label>
+          <input type="text" id="customModel" placeholder="自动从EXIF读取">
+        </div>
+      </div>
+
+      <!-- 拍摄参数 -->
+      <div class="edit-section">
+        <div class="section-title"><i class="fas fa-tachometer-alt"></i> 拍摄参数</div>
+        <div class="control-group">
+          <div class="switch-group">
+            <label>显示拍摄参数</label>
+            <div class="switch active" id="switchParams"></div>
+          </div>
+        </div>
+        <!-- 参数 2x2 网格 - 单位在后置 -->
+        <div class="params-grid">
+          <div class="param-item">
+            <input type="text" id="fNumber" placeholder="—">
+            <label>f/</label>
+          </div>
+          <div class="param-item">
+            <input type="text" id="exposureTime" placeholder="—">
+            <label>s</label>
+          </div>
+          <div class="param-item">
+            <input type="text" id="focalLength" placeholder="—">
+            <label>mm</label>
+          </div>
+          <div class="param-item">
+            <label>ISO</label>
+            <input type="text" id="iso" placeholder="—">
+          </div>
+        </div>
+      </div>
+
+      <!-- 时间设置 -->
+      <div class="edit-section">
+        <div class="section-title"><i class="fas fa-clock"></i> 时间</div>
+        <div class="control-group">
+          <div class="switch-group">
+            <label>显示拍摄时间</label>
+            <div class="switch active" id="switchTime"></div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label>拍摄时间</label>
+          <input type="datetime-local" id="dateTime">
+        </div>
+      </div>
+
+      <!-- 署名设置 -->
+      <div class="edit-section">
+        <div class="section-title"><i class="fas fa-pen"></i> 署名</div>
+        <input type="hidden" id="switchSignature" class="switch">
+        <div class="control-group">
+          <label>署名文字</label>
+          <input type="text" id="signatureText" placeholder="如: Photo by John">
+        </div>
+      </div>
+
+      <!-- 导出按钮 -->
+      <div class="panel-footer">
+        <button class="btn-primary" id="btnExport">
+          <i class="fas fa-download"></i>
+          导出图片
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 关于模态框 -->
+  <div class="modal-overlay hidden" id="aboutModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span class="modal-title">关于 OneFrame</span>
+        <button class="modal-close" id="modalClose">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p><strong>OneFrame</strong> v1.0.0</p>
+        <p>一款简洁优雅的图片边框添加工具，为您的照片自动添加精美的底部边框，并智能显示相机 EXIF 信息。</p>
+        <hr>
+        <p><strong>GitHub：</strong><a href="https://github.com/IceyVanci/OneFrame" target="_blank">github.com/IceyVanci/OneFrame</a></p>
+        <p><strong>技术栈：</strong>原生 HTML/CSS/JS + Docker</p>
+        <p><strong>EXIF：</strong>exifreader + piexifjs</p>
+        <p><strong>字体：</strong>opentype.js + MiSans</p>
+        <hr>
+        <p class="modal-note">本项目入选 Xiaomi MiMo Orbit-百万亿 Token 创造者激励计划，感谢 Xiaomi MiMo Orbit 提供的免费 Token。</p>
+        <p><strong>许可证：</strong>MIT License</p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
