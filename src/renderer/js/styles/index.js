@@ -20,6 +20,8 @@ import { typeDPreview } from './type-d-preview.js';
 import { typeDExport } from './type-d-export.js';
 import { typeEPreview } from './type-e-preview.js';
 import { typeEExport } from './type-e-export.js';
+import { typeFPreview } from './type-f-preview.js';
+import { typeFExport } from './type-f-export.js';
 
 /**
  * @typedef {Object} StyleModule
@@ -48,6 +50,10 @@ export const styles = {
   'type-e': {
     preview: typeEPreview,
     export: typeEExport
+  },
+  'type-f': {
+    preview: typeFPreview,
+    export: typeFExport
   }
 };
 
@@ -103,3 +109,6 @@ export { typeDPreview } from './type-d-preview.js';
 
 // 重新导出 Type E Preview
 export { typeEPreview } from './type-e-preview.js';
+
+// 重新导出 Type F Preview
+export { typeFPreview } from './type-f-preview.js';

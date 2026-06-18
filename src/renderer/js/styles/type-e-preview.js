@@ -136,7 +136,7 @@ export function updateFrameWrapper(squareSize) {
   console.log('[TypeE] updateFrameWrapper called with squareSize:', squareSize);
 
   // 移除所有类型类名后再添加当前类型
-  state.frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e');
+  state.frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e', 'type-f');
   state.frameWrapper.classList.add('type-e');
 
   // 设置尺寸为 3:2
@@ -369,7 +369,7 @@ export function reset() {
     const hints = frameWrapper.parentElement?.querySelectorAll('.type-e-drag-hint');
     hints?.forEach(hint => hint.remove());
     
-    frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e');
+    frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e', 'type-f');
     frameWrapper.classList.add('type-a');
     frameWrapper.style.width = '';
     frameWrapper.style.height = '';

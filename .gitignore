@@ -2,8 +2,9 @@
 node_modules/
 *.tgz
 
-# Project management docs
-implementation_plan.md
+# Archived docs (moved to docs/)
+docs/CHANGELOG_v1.01-nas_ARCHIVE.md
+docs/implementation_plan_ARCHIVE.md
 
 # Redundant docker ignore
 docker/.dockerignore

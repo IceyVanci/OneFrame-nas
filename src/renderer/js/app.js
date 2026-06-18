@@ -1,7 +1,8 @@
 // OneFrame 主程序
 import { getExif, formatDateTime, getFocalLength } from './exif.js';
 import { getModelName, getAllLogos, getLogoFilename, getMakeName } from './logo-utils.js';
-import { getStyle, getPreview, typeBPreview, typeEPreview } from './styles/index.js';
+import { getStyle, getPreview, typeBPreview, typeEPreview, typeFPreview } from './styles/index.js';
+import { configureEditPanel as configureTypeF } from './components/type-f-editor-panel.js';
 import { exportImage } from './exporter.js';
 
 let currentExif = null;
@@ -164,7 +165,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const matchedLogo = allLogos.find(logo => makeName.toLowerCase().includes(logo.toLowerCase()));
       if (matchedLogo) selectLogo(matchedLogo);
     }
-    if (currentExif.Model) customModel.value = getModelName(currentExif.Model);
+    if (currentExif.Model) {
+      const modelName = getModelName(currentExif.Model);
+      if (currentStyle === 'type-f') {
+        const makeName = make ? getMakeName(make) : '';
+        customModel.value = makeName ? `${makeName} ${modelName}` : modelName;
+      } else {
+        customModel.value = modelName;
+      }
+    }
     if (currentExif.FNumber) fNumber.value = typeof currentExif.FNumber === 'string' ? currentExif.FNumber.replace('f/', '').replace('F', '') : currentExif.FNumber;
     if (currentExif.ExposureTime) exposureTime.value = currentExif.ExposureTime;
     const focal = getFocalLength(currentExif);
@@ -198,7 +207,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // 监听窗口大小变化，重新计算预览布局
     window.addEventListener('resize', updateBorder);
     const borderColorSection = document.querySelector('.edit-section:has(#borderColor)');
-    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e') ? 'none' : 'block';
+    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f') ? 'none' : 'block';
+    
+    // Type F: 调用面板配置模块
+    if (currentStyle === 'type-f') {
+      configureTypeF();
+    }
     
     // Type B: 隐藏 Logo、拍摄参数、时间开关
     if (currentStyle === 'type-b') {
@@ -332,6 +346,34 @@ document.addEventListener('DOMContentLoaded', () => {
         naturalWidth: userImage.naturalWidth,
         naturalHeight: userImage.naturalHeight
       });
+      updateBorderContent();
+    } else if (currentStyle === 'type-f') {
+      // 使用 Type F Preview 模块
+      const frameWrapper = document.getElementById('frameWrapper');
+      const borderContent = document.getElementById('borderContent');
+      preview.init({
+        img: userImage,
+        frameWrapper: frameWrapper,
+        photoFooter: photoFooter,
+        borderContent: borderContent
+      });
+      // 画布原始尺寸（基于图片，不受窗口影响）
+      const canvasW = userImage.naturalWidth;
+      const canvasH = Math.round(userImage.naturalHeight / 0.8);
+      // 每次 resize 动态计算显示尺寸（等比缩放）
+      const previewArea = frameWrapper?.parentElement;
+      const availW = (previewArea?.clientWidth || 500) * 0.96;
+      const availH = (previewArea?.clientHeight || 600) * 0.96;
+      const displayScale = Math.min(availW / canvasW, availH / canvasH, 1);
+      const displayW = Math.round(canvasW * displayScale);
+      const displayH = Math.round(canvasH * displayScale);
+      // 设置显示尺寸（字号和 CSS 百分比基于此）
+      preview.updateFrameWrapper(displayW, displayH);
+      preview.updatePreview(displayW, displayH, {
+        naturalWidth: userImage.naturalWidth,
+        naturalHeight: userImage.naturalHeight
+      });
+      frameWrapper.style.transform = 'none';
       updateBorderContent();
     } else {
       // 使用对应样式 Preview 模块

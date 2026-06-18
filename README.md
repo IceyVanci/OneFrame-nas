@@ -4,7 +4,7 @@
 
 本项目是 [OneFrame](https://github.com/IceyVanci/OneFrame) 的 NAS/Docker 移植版本，从 Electron 桌面应用迁移为纯前端 Web 应用，通过 Docker 容器化部署在 NAS 上，局域网内设备可通过浏览器访问。
 
-![Version](https://img.shields.io/badge/version-1.01--nas-blue.svg)
+![Version](https://img.shields.io/badge/version-1.04--nas-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Docker](https://img.shields.io/badge/Docker-nginx:alpine-2496ED.svg)
 
@@ -24,6 +24,7 @@
 - **Type C**：横向布局 - Logo 在左侧，参数在右侧，纵向图片自动缩放字体
 - **Type D**：横向布局 - Logo 居中，左侧时间+机型，右侧参数+署名
 - **Type E**：3:2 纵向 - 顶部 1:1 正方形图片，底部白色区域显示参数，支持拖动裁剪
+- **Type F**：画中画 - 上方白色留白 + 中部照片展示区 + 底部文字信息区，字号动态缩放
 
 ### 📝 边框信息编辑
 - Logo 显示开关
@@ -79,7 +80,14 @@ OneFrame-nas/
 ├── README.md                   # 本文档
 ├── CHANGELOG.md                # 更新日志
 ├── docs/
+│   ├── AI_PROJECT_GUIDE.md     # AI 项目认知指南
+│   ├── V1.00-NAS_CHANGES.md    # 初始移植说明
+│   ├── V1.01-NAS_CHANGES.md    # v1.01 说明
+│   ├── V1.03-NAS_CHANGES.md    # v1.03 Type F 同步
+│   ├── V1.04_CHANGES.md        # v1.04 Type F 缩放修复
+│   ├── release-v1.01-nas.md    # Release 历史
 │   ├── function_analysis.md    # 函数分析文档
+│   ├── migration-guide.md      # Electron→Docker 移植指南
 │   └── pending-issues-and-improvements.md  # 问题追踪
 └── src/
     └── renderer/               # 前端静态文件（Nginx 托管）
@@ -90,20 +98,24 @@ OneFrame-nas/
         │   ├── type-b.css      # Type B 样式
         │   ├── type-c.css      # Type C 样式
         │   ├── type-d.css      # Type D 样式
-        │   └── type-e.css      # Type E 样式
+        │   ├── type-e.css      # Type E 样式
+        │   └── type-f.css      # Type F 画中画样式
         ├── js/
         │   ├── app.js          # 主逻辑入口
         │   ├── exif.js         # EXIF 读取 (exifreader)
         │   ├── exif-exporter.js # EXIF 导出 (piexifjs)
         │   ├── exporter.js     # 图片导出
         │   ├── logo-utils.js   # Logo 工具
+        │   ├── components/
+        │   │   └── type-f-editor-panel.js  # Type F 面板配置
         │   └── styles/         # 样式模块
         │       ├── index.js    # 样式注册表
         │       ├── type-a-preview.js / type-a-export.js
         │       ├── type-b-preview.js / type-b-export.js
         │       ├── type-c-preview.js / type-c-export.js
         │       ├── type-d-preview.js / type-d-export.js
-        │       └── type-e-preview.js / type-e-export.js
+        │       ├── type-e-preview.js / type-e-export.js
+        │       └── type-f-preview.js / type-f-export.js
         ├── logos/               # 相机厂商 Logo (SVG)
         ├── fonts/               # 字体文件 (MiSans)
         └── assets/
@@ -187,6 +199,7 @@ docker compose up --build -d
 打开浏览器访问应用后，点击首页的样式卡片。
 - **参数**标签：Type A（白色下边框）、Type C（横向布局）、Type D（横向居中）
 - **海报**标签：Type B（黑色下边框）、Type E（3:2 纵向）
+- **参数**标签包含：Type A、Type C、Type D、Type F
 
 ### 2. 选择图片
 选择样式后，系统会弹出文件选择器，选择要处理的图片。
@@ -272,8 +285,12 @@ docker compose up --build
 ## 📚 相关文档
 
 - [CHANGELOG.md](./CHANGELOG.md) - 更新日志
+- [docs/AI_PROJECT_GUIDE.md](./docs/AI_PROJECT_GUIDE.md) - AI 项目认知指南
 - [docs/function_analysis.md](./docs/function_analysis.md) - 函数分析文档
 - [docs/migration-guide.md](./docs/migration-guide.md) - Electron → Docker 移植指南
+- [docs/V1.04_CHANGES.md](./docs/V1.04_CHANGES.md) - v1.04 Type F 缩放修复
+- [docs/V1.03-NAS_CHANGES.md](./docs/V1.03-NAS_CHANGES.md) - v1.03 Type F 同步
+- [docs/release-v1.01-nas.md](./docs/release-v1.01-nas.md) - Release 历史
 - [docs/pending-issues-and-improvements.md](./docs/pending-issues-and-improvements.md) - 问题追踪与修复记录
 
 ---

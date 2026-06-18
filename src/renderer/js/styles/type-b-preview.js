@@ -73,7 +73,7 @@ export function updateFrameWrapper(squareSize) {
   if (!state.frameWrapper) return;
   
   // 移除所有类型类名后再添加当前类型
-  state.frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e');
+  state.frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e', 'type-f');
   state.frameWrapper.classList.add('type-b');
   
   // 设置尺寸
@@ -470,7 +470,7 @@ export function reset() {
     if (mainContainer) mainContainer.remove();
     
     // 恢复 Type A 类名（移除所有类型类名）
-    state.frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e');
+    state.frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e', 'type-f');
     state.frameWrapper.classList.add('type-a');
     // 清除内联样式
     state.frameWrapper.style.width = '';

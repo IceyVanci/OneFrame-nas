@@ -1,0 +1,84 @@
+/**
+ * Type F 样式
+ * 上白边+照片+下文字区
+ * - 顶部 5% 白色留白
+ * - 中部照片展示区（92% 宽度，80% 高度）
+ * - 底部 15% 文字信息区（绝对定位，由 JS 控制）
+ */
+
+/* Type F 样式 - 独立布局 */
+.frame-wrapper.type-f {
+  display: block !important;
+  position: relative;
+  background: #ffffff;
+  /* 覆盖 type-a.css 中 .frame-wrapper:not(.type-b):not(.type-e) 继承的属性 */
+  max-width: none !important;
+  max-height: none !important;
+  /* 尺寸由 JS 通过 inline style 设置 */
+}
+
+/* 照片区：居中，92% 宽度，80% 高度 */
+.frame-wrapper.type-f img {
+  position: absolute;
+  top: 5%;
+  left: 4%;
+  width: 92%;
+  height: 80%;
+  object-fit: cover;
+  object-position: center center;
+  max-width: none;
+  max-height: none;
+}
+
+/* 隐藏 Type F 的 photoFooter */
+.frame-wrapper.type-f .photo-footer {
+  display: none;
+}
+
+/* 底部文字区：只占位，内部文字由 JS 绝对定位 */
+.frame-wrapper.type-f .border-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 15%;
+  overflow: visible;
+}
+
+/* 文字行基础样式 */
+.type-f-line {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  text-align: center;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* 第一行 */
+.type-f-line1 {
+  font-size: 1em;
+  font-family: 'MiSans Medium', 'MiSans', sans-serif;
+}
+
+.type-f-shot-on {
+  color: #888888;
+}
+
+.type-f-brand-model {
+  color: #000000;
+}
+
+/* 第二行 */
+.type-f-line2 {
+  font-size: 0.8571em;
+  font-family: 'MiSans Normal', 'MiSans', sans-serif;
+  color: #888888;
+}
+
+/* 第三行（署名） */
+.type-f-line3 {
+  font-size: 0.8571em;
+  font-family: 'MiSans Normal', 'MiSans', sans-serif;
+  color: #888888;
+}

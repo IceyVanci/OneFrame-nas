@@ -46,7 +46,7 @@ export function updateFrameWrapper(frameWrapper) {
   if (!frameWrapper) return;
   
   // 移除所有类型类名后再添加当前类型
-  frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e');
+  frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e', 'type-f');
   frameWrapper.classList.add('type-a');
 }
 
@@ -266,7 +266,7 @@ export function reset() {
   }
   
   if (state.frameWrapper) {
-    state.frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e');
+    state.frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e', 'type-f');
     state.frameWrapper.classList.add('type-a');
     state.frameWrapper.style.width = '';
     state.frameWrapper.style.height = '';
