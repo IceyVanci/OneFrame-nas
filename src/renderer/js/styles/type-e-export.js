@@ -133,8 +133,9 @@ async function drawBorderContentTypeE(ctx, canvasWidth, canvasHeight, settings, 
   const squareSize = canvasWidth;
   const footerHeight = canvasHeight - squareSize;
   
-  // 缩放比例：以预览 squareSize 为基准，确保导出与预览一致
-  const scale = previewSquareSize > 0 ? canvasWidth / previewSquareSize : 1;
+  // 缩放比例：以 TYPE_E_STYLES 基准宽度（480px）为基准，确保导出文字与画布比例一致
+  // 不依赖 previewSquareSize，避免窗口大小影响导出字号
+  const scale = canvasWidth / 480;
   
   const monthFontSize = Math.round(TYPE_E_STYLES.month.fontSize * scale);
   const yearFontSize = Math.round(TYPE_E_STYLES.year.fontSize * scale);

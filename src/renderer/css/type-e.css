@@ -69,17 +69,17 @@
 /* 月份 - 大字，高度是其他的2倍 */
 .type-e-month {
   font-family: 'MiSans', 'Segoe UI', sans-serif;
-  font-size: 48px;
+  font-size: 2em;     /* 48/24=2，相对于基准字号 24px */
   font-weight: 500;
   color: #000000;
   line-height: 1;
-  margin-bottom: 8px;
+  margin-bottom: 0.333em; /* 8/24≈0.333，相对于基准字号 */
 }
 
 /* 年份 */
 .type-e-year {
   font-family: 'MiSans', 'Segoe UI', sans-serif;
-  font-size: 24px;
+  font-size: 1em;     /* 24/24=1，相对于基准字号 24px */
   font-weight: 500;
   color: #FF6B00;
   line-height: 1;
@@ -121,7 +121,7 @@
 /* 参数行 - 字体缩小 25%（从 24px 改为 18px） */
 .type-e-param-line {
   font-family: 'MiSans', 'Segoe UI', sans-serif;
-  font-size: 18px;
+  font-size: 0.75em;  /* 18/24=0.75，相对于基准字号 24px */
   font-weight: 500;
   color: #000000;
   line-height: 1.5;

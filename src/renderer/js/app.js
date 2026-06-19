@@ -358,8 +358,11 @@ document.addEventListener('DOMContentLoaded', () => {
         borderContent: borderContent
       });
       // 画布原始尺寸（基于图片，不受窗口影响）
+      // 纵向图片照片占 90%（白色区域减半），横向图片照片占 80%（默认）
       const canvasW = userImage.naturalWidth;
-      const canvasH = Math.round(userImage.naturalHeight / 0.8);
+      const isPortraitF = userImage.naturalHeight > userImage.naturalWidth;
+      const heightRatioF = isPortraitF ? 0.9 : 0.8;
+      const canvasH = Math.round(userImage.naturalHeight / heightRatioF);
       // 每次 resize 动态计算显示尺寸（等比缩放）
       const previewArea = frameWrapper?.parentElement;
       const availW = (previewArea?.clientWidth || 500) * 0.96;

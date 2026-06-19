@@ -116,10 +116,11 @@ function formatDateForDisplay(dateTimeStr) {
  * @param {Object} settings - 设置
  * @param {Object} fonts - 字体对象
  */
-async function drawBorderContent(ctx, canvasWidth, canvasHeight, settings, fonts) {
-  // 底部文字区域：底部 15% 高度
-  const textAreaHeight = canvasHeight * 0.15;
-  const textAreaTop = canvasHeight * 0.85; // 85% = 底部文字区顶部
+async function drawBorderContent(ctx, canvasWidth, canvasHeight, settings, fonts, isPortrait = false) {
+  // 底部文字区域：纵向 7.5%，横向 15%
+  const textRatio = isPortrait ? 0.075 : 0.15;
+  const textAreaHeight = canvasHeight * textRatio;
+  const textAreaTop = canvasHeight * (1 - textRatio);
   const textCenterY = textAreaTop + textAreaHeight / 2;
   const centerX = canvasWidth / 2;
   
@@ -209,9 +210,11 @@ export async function renderImage(img, options) {
     throw new Error('图片尚未加载完成');
   }
   
-  // 画布尺寸：宽度 = 图片宽度，高度 = 图片高度 / 0.8
+  // 画布尺寸：纵向图片照片占 90%，横向图片照片占 80%
   const canvasWidth = img.naturalWidth;
-  const canvasHeight = Math.round(img.naturalHeight / 0.8);
+  const isPortrait = img.naturalHeight > img.naturalWidth;
+  const heightRatio = isPortrait ? 0.9 : 0.8;
+  const canvasHeight = Math.round(img.naturalHeight / heightRatio);
   
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
@@ -222,11 +225,11 @@ export async function renderImage(img, options) {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, canvasWidth, canvasHeight);
   
-  // 2. 绘制照片（92% 宽度，80% 高度，顶部 5%，左右 4%）
+  // 2. 绘制照片（92% 宽度，纵向 90%/横向 80% 高度，纵向 2.5%/横向 5% 顶部，左右 4%）
   const photoX = canvasWidth * 0.04;
-  const photoY = canvasHeight * 0.05;
+  const photoY = canvasHeight * (isPortrait ? 0.025 : 0.05);
   const photoWidth = canvasWidth * 0.92;
-  const photoHeight = canvasHeight * 0.80;
+  const photoHeight = canvasHeight * (isPortrait ? 0.90 : 0.80);
   
   // 使用 object-fit: cover 逻辑裁剪图片
   const imgRatio = img.naturalWidth / img.naturalHeight;
@@ -247,7 +250,7 @@ export async function renderImage(img, options) {
   ctx.drawImage(img, srcX, srcY, srcW, srcH, photoX, photoY, photoWidth, photoHeight);
   
   // 3. 绘制底部文字内容
-  await drawBorderContent(ctx, canvasWidth, canvasHeight, settings, fonts);
+  await drawBorderContent(ctx, canvasWidth, canvasHeight, settings, fonts, isPortrait);
   
   return canvas.toDataURL('image/jpeg', quality);
 }

@@ -37,11 +37,15 @@ export function init(elements) {
 export function calcSize(settings) {
   const { naturalWidth, naturalHeight } = settings;
   
-  // 画布宽度 = 图片宽度，画布高度 = 图片高度 / 0.8（照片占 80%）
+  // 画布宽度 = 图片宽度
   const canvasWidth = naturalWidth;
-  const canvasHeight = Math.round(naturalHeight / 0.8);
+  // 纵向图片：照片占 90%（白色区域减半），横向图片：照片占 80%（默认）
+  const isPortrait = naturalHeight > naturalWidth;
+  const heightRatio = isPortrait ? 0.9 : 0.8;
+  const canvasHeight = Math.round(naturalHeight / heightRatio);
   
-  return { squareSize: canvasWidth, margin: canvasHeight, canvasHeight };
+  // 返回原始画布尺寸，显示缩放在 app.js 中根据预览区域大小计算
+  return { squareSize: canvasWidth, canvasHeight, isPortrait };
 }
 
 /**
@@ -91,6 +95,18 @@ export function updatePreview(squareSize, canvasHeight, imgDimensions = {}) {
   state.img.style.clipPath = '';
   state.img.style.transform = '';
   
+  // 纵向图片：覆盖 CSS 默认的 top:5% height:80% 为 top:2.5% height:90%
+  const isPortrait = imgDimensions.naturalHeight > imgDimensions.naturalWidth;
+  if (isPortrait) {
+    state.img.style.top = '2.5%';
+    state.img.style.height = '90%';
+  }
+
+  // 同步设置文字区域高度（纵向 7.5%，横向由 CSS 默认 15%）
+  if (state.borderContent) {
+    state.borderContent.style.height = isPortrait ? '7.5%' : '';
+  }
+
   // 设置 photoFooter 隐藏（Type F 不需要独立的底部区域）
   if (state.photoFooter) {
     state.photoFooter.style.display = 'none';
