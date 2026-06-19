@@ -4,7 +4,7 @@
 
 本项目是 [OneFrame](https://github.com/IceyVanci/OneFrame) 的 NAS/Docker 移植版本，从 Electron 桌面应用迁移为纯前端 Web 应用，通过 Docker 容器化部署在 NAS 上，局域网内设备可通过浏览器访问。
 
-![Version](https://img.shields.io/badge/version-1.04--nas-blue.svg)
+![Version](https://img.shields.io/badge/version-1.05--nas-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Docker](https://img.shields.io/badge/Docker-nginx:alpine-2496ED.svg)
 
@@ -18,13 +18,14 @@
 - 自动读取拍摄时间和设备型号
 
 ### 🎨 边框样式
-支持多种边框样式：
+支持 7 种边框样式：
 - **Type A**：白色下边框 - 可调节边框高度（5%-30%），完整编辑面板
 - **Type B**：黑色下边框 - 正方形画布，图片居左，右侧显示参数和 Logo
 - **Type C**：横向布局 - Logo 在左侧，参数在右侧，纵向图片自动缩放字体
 - **Type D**：横向布局 - Logo 居中，左侧时间+机型，右侧参数+署名
 - **Type E**：3:2 纵向 - 顶部 1:1 正方形图片，底部白色区域显示参数，支持拖动裁剪
 - **Type F**：画中画 - 上方白色留白 + 中部照片展示区 + 底部文字信息区，字号动态缩放
+- **Type G**：画中画 - 白色背景 + 居中 Logo + 日期|参数|机型 + 署名，支持纵向图片自适应
 
 ### 📝 边框信息编辑
 - Logo 显示开关
@@ -85,10 +86,10 @@ OneFrame-nas/
 │   ├── V1.01-NAS_CHANGES.md    # v1.01 说明
 │   ├── V1.03-NAS_CHANGES.md    # v1.03 Type F 同步
 │   ├── V1.04_CHANGES.md        # v1.04 Type F 缩放修复
-│   ├── release-v1.01-nas.md    # Release 历史
+│   ├── V1.05-NAS_CHANGES.md    # v1.05 同步变更（Type F/E/G）
+│   ├── release-v1.05-nas.md    # v1.05 Release 说明
 │   ├── function_analysis.md    # 函数分析文档
-│   ├── migration-guide.md      # Electron→Docker 移植指南
-│   └── pending-issues-and-improvements.md  # 问题追踪
+│   └── migration-guide.md      # Electron→Docker 移植指南
 └── src/
     └── renderer/               # 前端静态文件（Nginx 托管）
         ├── index.html          # 主页面
@@ -99,7 +100,8 @@ OneFrame-nas/
         │   ├── type-c.css      # Type C 样式
         │   ├── type-d.css      # Type D 样式
         │   ├── type-e.css      # Type E 样式
-        │   └── type-f.css      # Type F 画中画样式
+        │   ├── type-f.css      # Type F 画中画样式
+        │   └── type-g.css      # Type G 画中画样式
         ├── js/
         │   ├── app.js          # 主逻辑入口
         │   ├── exif.js         # EXIF 读取 (exifreader)
@@ -107,7 +109,8 @@ OneFrame-nas/
         │   ├── exporter.js     # 图片导出
         │   ├── logo-utils.js   # Logo 工具
         │   ├── components/
-        │   │   └── type-f-editor-panel.js  # Type F 面板配置
+        │   │   ├── type-f-editor-panel.js  # Type F 面板配置
+        │   │   └── type-g-editor-panel.js  # Type G 面板配置
         │   └── styles/         # 样式模块
         │       ├── index.js    # 样式注册表
         │       ├── type-a-preview.js / type-a-export.js
@@ -115,7 +118,8 @@ OneFrame-nas/
         │       ├── type-c-preview.js / type-c-export.js
         │       ├── type-d-preview.js / type-d-export.js
         │       ├── type-e-preview.js / type-e-export.js
-        │       └── type-f-preview.js / type-f-export.js
+        │       ├── type-f-preview.js / type-f-export.js
+        │       └── type-g-preview.js / type-g-export.js
         ├── logos/               # 相机厂商 Logo (SVG)
         ├── fonts/               # 字体文件 (MiSans)
         └── assets/
@@ -151,7 +155,7 @@ docker compose up --build -d
 ```bash
 # 下载镜像文件（在 Release 页面下载 .tar 文件）
 # 导入镜像
-docker load -i oneframe-web-v1.01-nas.tar
+docker load -i oneframe-web-v1.05-nas.tar
 
 # 运行容器
 docker run -d -p 8888:80 --name oneframe-web --restart unless-stopped oneframe-nas-oneframe:latest
@@ -197,9 +201,8 @@ docker compose up --build -d
 
 ### 1. 选择边框样式
 打开浏览器访问应用后，点击首页的样式卡片。
-- **参数**标签：Type A（白色下边框）、Type C（横向布局）、Type D（横向居中）
+- **参数**标签：Type A（白色下边框）、Type C（横向布局）、Type D（横向居中）、Type F（画中画）、Type G（画中画）
 - **海报**标签：Type B（黑色下边框）、Type E（3:2 纵向）
-- **参数**标签包含：Type A、Type C、Type D、Type F
 
 ### 2. 选择图片
 选择样式后，系统会弹出文件选择器，选择要处理的图片。
@@ -288,10 +291,10 @@ docker compose up --build
 - [docs/AI_PROJECT_GUIDE.md](./docs/AI_PROJECT_GUIDE.md) - AI 项目认知指南
 - [docs/function_analysis.md](./docs/function_analysis.md) - 函数分析文档
 - [docs/migration-guide.md](./docs/migration-guide.md) - Electron → Docker 移植指南
+- [docs/V1.05-NAS_CHANGES.md](./docs/V1.05-NAS_CHANGES.md) - v1.05 同步变更（Type F/E/G）
+- [docs/release-v1.05-nas.md](./docs/release-v1.05-nas.md) - v1.05 Release 说明
 - [docs/V1.04_CHANGES.md](./docs/V1.04_CHANGES.md) - v1.04 Type F 缩放修复
 - [docs/V1.03-NAS_CHANGES.md](./docs/V1.03-NAS_CHANGES.md) - v1.03 Type F 同步
-- [docs/release-v1.01-nas.md](./docs/release-v1.01-nas.md) - Release 历史
-- [docs/pending-issues-and-improvements.md](./docs/pending-issues-and-improvements.md) - 问题追踪与修复记录
 
 ---
 

@@ -3,6 +3,7 @@ import { getExif, formatDateTime, getFocalLength } from './exif.js';
 import { getModelName, getAllLogos, getLogoFilename, getMakeName } from './logo-utils.js';
 import { getStyle, getPreview, typeBPreview, typeEPreview, typeFPreview } from './styles/index.js';
 import { configureEditPanel as configureTypeF } from './components/type-f-editor-panel.js';
+import { configureEditPanel as configureTypeG } from './components/type-g-editor-panel.js';
 import { exportImage } from './exporter.js';
 
 let currentExif = null;
@@ -207,11 +208,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // 监听窗口大小变化，重新计算预览布局
     window.addEventListener('resize', updateBorder);
     const borderColorSection = document.querySelector('.edit-section:has(#borderColor)');
-    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f') ? 'none' : 'block';
+    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f' || currentStyle === 'type-g') ? 'none' : 'block';
     
     // Type F: 调用面板配置模块
     if (currentStyle === 'type-f') {
       configureTypeF();
+    }
+    
+    // Type G: 调用面板配置模块
+    if (currentStyle === 'type-g') {
+      configureTypeG();
     }
     
     // Type B: 隐藏 Logo、拍摄参数、时间开关
@@ -373,6 +379,37 @@ document.addEventListener('DOMContentLoaded', () => {
       // 设置显示尺寸（字号和 CSS 百分比基于此）
       preview.updateFrameWrapper(displayW, displayH);
       preview.updatePreview(displayW, displayH, {
+        naturalWidth: userImage.naturalWidth,
+        naturalHeight: userImage.naturalHeight
+      });
+      frameWrapper.style.transform = 'none';
+      updateBorderContent();
+    } else if (currentStyle === 'type-g') {
+      // 使用 Type G Preview 模块（与 Type F 相同的缩放逻辑）
+      const frameWrapper = document.getElementById('frameWrapper');
+      const borderContent = document.getElementById('borderContent');
+      preview.init({
+        img: userImage,
+        frameWrapper: frameWrapper,
+        photoFooter: photoFooter,
+        borderContent: borderContent
+      });
+      // 画布原始尺寸（基于图片，不受窗口影响）
+      // 纵向图片照片占 90%（白色区域减半），横向图片照片占 80%（默认）
+      const canvasW = userImage.naturalWidth;
+      const isPortraitG = userImage.naturalHeight > userImage.naturalWidth;
+      const heightRatioG = isPortraitG ? 0.9 : 0.8;
+      const canvasH = Math.round(userImage.naturalHeight / heightRatioG);
+      // 每次 resize 动态计算显示尺寸（等比缩放）
+      const gPreviewArea = frameWrapper?.parentElement;
+      const gAvailW = (gPreviewArea?.clientWidth || 500) * 0.96;
+      const gAvailH = (gPreviewArea?.clientHeight || 600) * 0.96;
+      const gDisplayScale = Math.min(gAvailW / canvasW, gAvailH / canvasH, 1);
+      const gDisplayW = Math.round(canvasW * gDisplayScale);
+      const gDisplayH = Math.round(canvasH * gDisplayScale);
+      // 设置显示尺寸（字号和 CSS 百分比基于此）
+      preview.updateFrameWrapper(gDisplayW, gDisplayH);
+      preview.updatePreview(gDisplayW, gDisplayH, {
         naturalWidth: userImage.naturalWidth,
         naturalHeight: userImage.naturalHeight
       });

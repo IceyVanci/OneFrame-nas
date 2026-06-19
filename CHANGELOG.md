@@ -1,5 +1,60 @@
 # OneFrame NAS Edition 更新日志
 
+## v1.05 (2026-06-19)
+
+### ✨ 新功能
+
+#### Type G 画中画样式（同步自原始项目 v1.0.5）
+- 新增 Type G 边框样式：第一行显示厂商 Logo，第二行显示「拍摄日期 | 拍摄参数 | 相机名称」（竖线分隔），第三行显示署名
+- 纵向图片自适应：白色区域减半（顶部 2.5%，底部 7.5%），照片区域增大到 90%
+- Logo 大小规则：横向图片高度 = 画布 2.5%，纵向图片高度 = 画布 1.25%
+- 编辑面板：隐藏所有显示开关（所有元素默认显示），保留 Logo 选择区域
+- 机型名称只显示型号（不带品牌前缀）
+- 文字颜色统一为黑色
+
+#### Type F 纵向图片自适应
+- 纵向图片（高度 > 宽度）时，顶部/底部白色区域减半，照片区域增大到 90%
+
+#### Type E 预览文字缩放
+- CSS font-size 从 px 改为 em 单位，文字随画布大小自动缩放
+- Logo 加载时从 borderContent 读取动态基准字号
+
+### 📁 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `css/type-g.css` | Type G 布局样式 |
+| `styles/type-g-preview.js` | Type G 预览模块 |
+| `styles/type-g-export.js` | Type G 导出模块 |
+| `components/type-g-editor-panel.js` | Type G 编辑面板配置 |
+| `TypeG-sample_compressed.jpeg` | Type G 预览缩略图 |
+
+### 🔧 修改文件
+
+- `styles/index.js` — 注册 Type G
+- `exporter.js` — 注册 Type G 导出
+- `index.html` — 添加 Type G 卡片和 CSS 引用，版本号更新为 v1.05
+- `app.js` — 添加 Type G 的 showEditor/updateBorder 分支
+- `css/type-e.css` — font-size 从 px 改为 em
+- `styles/type-e-preview.js` — 动态基准字号
+- `styles/type-e-export.js` — 缩放基准固定为 480
+- `styles/type-f-preview.js` — 纵向图片自适应
+- `styles/type-f-export.js` — 纵向图片自适应
+
+### 📝 文档
+
+- 更新版本号到 v1.05
+- 新增 `docs/release-v1.05-nas.md` Release 说明
+- 更新 `docs/V1.05-NAS_CHANGES.md` 添加 Type G 章节
+- 更新 `docs/function_analysis.md` 添加 Type G 函数分析和布局说明
+- 更新 README.md 版本号和样式列表
+
+### 📦 构建
+
+- 新增 `oneframe-web-v1.05-nas.tar` 预编译镜像
+
+---
+
 ## v1.04 (2026-06-19)
 
 ### 🐛 Bug 修复

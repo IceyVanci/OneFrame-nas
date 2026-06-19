@@ -1,0 +1,91 @@
+/**
+ * Type G 样式
+ * 布局：与 Type F 类似，上方白色留白 + 中部照片展示区 + 下方文字信息区
+ * - 顶部 5% 白色留白
+ * - 中部照片展示区（92% 宽度，80% 高度）
+ * - 底部 15% 文字信息区（绝对定位，由 JS 控制）
+ */
+
+/* Type G 样式 - 独立布局 */
+.frame-wrapper.type-g {
+  display: block !important;
+  position: relative;
+  background: #ffffff;
+  max-width: none !important;
+  max-height: none !important;
+  /* 尺寸由 JS 通过 inline style 设置 */
+}
+
+/* 照片区：居中，92% 宽度，80% 高度（仅匹配直接子级 img，不匹配 Logo） */
+.frame-wrapper.type-g > img {
+  position: absolute;
+  top: 5%;
+  left: 4%;
+  width: 92%;
+  height: 80%;
+  object-fit: cover;
+  object-position: center center;
+  max-width: none;
+  max-height: none;
+}
+
+/* 隐藏 Type G 的 photoFooter */
+.frame-wrapper.type-g .photo-footer {
+  display: none;
+}
+
+/* 底部文字区：只占位，内部文字由 JS 绝对定位 */
+.frame-wrapper.type-g .border-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 15%;
+  overflow: visible;
+}
+
+/* 文字行基础样式 */
+.type-g-line {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  text-align: center;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* 第一行：Logo 容器（使用 text-align:center 居中，与文字行一致） */
+.type-g-line1 {
+  text-align: center;
+  line-height: 0;
+  font-size: 0;
+}
+
+.type-g-logo {
+  text-align: center;
+}
+
+.type-g-logo img {
+  display: inline-block;
+  object-fit: contain;
+}
+
+/* 第二行：三部分竖线分隔 */
+.type-g-line2 {
+  font-size: 1em;
+  font-family: 'MiSans Medium', 'MiSans', sans-serif;
+  color: #000000;
+}
+
+.type-g-separator {
+  margin: 0 0.5em;
+  font-family: 'MiSans Normal', 'MiSans', sans-serif;
+  color: #000000;
+}
+
+/* 第三行（署名） */
+.type-g-line3 {
+  font-size: 0.8571em;
+  font-family: 'MiSans Normal', 'MiSans', sans-serif;
+  color: #000000;
+}

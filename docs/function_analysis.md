@@ -26,7 +26,8 @@ src/renderer/
 │   ├── type-c.css       # Type C 样式（横向布局）
 │   ├── type-d.css       # Type D 样式（横向居中）
 │   ├── type-e.css       # Type E 样式（3:2纵向）
-│   └── type-f.css       # Type F 样式（画中画风格）
+│   ├── type-f.css       # Type F 样式（画中画风格）
+│   └── type-g.css       # Type G 样式（Logo+日期参数+签名画中画）
 ├── js/
 │   ├── app.js           # 主逻辑入口（浏览器模式）
 │   ├── exif.js          # EXIF 读取 (exifreader)
@@ -34,7 +35,8 @@ src/renderer/
 │   ├── exporter.js      # 图片导出
 │   ├── logo-utils.js    # Logo 工具函数
 │   ├── components/
-│   │   └── type-f-editor-panel.js  # Type F 编辑面板配置
+│   │   ├── type-f-editor-panel.js  # Type F 编辑面板配置
+│   │   └── type-g-editor-panel.js  # Type G 编辑面板配置
 │   └── styles/
 │       ├── index.js     # 样式注册表
 │       ├── type-a-preview.js / type-a-export.js
@@ -42,7 +44,8 @@ src/renderer/
 │       ├── type-c-preview.js / type-c-export.js
 │       ├── type-d-preview.js / type-d-export.js
 │       ├── type-e-preview.js / type-e-export.js
-│       └── type-f-preview.js / type-f-export.js
+│       ├── type-f-preview.js / type-f-export.js
+│       └── type-g-preview.js / type-g-export.js
 ├── logos/               # 相机厂商 Logo (SVG)
 ├── fonts/               # 字体文件 (MiSans)
 └── assets/
@@ -66,13 +69,16 @@ src/renderer/
 | **预览** | `type-d-preview.js` | Type D 边框预览渲染（横向居中） | Type D |
 | **预览** | `type-e-preview.js` | Type E 边框预览渲染（3:2纵向，支持拖动裁剪） | Type E |
 | **预览** | `type-f-preview.js` | Type F 边框预览渲染（画中画风格，动态字号缩放） | Type F |
+| **预览** | `type-g-preview.js` | Type G 边框预览渲染（Logo+日期参数+签名画中画） | Type G |
 | **导出** | `type-a-export.js` | Type A Canvas 绘制导出 | Type A |
 | **导出** | `type-b-export.js` | Type B Canvas 绘制导出 | Type B |
 | **导出** | `type-c-export.js` | Type C Canvas 绘制导出 | Type C |
 | **导出** | `type-d-export.js` | Type D Canvas 绘制导出 | Type D |
 | **导出** | `type-e-export.js` | Type E Canvas 绘制导出 | Type E |
 | **导出** | `type-f-export.js` | Type F Canvas 绘制导出 | Type F |
+| **导出** | `type-g-export.js` | Type G Canvas 绘制导出 | Type G |
 | **编辑面板** | `type-f-editor-panel.js` | Type F 编辑面板配置（隐藏边框颜色/高度/比例/Logo） | Type F |
+| **编辑面板** | `type-g-editor-panel.js` | Type G 编辑面板配置（隐藏边框/比例/所有开关，保留 Logo 区域） | Type G |
 | **样式注册表** | `index.js` | 统一管理样式模块 | 通用 |
 
 ### 共享模块
@@ -197,11 +203,41 @@ src/renderer/
 | `drawBorderContent(ctx, canvasWidth, canvasHeight, settings, fonts)` | ✅ | 绘制 Type F 底部文字区（Shot on + 参数 + 署名） |
 | `renderImage(img, options)` | ✅ | Type F Canvas 导出（画布宽度=图片宽度，高度=图片高度/0.8） |
 
+### styles/type-g-preview.js（Logo+日期参数+签名画中画）
+
+| 函数名 | 状态 | 说明 |
+|--------|------|------|
+| `init(elements)` | ✅ | 初始化 Type G 预览 |
+| `calcSize(settings)` | ✅ | 计算画布尺寸（宽度=图片宽度，高度=图片高度/0.8或0.9） |
+| `updateFrameWrapper(squareSize, canvasHeight)` | ✅ | 设置 frameWrapper 尺寸和动态字号（基准 900px 对应 14px） |
+| `updatePreview(squareSize, canvasHeight, imgDimensions)` | ✅ | 更新照片区域样式（纵向图片覆盖 CSS 默认值） |
+| `updateContentPreview(elements, settings)` | ✅ | 更新文字和 Logo 内容预览（三行居中布局） |
+| `reset()` | ✅ | 重置预览状态 |
+
+### styles/type-g-export.js（Logo+日期参数+签名导出）
+
+| 函数名 | 状态 | 说明 |
+|--------|------|------|
+| `loadFonts()` | ✅ | 预加载 MiSans 字体（Semibold/Medium/Normal） |
+| `drawText(ctx, text, x, y, fontSize, options)` | ✅ | 使用 ctx.fillText 绘制文字 |
+| `detectLogoBrightness(logoPath)` | ✅ | 检测 logo 图片的平均亮度 |
+| `borderColorIsLight(color)` | ✅ | 判断颜色是否为浅色 |
+| `formatDateForDisplay(dateTimeStr)` | ✅ | 格式化日期 |
+| `drawBorderContent(ctx, canvasWidth, canvasHeight, settings, fonts, isPortrait)` | ✅ | 绘制底部文字内容（Logo+日期参数+签名） |
+| `drawLogoG(ctx, logoName, centerX, centerY, maxHeight)` | ✅ | 绘制 Logo（居中，按目标高度缩放） |
+| `renderImage(img, options)` | ✅ | Type G Canvas 导出 |
+
 ### components/type-f-editor-panel.js（Type F 编辑面板配置）
 
 | 函数名 | 状态 | 说明 |
 |--------|------|------|
 | `configureEditPanel()` | ✅ | 配置 Type F 编辑面板（隐藏边框颜色/高度/比例/Logo，更新设备型号提示） |
+
+### components/type-g-editor-panel.js（Type G 编辑面板配置）
+
+| 函数名 | 状态 | 说明 |
+|--------|------|------|
+| `configureEditPanel()` | ✅ | 配置 Type G 编辑面板（隐藏边框/比例/所有开关，保留 Logo 区域，更新机型提示） |
 
 ### app.js（浏览器模式）
 
@@ -464,6 +500,80 @@ src/renderer/
 - 隐藏：边框颜色、边框高度、比例设置、Logo 区域
 - 设备型号文本框自动包含品牌名（如 "Sony A7M4"）
 - 使用 `type-f-editor-panel.js` 独立配置模块
+
+---
+
+## Type G 特殊布局说明
+
+### Type G 画布结构
+
+```
+┌──────────────────────────────────┐
+│          5% 白色留白              │
+├──────────────────────────────────┤
+│                                  │
+│     92% 宽度 × 80% 高度           │  ← 照片展示区
+│     (object-fit: cover)          │
+│                                  │
+├──────────────────────────────────┤
+│         [Canon Logo]             │  ← 第一行：厂商 Logo（居中）
+│   2024/06/18 | f/2.8 50mm | A7M4 │  ← 第二行：日期|参数|机型（竖线分隔）
+│         © Photo by John          │  ← 第三行：署名（居中）
+└──────────────────────────────────┘
+
+画布尺寸：图片宽度 × (图片高度 / 0.8)
+```
+
+### Type G 布局规则
+
+| 区域 | 位置 | 内容 |
+|------|------|------|
+| 白色留白 | 顶部 5% 高度 | 纯白背景 |
+| 照片区 | top:5%, left:4%, width:92%, height:80% | 图片（object-fit: cover） |
+| 文字区 | 底部 15% 高度 | 绝对定位文字 |
+| 第一行 | 文字区居中 | 厂商 Logo（居中，高度 = textAreaHeight / 6） |
+| 第二行 | 第一行下方 | 日期 | 参数 | 机型（竖线分隔，全部黑色 #000） |
+| 第三行 | 第二行下方 | © 署名（黑色 #000，可选） |
+
+### Type G 纵向图片自适应
+
+| 场景 | 照片区 | 顶部留白 | 底部文字区 | Logo 高度 |
+|------|--------|---------|-----------|----------|
+| 横向图片 | 80% | 5% | 15% | canvasHeight × 2.5% |
+| 纵向图片 | 90% | 2.5% | 7.5% | canvasHeight × 1.25% |
+
+### Type G 动态字号
+
+- 基准：900px 画布宽度对应 14px 字号
+- 公式：`fontSize = 14 × displayWidth / 900`
+- 第三行字号 = 基准 × (12/14)
+- 行间距 = baseFontSize × (6/14)
+
+### Type G 预览缩放机制
+
+与 Type F 一致：
+- 画布原始尺寸完全基于图片（`canvasW = naturalWidth`，`canvasH = naturalHeight / 0.8`）
+- 每次 resize 时计算 `displayScale = min(availW/canvasW, availH/canvasH, 1)`
+- 显示尺寸 = 原始尺寸 × displayScale
+- 所有元素（字号、CSS 百分比）基于显示尺寸计算
+
+### Type G 与 Type F 差异
+
+| 特性 | Type F | Type G |
+|------|--------|--------|
+| 第一行 | "Shot on" + 品牌型号（文字） | 厂商 Logo（图片） |
+| 第二行格式 | 日期 光圈 焦距 快门 ISO（空格分隔） | 日期\|参数\|机型（竖线分隔） |
+| 文字颜色 | 灰色 #888888 | 黑色 #000000 |
+| 机型名 | 带品牌前缀（如 "Sony A7M4"） | 仅型号（如 "A7M4"） |
+| 编辑面板 | 隐藏 Logo 区域 | 保留 Logo 区域 |
+| 开关控制 | 保留部分开关 | 隐藏所有开关（全部默认显示） |
+
+### Type G 编辑面板特殊配置
+
+- 隐藏：边框颜色、边框高度、比例设置
+- 隐藏：所有显示开关（Logo/参数/时间/署名，所有元素默认显示）
+- 保留：Logo 选择区域
+- 机型 placeholder：`型号（如 A7M4）`
 
 ---
 
