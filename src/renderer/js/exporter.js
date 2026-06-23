@@ -11,6 +11,7 @@ import { typeDExport } from './styles/type-d-export.js';
 import { typeEExport } from './styles/type-e-export.js';
 import { typeFExport } from './styles/type-f-export.js';
 import { typeGExport } from './styles/type-g-export.js';
+import { typeHExport } from './styles/type-h-export.js';
 
 // 导出样式映射
 const exportStyles = {
@@ -20,7 +21,8 @@ const exportStyles = {
   'type-d': typeDExport,
   'type-e': typeEExport,
   'type-f': typeFExport,
-  'type-g': typeGExport
+  'type-g': typeGExport,
+  'type-h': typeHExport
 };
 
 /**

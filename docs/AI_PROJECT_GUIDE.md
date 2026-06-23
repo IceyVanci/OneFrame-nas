@@ -10,7 +10,7 @@
 
 ### 核心特性
 - 智能 EXIF 读取：自动识别相机厂商并显示对应 Logo
-- 多种边框样式：支持 Type A/B/C/D/E/F 六种样式
+- 多种边框样式：支持 Type A/B/C/D/E/F/G/H 八种样式
 - EXIF 保留：导出时自动保留原图 EXIF 信息
 - 纯前端：零构建方案，无需 Node.js
 
@@ -41,15 +41,15 @@ OneFrame-nas/
 ├── CHANGELOG.md                # 更新日志
 ├── docs/
 │   ├── AI_PROJECT_GUIDE.md     # 本文档
-│   ├── CHANGELOG.md            # 更新日志
 │   ├── V1.00-NAS_CHANGES.md    # 初始移植说明
 │   ├── V1.01-NAS_CHANGES.md    # v1.01 版本说明
 │   ├── V1.03-NAS_CHANGES.md    # Type F 同步说明
 │   ├── V1.04_CHANGES.md        # Type F 缩放修复说明
-│   ├── release-v1.01-nas.md    # Release 历史
+│   ├── V1.05-NAS_CHANGES.md    # Type F/E/G 同步说明
+│   ├── V1.06-NAS_CHANGES.md    # Type H 同步说明
+│   ├── release-v1.06-nas.md    # Release 历史
 │   ├── function_analysis.md    # 函数分析文档
-│   ├── migration-guide.md      # Electron→Docker 移植指南
-│   └── pending-issues-and-improvements.md
+│   └── migration-guide.md      # Electron→Docker 移植指南
 └── src/
     └── renderer/
         ├── index.html           # 主页面（首页 + 编辑器）
@@ -60,7 +60,9 @@ OneFrame-nas/
         │   ├── type-c.css       # Type C：横向布局
         │   ├── type-d.css       # Type D：横向居中
         │   ├── type-e.css       # Type E：3:2纵向
-        │   └── type-f.css       # Type F：画中画风格
+        │   ├── type-f.css       # Type F：画中画风格
+        │   ├── type-g.css       # Type G：画中画（Logo+日期参数+签名）
+        │   └── type-h.css       # Type H：全画幅叠加文字
         ├── js/
         │   ├── app.js           # 主逻辑入口（浏览器模式）
         │   ├── exif.js          # EXIF 读取
@@ -106,30 +108,30 @@ OneFrame-nas/
 
 ### Type E - 3:2 纵向
 - **特点**：顶部 1:1 正方形图片，底部白色区域显示参数
-- **布局**：
-  ```
-  ┌────────────────────┐
-  │                    │
-  │   1:1 正方形图片    │  ← 可拖动裁剪区域
-  │   (可拖动选择)      │
-  │                    │
-  ├────────────────────┤
-  │ March      f/2.8   │  ← 底部白色区域
-  │ 2024    50mm 1/125│
-  │          ISO 400   │
-  │ [Logo]    Model    │
-  └────────────────────┘
-  ```
 - **特殊功能**：图片可拖动选择裁剪区域
 
 ### Type F - 画中画风格
 - **特点**：上方白色留白 + 中部照片展示区 + 下方文字信息区
 - **布局**：画布宽度 = 图片宽度，画布高度 = 图片高度 / 0.8
 - **照片区域**：92% 宽度 × 80% 高度，顶部 5% 留白
-- **文字区域**：底部 15%，使用绝对定位
 - **字号**：动态缩放（基准 900px 宽度对应 14px）
 - **窗口缩放**：每次 resize 动态计算显示尺寸，所有元素等比缩放
 - **编辑面板**：隐藏边框颜色/高度/比例/Logo，设备型号自动包含品牌名
+
+### Type G - 画中画（Logo+日期参数+签名）
+- **特点**：白色背景，Logo 居中 + 日期|参数|机型（竖线分隔）+ 署名
+- **布局**：与 Type F 相同的画中画结构，但第一行显示 Logo 而非文字
+- **文字颜色**：全部黑色 #000000
+- **机型名**：只显示型号，不带品牌前缀（如 "A7M4"）
+- **编辑面板**：隐藏开关，显示 Logo 选择
+- **纵向图片**：白色区域减半（顶部 2.5%，底部 7.5%）
+
+### Type H - 全画幅叠加文字
+- **特点**：照片 100% 填满画布，Logo 和文字叠加在照片底部
+- **布局**：画布 = 图片原始大小，无额外白色区域
+- **文字颜色**：默认白色 #ffffff，支持黑/灰/白切换
+- **编辑面板**：隐藏开关，显示 Logo 选择 + 文字颜色选择器
+- **与 Type G 差异**：无白色边框，照片填满画布，文字叠加在照片上
 
 ---
 
@@ -140,17 +142,23 @@ OneFrame-nas/
 export const styles = {
   'type-a': { preview, export },
   'type-b': { preview, export },
-  // ... type-c, type-d, type-e, type-f
+  'type-c': { preview, export },
+  'type-d': { preview, export },
+  'type-e': { preview, export },
+  'type-f': { preview, export },
+  'type-g': { preview, export },
+  'type-h': { preview, export }
 };
 ```
 
 ### 2. app.js - 主逻辑
 浏览器模式下的主逻辑：
 - 图片导入（`<input type="file">`）
-- 样式切换（Type B/E/F 走独立路径）
+- 样式切换（Type B/E/F/G/H 走独立路径）
 - 预览更新（`updateBorder()`）
 - 导出处理（`<a download>`）
 - 表单管理
+- 文字颜色管理（Type H）
 
 ### 3. exif.js - EXIF 读取
 使用 exifreader 读取图片 EXIF：
@@ -277,7 +285,7 @@ Apple, Canon, DJI, Fujifilm, Google, GoPro, Hasselblad, Huawei*, Insta360*, Leic
 ### 默认边框高度
 - Type A: 12%（可调 5%-30%）
 - Type B: 固定比例
-- Type F: 不适用（画布由图片决定）
+- Type F/G/H: 不适用（画布由图片决定）
 
 ### 支持的 EXIF 字段
 - Make: 相机厂商

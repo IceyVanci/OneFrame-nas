@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="css/type-e.css">
   <link rel="stylesheet" href="css/type-f.css">
   <link rel="stylesheet" href="css/type-g.css">
+  <link rel="stylesheet" href="css/type-h.css">
   <link rel="stylesheet" href="assets/font-awesome/css/all.min.css">
   <script src="assets/opentype.min.js"></script>
   <script src="assets/piexif.js"></script>
@@ -96,6 +97,16 @@
           <div class="style-preview">
             <div class="frame-container">
               <img src="TypeG-sample_compressed.jpeg" alt="示例图片" class="preview-image">
+              <div class="photo-footer"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 样式卡片 8: Type H 全画幅叠加文字 -->
+        <div class="style-card" data-style="type-h" data-category="params">
+          <div class="style-preview">
+            <div class="frame-container">
+              <img src="TypeH-sample_compressed.jpeg" alt="示例图片" class="preview-image">
               <div class="photo-footer"></div>
             </div>
           </div>
@@ -280,6 +291,19 @@
         </div>
       </div>
 
+      <!-- 文字颜色选择（仅 Type H 显示） -->
+      <div class="edit-section" id="textColorSection" style="display:none">
+        <div class="section-title"><i class="fas fa-palette"></i> 文字颜色</div>
+        <div class="control-group">
+          <div class="color-preset-group" id="textColorPresets">
+            <button class="color-preset black" data-text-color="#000000">黑</button>
+            <button class="color-preset" data-text-color="#888888">灰</button>
+            <button class="color-preset white active" data-text-color="#ffffff">白</button>
+          </div>
+        </div>
+        <input type="hidden" id="textColor" value="#ffffff">
+      </div>
+
       <!-- 导出按钮 -->
       <div class="panel-footer">
         <button class="btn-primary" id="btnExport">
@@ -298,7 +322,7 @@
         <button class="modal-close" id="modalClose">&times;</button>
       </div>
       <div class="modal-body">
-        <p><strong>OneFrame</strong> v1.05</p>
+        <p><strong>OneFrame</strong> v1.06</p>
         <p>一款简洁优雅的图片边框添加工具，为您的照片自动添加精美的底部边框，并智能显示相机 EXIF 信息。</p>
         <hr>
         <p><strong>GitHub：</strong><a href="https://github.com/IceyVanci/OneFrame" target="_blank">github.com/IceyVanci/OneFrame</a></p>

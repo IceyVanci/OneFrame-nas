@@ -4,6 +4,7 @@ import { getModelName, getAllLogos, getLogoFilename, getMakeName } from './logo-
 import { getStyle, getPreview, typeBPreview, typeEPreview, typeFPreview } from './styles/index.js';
 import { configureEditPanel as configureTypeF } from './components/type-f-editor-panel.js';
 import { configureEditPanel as configureTypeG } from './components/type-g-editor-panel.js';
+import { configureEditPanel as configureTypeH } from './components/type-h-editor-panel.js';
 import { exportImage } from './exporter.js';
 
 let currentExif = null;
@@ -208,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 监听窗口大小变化，重新计算预览布局
     window.addEventListener('resize', updateBorder);
     const borderColorSection = document.querySelector('.edit-section:has(#borderColor)');
-    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f' || currentStyle === 'type-g') ? 'none' : 'block';
+    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f' || currentStyle === 'type-g' || currentStyle === 'type-h') ? 'none' : 'block';
     
     // Type F: 调用面板配置模块
     if (currentStyle === 'type-f') {
@@ -218,6 +219,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Type G: 调用面板配置模块
     if (currentStyle === 'type-g') {
       configureTypeG();
+    }
+    
+    // Type H: 调用面板配置模块
+    if (currentStyle === 'type-h') {
+      configureTypeH();
     }
     
     // Type B: 隐藏 Logo、拍摄参数、时间开关
@@ -304,9 +310,9 @@ document.addEventListener('DOMContentLoaded', () => {
   btnEdit.addEventListener('click', () => editPanel.classList.toggle('visible'));
   document.getElementById('btnClosePanel')?.addEventListener('click', () => editPanel.classList.remove('visible'));
 
-  document.querySelectorAll('.color-preset').forEach(btn => {
+  document.querySelectorAll('.color-preset[data-color]').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.color-preset').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.color-preset[data-color]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       borderColor.value = btn.dataset.color;
       updateBorder();
@@ -415,6 +421,34 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       frameWrapper.style.transform = 'none';
       updateBorderContent();
+    } else if (currentStyle === 'type-h') {
+      // 使用 Type H Preview 模块（画布=原始大小，无白色边框）
+      const frameWrapper = document.getElementById('frameWrapper');
+      const borderContent = document.getElementById('borderContent');
+      preview.init({
+        img: userImage,
+        frameWrapper: frameWrapper,
+        photoFooter: photoFooter,
+        borderContent: borderContent
+      });
+      // 画布原始尺寸（Type H 直接使用图片大小）
+      const canvasW = userImage.naturalWidth;
+      const canvasH = userImage.naturalHeight;
+      // 每次 resize 动态计算显示尺寸（等比缩放）
+      const hPreviewArea = frameWrapper?.parentElement;
+      const hAvailW = (hPreviewArea?.clientWidth || 500) * 0.96;
+      const hAvailH = (hPreviewArea?.clientHeight || 600) * 0.96;
+      const hDisplayScale = Math.min(hAvailW / canvasW, hAvailH / canvasH, 1);
+      const hDisplayW = Math.round(canvasW * hDisplayScale);
+      const hDisplayH = Math.round(canvasH * hDisplayScale);
+      // 设置显示尺寸（字号和 CSS 百分比基于此）
+      preview.updateFrameWrapper(hDisplayW, hDisplayH);
+      preview.updatePreview(hDisplayW, hDisplayH, {
+        naturalWidth: userImage.naturalWidth,
+        naturalHeight: userImage.naturalHeight
+      });
+      frameWrapper.style.transform = 'none';
+      updateBorderContent();
     } else {
       // 使用对应样式 Preview 模块
       const frameWrapper = document.getElementById('frameWrapper');
@@ -452,7 +486,8 @@ document.addEventListener('DOMContentLoaded', () => {
       iso: iso?.value || '',
       showTime: document.getElementById('switchTime')?.classList.contains('active'),
       dateTime: dateTime?.value || '',
-      signatureText: signatureText?.value || ''
+      signatureText: signatureText?.value || '',
+      textColor: document.getElementById('textColor')?.value || '#ffffff'
     };
   }
 
@@ -485,6 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
           showTime: document.getElementById('switchTime')?.classList.contains('active'),
           dateTime: dateTime?.value || '',
           signatureText: signatureText?.value || '',
+          textColor: document.getElementById('textColor')?.value || '#ffffff',
           borderColor: borderColor.value
         }
       );
@@ -500,6 +536,17 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.querySelectorAll('.switch').forEach(sw => {
     sw.addEventListener('click', () => { sw.classList.toggle('active'); updateBorderContent(); });
+  });
+
+  // 文字颜色预设按钮事件（Type H 使用）
+  document.querySelectorAll('#textColorPresets .color-preset').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#textColorPresets .color-preset').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const textColorInput = document.getElementById('textColor');
+      if (textColorInput) textColorInput.value = btn.dataset.textColor;
+      updateBorderContent();
+    });
   });
 
   function getEditSettings() {
@@ -518,6 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
       dateTime: dateTime?.value || '',
       showSignature: document.getElementById('switchSignature')?.classList.contains('active') ?? false,
       signatureText: signatureText?.value || '',
+      textColor: document.getElementById('textColor')?.value || '#ffffff',
       borderColor: borderColor?.value || '#ffffff',
       borderHeight: borderHeight?.value || 12,
       aspectRatio: document.getElementById('aspectRatio')?.value || 'default'
