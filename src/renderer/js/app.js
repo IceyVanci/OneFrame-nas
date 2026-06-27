@@ -5,6 +5,8 @@ import { getStyle, getPreview, typeBPreview, typeEPreview, typeFPreview } from '
 import { configureEditPanel as configureTypeF } from './components/type-f-editor-panel.js';
 import { configureEditPanel as configureTypeG } from './components/type-g-editor-panel.js';
 import { configureEditPanel as configureTypeH } from './components/type-h-editor-panel.js';
+import { configureEditPanel as configureTypeI } from './components/type-i-editor-panel.js';
+import { configureEditPanel as configureTypeJ } from './components/type-j-editor-panel.js';
 import { exportImage } from './exporter.js';
 
 let currentExif = null;
@@ -169,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     if (currentExif.Model) {
       const modelName = getModelName(currentExif.Model);
-      if (currentStyle === 'type-f') {
+      if (currentStyle === 'type-f' || currentStyle === 'type-j') {
         const makeName = make ? getMakeName(make) : '';
         customModel.value = makeName ? `${makeName} ${modelName}` : modelName;
       } else {
@@ -209,7 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 监听窗口大小变化，重新计算预览布局
     window.addEventListener('resize', updateBorder);
     const borderColorSection = document.querySelector('.edit-section:has(#borderColor)');
-    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f' || currentStyle === 'type-g' || currentStyle === 'type-h') ? 'none' : 'block';
+    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f' || currentStyle === 'type-g' || currentStyle === 'type-h' || currentStyle === 'type-i' || currentStyle === 'type-j') ? 'none' : 'block';
     
     // Type F: 调用面板配置模块
     if (currentStyle === 'type-f') {
@@ -224,6 +226,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Type H: 调用面板配置模块
     if (currentStyle === 'type-h') {
       configureTypeH();
+    }
+    
+    // Type I: 调用面板配置模块
+    if (currentStyle === 'type-i') {
+      configureTypeI();
+    }
+    
+    // Type J: 调用面板配置模块
+    if (currentStyle === 'type-j') {
+      configureTypeJ();
     }
     
     // Type B: 隐藏 Logo、拍摄参数、时间开关
@@ -444,6 +456,33 @@ document.addEventListener('DOMContentLoaded', () => {
       // 设置显示尺寸（字号和 CSS 百分比基于此）
       preview.updateFrameWrapper(hDisplayW, hDisplayH);
       preview.updatePreview(hDisplayW, hDisplayH, {
+        naturalWidth: userImage.naturalWidth,
+        naturalHeight: userImage.naturalHeight
+      });
+      frameWrapper.style.transform = 'none';
+      updateBorderContent();
+    } else if (currentStyle === 'type-i' || currentStyle === 'type-j') {
+      // 使用 Type I/J Preview 模块（画布=原始大小，无白色边框）
+      const frameWrapper = document.getElementById('frameWrapper');
+      const borderContent = document.getElementById('borderContent');
+      preview.init({
+        img: userImage,
+        frameWrapper: frameWrapper,
+        photoFooter: photoFooter,
+        borderContent: borderContent
+      });
+      // 画布原始尺寸（Type I/J 直接使用图片大小）
+      const canvasW = userImage.naturalWidth;
+      const canvasH = userImage.naturalHeight;
+      // 每次 resize 动态计算显示尺寸（等比缩放）
+      const ijPreviewArea = frameWrapper?.parentElement;
+      const ijAvailW = (ijPreviewArea?.clientWidth || 500) * 0.96;
+      const ijAvailH = (ijPreviewArea?.clientHeight || 600) * 0.96;
+      const ijDisplayScale = Math.min(ijAvailW / canvasW, ijAvailH / canvasH, 1);
+      const ijDisplayW = Math.round(canvasW * ijDisplayScale);
+      const ijDisplayH = Math.round(canvasH * ijDisplayScale);
+      preview.updateFrameWrapper(ijDisplayW, ijDisplayH);
+      preview.updatePreview(ijDisplayW, ijDisplayH, {
         naturalWidth: userImage.naturalWidth,
         naturalHeight: userImage.naturalHeight
       });

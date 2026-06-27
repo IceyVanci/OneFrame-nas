@@ -4,7 +4,7 @@
 
 本项目是 [OneFrame](https://github.com/IceyVanci/OneFrame) 的 NAS/Docker 移植版本，从 Electron 桌面应用迁移为纯前端 Web 应用，通过 Docker 容器化部署在 NAS 上，局域网内设备可通过浏览器访问。
 
-![Version](https://img.shields.io/badge/version-1.06--nas-blue.svg)
+![Version](https://img.shields.io/badge/version-1.07--nas-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Docker](https://img.shields.io/badge/Docker-nginx:alpine-2496ED.svg)
 
@@ -18,7 +18,7 @@
 - 自动读取拍摄时间和设备型号
 
 ### 🎨 边框样式
-支持 8 种边框样式：
+支持 10 种边框样式：
 - **Type A**：白色下边框 - 可调节边框高度（5%-30%），完整编辑面板
 - **Type B**：黑色下边框 - 正方形画布，图片居左，右侧显示参数和 Logo
 - **Type C**：横向布局 - Logo 在左侧，参数在右侧，纵向图片自动缩放字体
@@ -27,6 +27,8 @@
 - **Type F**：画中画 - 上方白色留白 + 中部照片展示区 + 底部文字信息区，字号动态缩放
 - **Type G**：画中画 - 白色背景 + 居中 Logo + 日期|参数|机型 + 署名，支持纵向图片自适应
 - **Type H**：全画幅叠加 - 照片 100% 填满画布，Logo 和文字叠加在照片底部，支持文字颜色选择
+- **Type I**：极简叠加 - 照片 100% 填满画布，Logo 顶部居中，底部仅署名（默认 "OneFrame"），纵向图片字号增大 50%
+- **Type J**：署名+三栏参数 - 照片 100% 填满画布，署名+参数行三栏布局（左机型/中参数/右时间），机型含厂商名
 
 ### 📝 边框信息编辑
 - Logo 显示开关
@@ -34,7 +36,7 @@
 - 拍摄时间显示开关
 - 支持自定义署名
 - 边框颜色和高度自定义
-- 文字颜色选择（Type H）
+- 文字颜色选择（Type H/I/J）
 
 ### 🔒 EXIF 保留
 - 导出时自动保留原图 EXIF 信息
@@ -94,7 +96,7 @@ docker compose up --build -d
 ```bash
 # 下载镜像文件（在 Release 页面下载 .tar 文件）
 # 导入镜像
-docker load -i oneframe-web-v1.06-nas.tar
+docker load -i oneframe-web-v1.07-nas.tar
 
 # 运行容器
 docker run -d -p 8888:80 --name oneframe-web --restart unless-stopped oneframe-nas-oneframe:latest
@@ -140,7 +142,7 @@ docker compose up --build -d
 
 ### 1. 选择边框样式
 打开浏览器访问应用后，点击首页的样式卡片。
-- **参数**标签：Type A（白色下边框）、Type C（横向布局）、Type D（横向居中）、Type F（画中画）、Type G（画中画）、Type H（全画幅叠加）
+- **参数**标签：Type A、Type C、Type D、Type F、Type G、Type H、Type I、Type J
 - **海报**标签：Type B（黑色下边框）、Type E（3:2 纵向）
 
 ### 2. 选择图片
@@ -231,6 +233,7 @@ docker compose up --build
 - [docs/AI_PROJECT_GUIDE.md](./docs/AI_PROJECT_GUIDE.md) - AI 项目认知指南
 - [docs/function_analysis.md](./docs/function_analysis.md) - 函数分析文档
 - [docs/migration-guide.md](./docs/migration-guide.md) - Electron → Docker 移植指南
+- [docs/V1.07-NAS_CHANGES.md](./docs/V1.07-NAS_CHANGES.md) - v1.07 同步变更（Type I/J）
 - [docs/V1.06-NAS_CHANGES.md](./docs/V1.06-NAS_CHANGES.md) - v1.06 同步变更（Type H）
 - [docs/release-v1.06-nas.md](./docs/release-v1.06-nas.md) - v1.06 Release 说明
 - [docs/V1.05-NAS_CHANGES.md](./docs/V1.05-NAS_CHANGES.md) - v1.05 同步变更（Type F/E/G）

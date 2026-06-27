@@ -1,5 +1,51 @@
 # OneFrame NAS Edition 更新日志
 
+## v1.07 (2026-06-28)
+
+### ✨ 新功能
+
+#### Type I 极简叠加文字样式（同步自原始项目 v1.0.7）
+- 照片 100% 填满画布，Logo 顶部居中，底部仅署名（默认 "OneFrame"）
+- 纵向图片底部字号增大 50%
+- 编辑面板：隐藏型号/参数/时间，保留 Logo + 署名 + 文字颜色
+
+#### Type J 署名+三栏参数行样式（同步自原始项目 v1.0.7）
+- 不显示 Logo，署名在底部第一行，参数行三栏布局（左机型/中参数/右时间）
+- 机型名称自动包含厂商前缀（如 "Sony A7M4"）
+- 纵向图片底部字号增大 50%
+- 导出使用底部锚定 `bottom: 3%` 定位
+
+#### 文字颜色选择功能扩展
+- Type I 和 Type J 均支持文字颜色选择（黑/灰/白）
+
+### 📁 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `css/type-i.css` | Type I 样式定义 |
+| `styles/type-i-preview.js` | Type I 预览模块 |
+| `styles/type-i-export.js` | Type I 导出模块 |
+| `components/type-i-editor-panel.js` | Type I 编辑面板配置 |
+| `css/type-j.css` | Type J 样式定义 |
+| `styles/type-j-preview.js` | Type J 预览模块 |
+| `styles/type-j-export.js` | Type J 导出模块 |
+| `components/type-j-editor-panel.js` | Type J 编辑面板配置 |
+
+### 🔧 修改文件
+
+- `styles/index.js` — 注册 Type I/J
+- `exporter.js` — 注册 Type I/J 导出
+- `index.html` — 添加 Type I/J 卡片和 CSS 引用，版本号 v1.07
+- `app.js` — 添加 Type I/J 的 showEditor/updateBorder 分支
+
+### 📝 文档
+
+- 新增 `docs/V1.07-NAS_CHANGES.md`
+- 更新 `README.md` 版本号和样式列表
+- 更新 `docs/AI_PROJECT_GUIDE.md`
+
+---
+
 ## v1.05 (2026-06-19)
 
 ### ✨ 新功能

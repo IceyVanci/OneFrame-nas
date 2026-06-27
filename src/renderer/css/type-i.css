@@ -1,0 +1,77 @@
+/**
+ * Type I 样式
+ * 布局：照片 100% 填满画布，Logo 在顶部居中，底部仅显示署名
+ * 基于 Type H 调整：Logo 移至顶部，移除参数、机型和时间
+ */
+
+/* Type I 样式 - 独立布局 */
+.frame-wrapper.type-i {
+  display: block !important;
+  position: relative;
+  background: #000000;
+  max-width: none !important;  /* 覆盖 type-a.css 通用选择器 */
+  max-height: none !important;
+  /* 尺寸由 JS 通过 inline style 设置 */
+}
+
+/* 照片区：100% 填满画布（仅匹配直接子级 img，不匹配 Logo） */
+.frame-wrapper.type-i > img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  max-width: none;
+  max-height: none;
+}
+
+/* 隐藏 Type I 的 photoFooter */
+.frame-wrapper.type-i .photo-footer {
+  display: none;
+}
+
+/* 覆盖 type-a.css 的 border-content 默认样式 */
+.frame-wrapper.type-i .border-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  bottom: auto;  /* 覆盖 type-a.css 的 bottom: 0 */
+}
+
+/* 顶部 Logo 容器 */
+.type-i-top-logo {
+  position: absolute;
+  top: 3%;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  line-height: 0;
+  font-size: 0;
+}
+
+.type-i-top-logo img {
+  display: inline-block;
+  object-fit: contain;
+}
+
+/* 底部文字区 */
+.type-i-bottom {
+  position: absolute;
+  bottom: 3%;
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+
+/* 署名行 */
+.type-i-signature {
+  font-size: 1em;  /* 与时间相同字号 */
+  font-family: 'MiSans Normal', 'MiSans', sans-serif;
+  color: #ffffff;  /* CSS fallback，实际由 JS inline style 覆盖 */
+  line-height: 1;
+}

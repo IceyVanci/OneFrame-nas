@@ -10,7 +10,7 @@
 
 ### 核心特性
 - 智能 EXIF 读取：自动识别相机厂商并显示对应 Logo
-- 多种边框样式：支持 Type A/B/C/D/E/F/G/H 八种样式
+- 多种边框样式：支持 Type A/B/C/D/E/F/G/H/I/J 十种样式
 - EXIF 保留：导出时自动保留原图 EXIF 信息
 - 纯前端：零构建方案，无需 Node.js
 
@@ -47,6 +47,7 @@ OneFrame-nas/
 │   ├── V1.04_CHANGES.md        # Type F 缩放修复说明
 │   ├── V1.05-NAS_CHANGES.md    # Type F/E/G 同步说明
 │   ├── V1.06-NAS_CHANGES.md    # Type H 同步说明
+│   ├── V1.07-NAS_CHANGES.md    # Type I/J 同步说明
 │   ├── release-v1.06-nas.md    # Release 历史
 │   ├── function_analysis.md    # 函数分析文档
 │   └── migration-guide.md      # Electron→Docker 移植指南
@@ -62,7 +63,9 @@ OneFrame-nas/
         │   ├── type-e.css       # Type E：3:2纵向
         │   ├── type-f.css       # Type F：画中画风格
         │   ├── type-g.css       # Type G：画中画（Logo+日期参数+签名）
-        │   └── type-h.css       # Type H：全画幅叠加文字
+│   ├── type-h.css       # Type H：全画幅叠加文字
+│   ├── type-i.css       # Type I：极简叠加（Logo顶部+署名）
+│   └── type-j.css       # Type J：署名+三栏参数行
         ├── js/
         │   ├── app.js           # 主逻辑入口（浏览器模式）
         │   ├── exif.js          # EXIF 读取
@@ -147,14 +150,16 @@ export const styles = {
   'type-e': { preview, export },
   'type-f': { preview, export },
   'type-g': { preview, export },
-  'type-h': { preview, export }
+  'type-h': { preview, export },
+  'type-i': { preview, export },
+  'type-j': { preview, export }
 };
 ```
 
 ### 2. app.js - 主逻辑
 浏览器模式下的主逻辑：
 - 图片导入（`<input type="file">`）
-- 样式切换（Type B/E/F/G/H 走独立路径）
+- 样式切换（Type B/E/F/G/H/I/J 走独立路径）
 - 预览更新（`updateBorder()`）
 - 导出处理（`<a download>`）
 - 表单管理
