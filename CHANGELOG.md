@@ -1,5 +1,55 @@
 # OneFrame NAS Edition 更新日志
 
+## v1.08 (2026-06-29)
+
+### ✨ 新功能
+
+#### Type J 编辑面板改进
+- 设备型号输入框现在可见，方便手动修改机型名称
+- 输入框 placeholder 改为"型号（如 Sony A7M4）"
+
+#### Type K 左下角 Logo + 双行文字样式（同步自原始项目 v1.0.8）
+- Logo 在底部左下角，右侧两行左对齐文字
+- 第一行：署名（medium）+ 日期（normal）
+- 第二行：机型名称（medium）+ 拍摄参数（normal）
+- 纵向图片底部字号增大 50%
+
+#### Type L 高斯模糊背景样式（同步自原始项目 v1.0.8）
+- 基于 Type G，白色外框替换为照片高斯模糊版本
+- 文字颜色默认白色，支持黑/灰/白选择
+- 预览端：动态创建 blur 背景 DOM，CSS filter + transform scale
+- 导出端：Canvas ctx.filter 两步绘制
+
+### 📁 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `css/type-k.css` | Type K 样式定义 |
+| `styles/type-k-preview.js` | Type K 预览模块 |
+| `styles/type-k-export.js` | Type K 导出模块 |
+| `components/type-k-editor-panel.js` | Type K 编辑面板配置 |
+| `css/type-l.css` | Type L 样式定义 |
+| `styles/type-l-preview.js` | Type L 预览模块 |
+| `styles/type-l-export.js` | Type L 导出模块 |
+| `components/type-l-editor-panel.js` | Type L 编辑面板配置 |
+
+### 🔧 修改文件
+
+- `styles/index.js` — 注册 Type K/L
+- `exporter.js` — 注册 Type K/L 导出
+- `index.html` — 添加 Type K/L 卡片和 CSS，版本号 v1.08
+- `app.js` — 添加 Type K/L 入口
+- `components/type-j-editor-panel.js` — 显示设备型号输入框
+
+### 📝 文档
+
+- 新增 `docs/V1.08-NAS_CHANGES.md`
+- 新增 `docs/release-v1.08-nas.md`
+- 更新 `README.md` 版本号和样式列表
+- 更新 `docs/AI_PROJECT_GUIDE.md`
+
+---
+
 ## v1.07 (2026-06-28)
 
 ### ✨ 新功能

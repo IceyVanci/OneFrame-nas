@@ -1,0 +1,90 @@
+/**
+ * Type K 样式
+ * 布局：照片 100% 填满画布，底部左下角 Logo + 双行文字
+ * Logo 右侧第一行：署名 + 日期
+ * Logo 右侧第二行：机型名称 + 拍摄参数
+ */
+
+/* Type K 样式 - 独立布局 */
+.frame-wrapper.type-k {
+  display: block !important;
+  position: relative;
+  background: #000000;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+/* 照片区：100% 填满画布 */
+.frame-wrapper.type-k > img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  max-width: none;
+  max-height: none;
+}
+
+/* 隐藏 Type K 的 photoFooter */
+.frame-wrapper.type-k .photo-footer {
+  display: none;
+}
+
+/* 覆盖 type-a.css 的 border-content 默认样式 */
+.frame-wrapper.type-k .border-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  bottom: auto;
+}
+
+/* 底部内容容器 */
+.type-k-bottom {
+  position: absolute;
+  bottom: 3%;
+  left: 5%;
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+}
+
+/* Logo */
+.type-k-logo {
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.type-k-logo img {
+  display: block;
+  object-fit: contain;
+}
+
+/* 双行文字容器 */
+.type-k-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3em;
+}
+
+/* 第一行：署名 + 日期 */
+.type-k-line1 {
+  font-family: 'MiSans Normal', 'MiSans', sans-serif;
+  font-size: 1em;
+  color: #ffffff;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* 第二行：机型 + 参数 */
+.type-k-line2 {
+  font-family: 'MiSans Normal', 'MiSans', sans-serif;
+  font-size: 1em;
+  color: #ffffff;
+  line-height: 1;
+  white-space: nowrap;
+}

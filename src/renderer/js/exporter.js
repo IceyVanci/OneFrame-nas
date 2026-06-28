@@ -14,6 +14,8 @@ import { typeGExport } from './styles/type-g-export.js';
 import { typeHExport } from './styles/type-h-export.js';
 import { typeIExport } from './styles/type-i-export.js';
 import { typeJExport } from './styles/type-j-export.js';
+import { typeKExport } from './styles/type-k-export.js';
+import { typeLExport } from './styles/type-l-export.js';
 
 // 导出样式映射
 const exportStyles = {
@@ -26,7 +28,9 @@ const exportStyles = {
   'type-g': typeGExport,
   'type-h': typeHExport,
   'type-i': typeIExport,
-  'type-j': typeJExport
+  'type-j': typeJExport,
+  'type-k': typeKExport,
+  'type-l': typeLExport
 };
 
 /**

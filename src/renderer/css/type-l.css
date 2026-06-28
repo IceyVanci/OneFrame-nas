@@ -1,0 +1,108 @@
+/**
+ * Type L 样式
+ * 布局：基于 Type G，白色外框替换为照片高斯模糊背景
+ * - 顶部 5% 模糊背景
+ * - 中部照片展示区（92% 宽度，80% 高度），清晰
+ * - 底部 15% 文字信息区（绝对定位，由 JS 控制）
+ */
+
+/* Type L 样式 - 独立布局 */
+.frame-wrapper.type-l {
+  display: block !important;
+  position: relative;
+  background: #000; /* 黑色背景，让 blur 透明边缘视觉融合 */
+  max-width: none !important;
+  max-height: none !important;
+  overflow: hidden; /* 裁剪溢出的 blur 背景到画布边界内 */
+  border: 2px solid rgba(255, 255, 255, 0.3); /* 预览端标识画布边缘，不导出 */
+}
+
+/* 模糊背景层（由 JS 动态创建） */
+.type-l-blur-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  transform: scale(1.5); /* 从中心放大，确保 blur 透明边缘完全在裁剪区域外 */
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 照片区：居中，92% 宽度，80% 高度，在模糊背景之上（排除 blur 背景层） */
+.frame-wrapper.type-l > img:not(.type-l-blur-bg) {
+  position: absolute;
+  top: 5%;
+  left: 4%;
+  width: 92%;
+  height: 80%;
+  object-fit: cover;
+  object-position: center center;
+  max-width: none;
+  max-height: none;
+  z-index: 1;
+}
+
+/* 隐藏 Type L 的 photoFooter */
+.frame-wrapper.type-l .photo-footer {
+  display: none;
+}
+
+/* 底部文字区：在模糊背景之上 */
+.frame-wrapper.type-l .border-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 15%;
+  overflow: visible;
+  z-index: 1;
+}
+
+/* 文字行基础样式 */
+.type-l-line {
+  position: absolute;
+  left: 4%;
+  right: 4%;
+  text-align: center;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* 第一行：Logo 容器 */
+.type-l-line1 {
+  text-align: center;
+  line-height: 0;
+  font-size: 0;
+}
+
+.type-l-logo {
+  text-align: center;
+}
+
+.type-l-logo img {
+  display: inline-block;
+  object-fit: contain;
+}
+
+/* 第二行：三部分竖线分隔 */
+.type-l-line2 {
+  font-size: 1em;
+  font-family: 'MiSans Medium', 'MiSans', sans-serif;
+  color: #ffffff;
+}
+
+.type-l-separator {
+  margin: 0 0.5em;
+  font-family: 'MiSans Normal', 'MiSans', sans-serif;
+  color: #ffffff;
+}
+
+/* 第三行（署名） */
+.type-l-line3 {
+  font-size: 0.8571em;
+  font-family: 'MiSans Normal', 'MiSans', sans-serif;
+  color: #ffffff;
+}

@@ -20,9 +20,11 @@ export function configureEditPanel() {
   const logoSection = document.querySelector('.edit-section:has(#logoGrid)');
   if (logoSection) logoSection.style.display = 'none';
   
-  // 设备型号：隐藏（自动从 EXIF 读取含厂商名）
+  // 设备型号：显示（可手动修改，默认从 EXIF 读取含厂商名）
   const modelSection = document.querySelector('.edit-section:has(#customModel)');
-  if (modelSection) modelSection.style.display = 'none';
+  if (modelSection) modelSection.style.display = '';
+  const customModelInput = document.getElementById('customModel');
+  if (customModelInput) customModelInput.placeholder = '型号（如 Sony A7M4）';
   
   // 隐藏所有显示开关（默认激活）
   ['switchLogo', 'switchModel', 'switchParams', 'switchTime', 'switchSignature'].forEach(id => {

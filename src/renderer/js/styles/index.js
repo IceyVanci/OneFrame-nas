@@ -30,6 +30,10 @@ import { typeIPreview } from './type-i-preview.js';
 import { typeIExport } from './type-i-export.js';
 import { typeJPreview } from './type-j-preview.js';
 import { typeJExport } from './type-j-export.js';
+import { typeKPreview } from './type-k-preview.js';
+import { typeKExport } from './type-k-export.js';
+import { typeLPreview } from './type-l-preview.js';
+import { typeLExport } from './type-l-export.js';
 
 /**
  * @typedef {Object} StyleModule
@@ -78,6 +82,14 @@ export const styles = {
   'type-j': {
     preview: typeJPreview,
     export: typeJExport
+  },
+  'type-k': {
+    preview: typeKPreview,
+    export: typeKExport
+  },
+  'type-l': {
+    preview: typeLPreview,
+    export: typeLExport
   }
 };
 
@@ -148,3 +160,7 @@ export { typeIPreview } from './type-i-preview.js';
 
 // 重新导出 Type J Preview
 export { typeJPreview } from './type-j-preview.js';
+
+export { typeKPreview } from './type-k-preview.js';
+
+export { typeLPreview } from './type-l-preview.js';

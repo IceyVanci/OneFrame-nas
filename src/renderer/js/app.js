@@ -7,6 +7,8 @@ import { configureEditPanel as configureTypeG } from './components/type-g-editor
 import { configureEditPanel as configureTypeH } from './components/type-h-editor-panel.js';
 import { configureEditPanel as configureTypeI } from './components/type-i-editor-panel.js';
 import { configureEditPanel as configureTypeJ } from './components/type-j-editor-panel.js';
+import { configureEditPanel as configureTypeK } from './components/type-k-editor-panel.js';
+import { configureEditPanel as configureTypeL } from './components/type-l-editor-panel.js';
 import { exportImage } from './exporter.js';
 
 let currentExif = null;
@@ -211,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 监听窗口大小变化，重新计算预览布局
     window.addEventListener('resize', updateBorder);
     const borderColorSection = document.querySelector('.edit-section:has(#borderColor)');
-    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f' || currentStyle === 'type-g' || currentStyle === 'type-h' || currentStyle === 'type-i' || currentStyle === 'type-j') ? 'none' : 'block';
+    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f' || currentStyle === 'type-g' || currentStyle === 'type-h' || currentStyle === 'type-i' || currentStyle === 'type-j' || currentStyle === 'type-k' || currentStyle === 'type-l') ? 'none' : 'block';
     
     // Type F: 调用面板配置模块
     if (currentStyle === 'type-f') {
@@ -236,6 +238,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // Type J: 调用面板配置模块
     if (currentStyle === 'type-j') {
       configureTypeJ();
+    }
+    
+    // Type K: 调用面板配置模块
+    if (currentStyle === 'type-k') {
+      configureTypeK();
+    }
+    
+    // Type L: 调用面板配置模块
+    if (currentStyle === 'type-l') {
+      configureTypeL();
     }
     
     // Type B: 隐藏 Logo、拍摄参数、时间开关
@@ -483,6 +495,58 @@ document.addEventListener('DOMContentLoaded', () => {
       const ijDisplayH = Math.round(canvasH * ijDisplayScale);
       preview.updateFrameWrapper(ijDisplayW, ijDisplayH);
       preview.updatePreview(ijDisplayW, ijDisplayH, {
+        naturalWidth: userImage.naturalWidth,
+        naturalHeight: userImage.naturalHeight
+      });
+      frameWrapper.style.transform = 'none';
+      updateBorderContent();
+    } else if (currentStyle === 'type-k') {
+      // 使用 Type K Preview 模块（与 Type H 相同的缩放逻辑）
+      const frameWrapper = document.getElementById('frameWrapper');
+      const borderContent = document.getElementById('borderContent');
+      preview.init({
+        img: userImage,
+        frameWrapper: frameWrapper,
+        photoFooter: photoFooter,
+        borderContent: borderContent
+      });
+      const kCanvasW = userImage.naturalWidth;
+      const kCanvasH = userImage.naturalHeight;
+      const kPreviewArea = frameWrapper?.parentElement;
+      const kAvailW = (kPreviewArea?.clientWidth || 500) * 0.96;
+      const kAvailH = (kPreviewArea?.clientHeight || 600) * 0.96;
+      const kDisplayScale = Math.min(kAvailW / kCanvasW, kAvailH / kCanvasH, 1);
+      const kDisplayW = Math.round(kCanvasW * kDisplayScale);
+      const kDisplayH = Math.round(kCanvasH * kDisplayScale);
+      preview.updateFrameWrapper(kDisplayW, kDisplayH);
+      preview.updatePreview(kDisplayW, kDisplayH, {
+        naturalWidth: userImage.naturalWidth,
+        naturalHeight: userImage.naturalHeight
+      });
+      frameWrapper.style.transform = 'none';
+      updateBorderContent();
+    } else if (currentStyle === 'type-l') {
+      // 使用 Type L Preview 模块（与 Type G 相同的缩放逻辑）
+      const frameWrapper = document.getElementById('frameWrapper');
+      const borderContent = document.getElementById('borderContent');
+      preview.init({
+        img: userImage,
+        frameWrapper: frameWrapper,
+        photoFooter: photoFooter,
+        borderContent: borderContent
+      });
+      const isPortraitL = userImage.naturalHeight > userImage.naturalWidth;
+      const heightRatioL = isPortraitL ? 0.9 : 0.8;
+      const lCanvasW = userImage.naturalWidth;
+      const lCanvasH = Math.round(userImage.naturalHeight / heightRatioL);
+      const lPreviewArea = frameWrapper?.parentElement;
+      const lAvailW = (lPreviewArea?.clientWidth || 500) * 0.96;
+      const lAvailH = (lPreviewArea?.clientHeight || 600) * 0.96;
+      const lDisplayScale = Math.min(lAvailW / lCanvasW, lAvailH / lCanvasH, 1);
+      const lDisplayW = Math.round(lCanvasW * lDisplayScale);
+      const lDisplayH = Math.round(lCanvasH * lDisplayScale);
+      preview.updateFrameWrapper(lDisplayW, lDisplayH);
+      preview.updatePreview(lDisplayW, lDisplayH, {
         naturalWidth: userImage.naturalWidth,
         naturalHeight: userImage.naturalHeight
       });

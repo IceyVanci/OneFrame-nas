@@ -10,7 +10,7 @@
 
 ### 核心特性
 - 智能 EXIF 读取：自动识别相机厂商并显示对应 Logo
-- 多种边框样式：支持 Type A/B/C/D/E/F/G/H/I/J 十种样式
+- 多种边框样式：支持 Type A/B/C/D/E/F/G/H/I/J/K/L 十二种样式
 - EXIF 保留：导出时自动保留原图 EXIF 信息
 - 纯前端：零构建方案，无需 Node.js
 
