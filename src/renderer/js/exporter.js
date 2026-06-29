@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 图片导出模块
  * 支持保留 EXIF 信息的高质量 JPG 输出
  */
@@ -16,6 +16,7 @@ import { typeIExport } from './styles/type-I-export.js';
 import { typeJExport } from './styles/type-J-export.js';
 import { typeKExport } from './styles/type-K-export.js';
 import { typeLExport } from './styles/type-L-export.js';
+import { typeMExport } from './styles/type-M-export.js';
 
 // 导出样式映射
 const exportStyles = {
@@ -30,7 +31,8 @@ const exportStyles = {
   'type-i': typeIExport,
   'type-j': typeJExport,
   'type-k': typeKExport,
-  'type-l': typeLExport
+  'type-l': typeLExport,
+  'type-m': typeMExport
 };
 
 /**

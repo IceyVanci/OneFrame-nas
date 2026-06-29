@@ -247,7 +247,15 @@ export async function renderImage(img, options) {
     srcY = Math.round((img.naturalHeight - srcH) / 2);
   }
   
+  // 圆角裁剪（按比例缩放）
+  const baseScaleF = canvasWidth / 900;
+  const cornerRadiusF = Math.round(12 * baseScaleF);
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(photoX, photoY, photoWidth, photoHeight, cornerRadiusF);
+  ctx.clip();
   ctx.drawImage(img, srcX, srcY, srcW, srcH, photoX, photoY, photoWidth, photoHeight);
+  ctx.restore();
   
   // 3. 绘制底部文字内容
   await drawBorderContent(ctx, canvasWidth, canvasHeight, settings, fonts, isPortrait);

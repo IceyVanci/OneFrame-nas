@@ -1,5 +1,43 @@
 # OneFrame NAS Edition 更新日志
 
+## v1.11 (2026-06-30)
+
+### ✨ 新功能
+
+#### 新增样式 M（模糊边框+顶部Logo+底部文字）
+- 照片 90%×90% 居中，四条边等高模糊背景（各 5%）
+- 顶部 Logo + 底部署名 + 参数行三栏
+- 导入图像应用 12px 圆角
+
+#### 样式 B/F/G/L 图片圆角
+- 预览端和导出端统一 12px 圆角
+
+#### 关于界面调整
+- GitHub 链接指向本项目，添加 Bilibili/Instagram 链接
+
+### 🐛 Bug 修复
+
+#### Type L 导出模糊背景缩放修复
+- 修复导出图片模糊背景边缘黑边/透明边问题
+
+### 🔧 修改文件
+
+- `app.js` — 添加 Type M 支持
+- `index.html` — 添加 Type M 卡片 + 关于模态框调整
+- `styles/index.js` — 注册 Type M
+- `exporter.js` — 注册 Type M 导出
+- `css/type-B/F/G/L.css` — 图片圆角 12px
+- `type-B/F/G/L-export.js` — 导出圆角
+- 新增 `type-M-preview.js`、`type-M-export.js`、`type-M.css`、`type-M-editor-panel.js`
+
+### 📝 文档
+
+- 新增 `docs/V1.11-NAS_CHANGES.md`
+- 更新 `README.md` 版本号
+- 更新 `CHANGELOG.md`
+
+---
+
 ## v1.10 (2026-06-29)
 
 ### ✨ 新功能

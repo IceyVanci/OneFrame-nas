@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 样式模块统一导出
  * 
  * 模块职责：
@@ -34,6 +34,8 @@ import { typeKPreview } from './type-K-preview.js';
 import { typeKExport } from './type-K-export.js';
 import { typeLPreview } from './type-L-preview.js';
 import { typeLExport } from './type-L-export.js';
+import { typeMPreview } from './type-M-preview.js';
+import { typeMExport } from './type-M-export.js';
 
 /**
  * @typedef {Object} StyleModule
@@ -90,6 +92,10 @@ export const styles = {
   'type-l': {
     preview: typeLPreview,
     export: typeLExport
+  },
+  'type-m': {
+    preview: typeMPreview,
+    export: typeMExport
   }
 };
 
@@ -161,3 +167,4 @@ export { typeJPreview } from './type-J-preview.js';
 export { typeKPreview } from './type-K-preview.js';
 
 export { typeLPreview } from './type-L-preview.js';
+export { typeMPreview } from './type-M-preview.js';

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Type G 样式
  * 布局：与 Type F 类似，上方白色留白 + 中部照片展示区 + 下方文字信息区
  * - 顶部 5% 白色留白
@@ -18,6 +18,7 @@
 
 /* 照片区：居中，92% 宽度，80% 高度（仅匹配直接子级 img，不匹配 Logo） */
 .frame-wrapper.type-g > img {
+  border-radius: 12px;
   position: absolute;
   top: 5%;
   left: 4%;

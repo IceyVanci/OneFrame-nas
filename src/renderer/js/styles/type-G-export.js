@@ -1,7 +1,7 @@
 /**
  * Type G 导出渲染模块
  * 布局：白色背景 + 顶部5%留白 + 中部92%×80%照片 + 底部15%文字
- * 文字：第一行 Logo，第二行日期|参数|机型，第三行署名
+ * 文字：第一行 "Shot on" 灰色 + 品牌黑色 + 机型黑色，第二行参数灰色
  */
 
 const opentype = window.opentype;
@@ -183,6 +183,7 @@ async function drawBorderContent(ctx, canvasWidth, canvasHeight, settings, fonts
  * @param {number} centerX - 居中 X 坐标
  * @param {number} centerY - Y 坐标（文字基线）
  * @param {number} maxHeight - 最大高度
+ * @param {number} maxWidth - 最大宽度
  */
 function drawLogoG(ctx, logoName, centerX, centerY, maxHeight) {
   return new Promise((resolve) => {
@@ -256,7 +257,15 @@ export async function renderImage(img, options) {
     srcY = Math.round((img.naturalHeight - srcH) / 2);
   }
   
+  // 圆角裁剪（按比例缩放）
+  const baseScaleG = canvasWidth / 900;
+  const cornerRadiusG = Math.round(12 * baseScaleG);
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(photoX, photoY, photoWidth, photoHeight, cornerRadiusG);
+  ctx.clip();
   ctx.drawImage(img, srcX, srcY, srcW, srcH, photoX, photoY, photoWidth, photoHeight);
+  ctx.restore();
   
   // 3. 绘制底部文字内容
   await drawBorderContent(ctx, canvasWidth, canvasHeight, settings, fonts, isPortrait);

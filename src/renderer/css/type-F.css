@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Type F 样式
  * 上白边+照片+下文字区
  * - 顶部 5% 白色留白
@@ -19,6 +19,7 @@
 
 /* 照片区：居中，92% 宽度，80% 高度 */
 .frame-wrapper.type-f img {
+  border-radius: 12px;
   position: absolute;
   top: 5%;
   left: 4%;

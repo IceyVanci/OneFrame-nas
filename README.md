@@ -1,10 +1,10 @@
-# OneFrame NAS Edition 🎨
+﻿# OneFrame NAS Edition 🎨
 
 一款简洁优雅的图片边框添加工具，为您的照片自动添加精美的底部边框，并智能显示相机 EXIF 信息。
 
 本项目是 [OneFrame](https://github.com/IceyVanci/OneFrame) 的 NAS/Docker 移植版本，从 Electron 桌面应用迁移为纯前端 Web 应用，通过 Docker 容器化部署在 NAS 上，局域网内设备可通过浏览器访问。
 
-![Version](https://img.shields.io/badge/version-1.10--nas-blue.svg)
+![Version](https://img.shields.io/badge/version-1.11--nas-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Docker](https://img.shields.io/badge/Docker-nginx:alpine-2496ED.svg)
 
@@ -31,6 +31,7 @@
 - **Type J**：署名+三栏参数 - 照片 100% 填满画布，署名+参数行三栏布局（左机型/中参数/右时间），机型含厂商名
 - **Type K**：左下角 Logo + 双行文字 - Logo 底部左下角，右侧署名+日期 / 机型+参数，字重区分
 - **Type L**：高斯模糊背景 - 照片高斯模糊外框 + 清晰照片居中 + 白色文字
+- **Type M**：模糊边框+顶部Logo - 四边模糊背景各5%，清晰照片居中90%，底部署名+参数行
 
 ### 📝 边框信息编辑
 - Logo 显示开关
@@ -154,7 +155,7 @@ docker compose up --build -d
 
 ### 1. 选择边框样式
 打开浏览器访问应用后，点击首页的样式卡片。
-所有 12 种样式（Type A-L）同时显示在首页图片墙中
+所有 13 种样式（Type A-M）同时显示在首页图片墙中
 
 ### 2. 选择图片
 选择样式后，系统会弹出文件选择器，选择要处理的图片。
@@ -244,6 +245,7 @@ docker compose up --build
 - [docs/AI_PROJECT_GUIDE.md](./docs/AI_PROJECT_GUIDE.md) - AI 项目认知指南
 - [docs/function_analysis.md](./docs/function_analysis.md) - 函数分析文档
 - [docs/migration-guide.md](./docs/migration-guide.md) - Electron → Docker 移植指南
+- [docs/V1.11-NAS_CHANGES.md](./docs/V1.11-NAS_CHANGES.md) - v1.11 同步变更（Type M + 圆角 + 模糊修复）
 - [docs/V1.10-NAS_CHANGES.md](./docs/V1.10-NAS_CHANGES.md) - v1.10 同步变更（编辑器动态背景色）
 - [docs/V1.09-NAS_CHANGES.md](./docs/V1.09-NAS_CHANGES.md) - v1.09 同步变更（图片墙重构+文件名大写化）
 - [docs/V1.08-NAS_CHANGES.md](./docs/V1.08-NAS_CHANGES.md) - v1.08 同步变更（Type K/L）

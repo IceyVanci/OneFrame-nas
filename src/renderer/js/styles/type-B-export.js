@@ -337,8 +337,15 @@ export async function renderImage(img, options) {
   const drawX = margin;
   const drawY = margin + (imgAvailableHeight - drawHeight) / 2;
   
-  // 绘制图片在左侧
+  // 绘制图片在左侧（圆角，按比例缩放）
+  const baseScaleB = squareSize / 900;
+  const cornerRadiusB = Math.round(12 * baseScaleB);
+  ctx.save();
+  ctx.beginPath();
+  ctx.roundRect(drawX, drawY, drawWidth, drawHeight, cornerRadiusB);
+  ctx.clip();
   ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
+  ctx.restore();
   
   // Type B 的边框内容位置调整（右侧白色区域）
   // 右侧预留约 15% 宽度

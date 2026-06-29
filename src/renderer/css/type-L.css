@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Type L 样式
  * 布局：基于 Type G，白色外框替换为照片高斯模糊背景
  * - 顶部 5% 模糊背景
@@ -33,6 +33,7 @@
 
 /* 照片区：居中，92% 宽度，80% 高度，在模糊背景之上（排除 blur 背景层） */
 .frame-wrapper.type-l > img:not(.type-l-blur-bg) {
+  border-radius: 12px;
   position: absolute;
   top: 5%;
   left: 4%;

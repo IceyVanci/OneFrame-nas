@@ -1,0 +1,137 @@
+/**
+ * Type M 样式
+ * 布局：基于 Type I + Type L 模糊边框（四边等高 5%）
+ * - 照片 90%×90% 居中，四条边高斯模糊背景
+ * - 顶部 Logo（和样式J一样，在清晰照片区域内）
+ * - 底部文字（和样式J一样：署名 + 参数行三栏）
+ */
+
+/* Type M 样式 - 独立布局 */
+.frame-wrapper.type-m {
+  display: block !important;
+  position: relative;
+  background: #000;
+  max-width: none !important;
+  max-height: none !important;
+  overflow: hidden;
+}
+
+/* 模糊背景层（JS 动态创建） */
+.type-m-blur-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center center;
+  transform: scale(1.5);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* 清晰照片区域：90%×90%，居中（四边各 5% 模糊） */
+.frame-wrapper.type-m > img:not(.type-m-blur-bg) {
+  position: absolute;
+  top: 5%;
+  left: 5%;
+  width: 90%;
+  height: 90%;
+  object-fit: cover;
+  object-position: center center;
+  max-width: none;
+  max-height: none;
+  z-index: 1;
+  border-radius: 12px;
+}
+
+/* 隐藏 photoFooter */
+.frame-wrapper.type-m .photo-footer {
+  display: none;
+}
+
+/* border-content 全画幅覆盖 */
+.frame-wrapper.type-m .border-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  bottom: auto;
+  z-index: 2;
+}
+
+/* 顶部 Logo 容器（在清晰照片区域内，和样式J一样） */
+.type-m-top-logo {
+  position: absolute;
+  top: 5%;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  padding-top: 3%;
+  line-height: 0;
+  font-size: 0;
+}
+
+.type-m-top-logo img {
+  display: inline-block;
+  object-fit: contain;
+}
+
+/* 底部文字区（在清晰照片区域内，和样式J一样） */
+.type-m-bottom {
+  position: absolute;
+  bottom: 3%;
+  left: 5%;
+  width: 90%;
+  text-align: center;
+  padding-bottom: 3%;
+}
+
+/* 署名行（和样式J一样） */
+.type-m-signature {
+  font-size: 1em;
+  font-family: 'MiSans Normal', 'MiSans', sans-serif;
+  color: #ffffff;
+  line-height: 1;
+  margin-bottom: 0.5em;
+}
+
+/* 参数行容器（和样式J一样） */
+.type-m-params-row {
+  position: relative;
+  font-size: 1em;
+  font-family: 'MiSans Normal', 'MiSans', sans-serif;
+  color: #ffffff;
+  line-height: 1;
+  height: 1.4em;
+}
+
+/* 左栏：机型 */
+.type-m-model {
+  position: absolute;
+  left: 5%;
+  top: 0;
+  font-family: 'MiSans Normal', 'MiSans', sans-serif;
+  white-space: nowrap;
+}
+
+/* 中栏：参数 */
+.type-m-params {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 0;
+  font-family: 'MiSans Normal', 'MiSans', sans-serif;
+  white-space: nowrap;
+}
+
+/* 右栏：时间 */
+.type-m-time {
+  position: absolute;
+  right: 5%;
+  top: 0;
+  font-family: 'MiSans Normal', 'MiSans', sans-serif;
+  white-space: nowrap;
+}
