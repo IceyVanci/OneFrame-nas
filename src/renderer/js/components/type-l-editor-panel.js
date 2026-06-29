@@ -20,9 +20,11 @@ export function configureEditPanel() {
   const logoSection = document.querySelector('.edit-section:has(#logoGrid)');
   if (logoSection) logoSection.style.display = '';
   
-  // 设备型号：隐藏（EXIF 自动读取）
-  const modelSection = document.querySelector('.edit-section:has(#customModel)');
-  if (modelSection) modelSection.style.display = 'none';
+  // 设备型号：显示（EXIF 自动读取，用户可手动修改）
+  const customModel = document.getElementById('customModel');
+  if (customModel) {
+    customModel.placeholder = '型号（如 A7M4）';
+  }
   
   // 隐藏所有显示开关（默认激活）
   ['switchLogo', 'switchModel', 'switchParams', 'switchTime', 'switchSignature'].forEach(id => {

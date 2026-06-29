@@ -2,18 +2,49 @@
 import { getExif, formatDateTime, getFocalLength } from './exif.js';
 import { getModelName, getAllLogos, getLogoFilename, getMakeName } from './logo-utils.js';
 import { getStyle, getPreview, typeBPreview, typeEPreview, typeFPreview } from './styles/index.js';
-import { configureEditPanel as configureTypeF } from './components/type-f-editor-panel.js';
-import { configureEditPanel as configureTypeG } from './components/type-g-editor-panel.js';
-import { configureEditPanel as configureTypeH } from './components/type-h-editor-panel.js';
-import { configureEditPanel as configureTypeI } from './components/type-i-editor-panel.js';
-import { configureEditPanel as configureTypeJ } from './components/type-j-editor-panel.js';
-import { configureEditPanel as configureTypeK } from './components/type-k-editor-panel.js';
-import { configureEditPanel as configureTypeL } from './components/type-l-editor-panel.js';
+import { configureEditPanel as configureTypeF } from './components/type-F-editor-panel.js';
+import { configureEditPanel as configureTypeG } from './components/type-G-editor-panel.js';
+import { configureEditPanel as configureTypeH } from './components/type-H-editor-panel.js';
+import { configureEditPanel as configureTypeI } from './components/type-I-editor-panel.js';
+import { configureEditPanel as configureTypeJ } from './components/type-J-editor-panel.js';
+import { configureEditPanel as configureTypeK } from './components/type-K-editor-panel.js';
+import { configureEditPanel as configureTypeL } from './components/type-L-editor-panel.js';
 import { exportImage } from './exporter.js';
 
 let currentExif = null;
 let currentFile = null;
+let currentImagePath = null;
 let currentStyle = null;
+
+/**
+ * 提取图片主色调并设置为编辑器背景色
+ * @param {HTMLImageElement} img - 已加载的图片元素
+ */
+function applyDynamicBackground(img) {
+  const target = document.querySelector('.preview-area');
+  if (!target) return;
+  try {
+    const canvas = document.createElement('canvas');
+    canvas.width = 10;
+    canvas.height = 10;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, 10, 10);
+    const imageData = ctx.getImageData(0, 0, 10, 10).data;
+    let r = 0, g = 0, b = 0, count = 0;
+    for (let i = 0; i < imageData.length; i += 4) {
+      r += imageData[i];
+      g += imageData[i + 1];
+      b += imageData[i + 2];
+      count++;
+    }
+    r = Math.round(r / count * 0.4);
+    g = Math.round(g / count * 0.4);
+    b = Math.round(b / count * 0.4);
+    target.style.backgroundColor = `rgb(${r}, ${g}, ${b})`;
+  } catch (e) {
+    target.style.backgroundColor = '#16213e';
+  }
+}
 
 // Logo 亮度缓存 { logoName: { isLight: boolean } }
 const logoBrightnessCache = {};
@@ -24,15 +55,18 @@ const logoBrightnessCache = {};
 async function checkImageOrientation(fileOrPath) {
   return new Promise((resolve) => {
     const img = new Image();
+    const isBlob = typeof fileOrPath !== 'string';
+    const src = isBlob ? URL.createObjectURL(fileOrPath) : `file://${fileOrPath}`;
     img.onload = () => {
+      if (isBlob) URL.revokeObjectURL(src);
       resolve({
         isPortrait: img.naturalHeight > img.naturalWidth,
         width: img.naturalWidth,
         height: img.naturalHeight
       });
     };
-    img.onerror = () => resolve({ isPortrait: false, width: 0, height: 0 });
-    img.src = URL.createObjectURL(fileOrPath);
+    img.onerror = () => { if (isBlob) URL.revokeObjectURL(src); resolve({ isPortrait: false, width: 0, height: 0 }); };
+    img.src = src;
   });
 }
 
@@ -45,8 +79,8 @@ function detectLogoBrightness(logoPath) {
     img.crossOrigin = 'anonymous';
     img.onload = () => {
       const canvas = document.createElement('canvas');
-      canvas.width = img.width;
-      canvas.height = img.height;
+      canvas.width = 32;
+      canvas.height = 32;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0);
       try {
@@ -103,9 +137,22 @@ document.addEventListener('DOMContentLoaded', () => {
   const signatureText = document.getElementById('signatureText');
 
   let selectedLogo = null;
+  let typeFCachedSize = null;  // Type F 图框尺寸缓存
+  let typeGCachedSize = null;  // Type G 图框尺寸缓存
+  let typeHCachedSize = null;  // Type H 图框尺寸缓存
+  let typeICachedSize = null;  // Type I 图框尺寸缓存
+  let typeJCachedSize = null;  // Type J 图框尺寸缓存
+  let typeKCachedSize = null;  // Type K 图框尺寸缓存
+  let typeLCachedSize = null;  // Type L 图框尺寸缓存
 
   async function initLogoGrid() {
-    const logos = getAllLogos();
+    let logos = getAllLogos();
+    if (window.electronAPI) {
+      try {
+        const serverLogos = await window.electronAPI.getLogos();
+        if (serverLogos?.length > 0) logos = serverLogos;
+      } catch (e) { /* ignore */ }
+    }
     logoGrid.innerHTML = '';
     logos.forEach(name => {
       const item = document.createElement('div');
@@ -115,7 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
       img.alt = name;
       img.loading = 'lazy';
       img.src = `logos/${getLogoFilename(name)}`;
-      img.onerror = () => { item.style.display = 'none'; };
       item.appendChild(img);
       item.addEventListener('click', () => selectLogo(name));
       logoGrid.appendChild(item);
@@ -152,6 +198,19 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     }
     currentFile = file;
+    currentImagePath = null;
+    typeFCachedSize = null;  // 清除 Type F 图框缓存
+    typeGCachedSize = null;  // 清除 Type G 图框缓存
+    typeHCachedSize = null;  // 清除 Type H 图框缓存
+    typeICachedSize = null;  // 清除 Type I 图框缓存
+    typeJCachedSize = null;  // 清除 Type J 图框缓存
+    typeKCachedSize = null;  // 清除 Type K 图框缓存
+    typeLCachedSize = null;  // 清除 Type L 图框缓存
+    // 释放旧的 Object URL 内存
+    if (userImage.src && userImage.src.startsWith('blob:')) {
+      URL.revokeObjectURL(userImage.src);
+    }
+    resetForm();
     userImage.src = URL.createObjectURL(file);
     try {
       currentExif = await getExif(file);
@@ -160,6 +219,53 @@ document.addEventListener('DOMContentLoaded', () => {
       currentExif = {};
     }
     return true;
+  }
+
+  async function loadImageInElectron(imagePath) {
+    if (currentStyle === 'type-b') {
+      const orientation = await checkImageOrientation(imagePath);
+      if (!orientation.isPortrait) {
+        alert('目前本样式只适配纵向图像哦');
+        return false;
+      }
+    }
+    currentImagePath = imagePath;
+    currentFile = null;
+    typeFCachedSize = null;  // 清除 Type F 图框缓存
+    typeGCachedSize = null;  // 清除 Type G 图框缓存
+    typeHCachedSize = null;  // 清除 Type H 图框缓存
+    typeICachedSize = null;  // 清除 Type I 图框缓存
+    typeJCachedSize = null;  // 清除 Type J 图框缓存
+    typeKCachedSize = null;  // 清除 Type K 图框缓存
+    typeLCachedSize = null;  // 清除 Type L 图框缓存
+    try {
+      const exifTags = await window.electronAPI.readExif(imagePath);
+      if (exifTags && Object.keys(exifTags).length > 0) {
+        currentExif = {};
+        for (const key in exifTags) {
+          if (exifTags[key]?.description) currentExif[key] = exifTags[key].description;
+          else if (exifTags[key]?.value !== undefined) currentExif[key] = exifTags[key].value;
+        }
+      } else {
+        currentExif = {};
+        const fileMtime = await window.electronAPI.getFileMtime(imagePath);
+        if (fileMtime) {
+          const dt = new Date(fileMtime);
+          dateTime.value = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}T${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
+        }
+      }
+    } catch (error) {
+      currentExif = {};
+    }
+    resetForm();
+    userImage.src = `file://${imagePath}`;
+    if (userImage.complete) {
+      updateExifDisplay();
+      updateBorder();
+      applyDynamicBackground(userImage);
+    } else {
+      userImage.addEventListener('load', () => { updateExifDisplay(); updateBorder(); applyDynamicBackground(userImage); }, { once: true });
+    }
   }
 
   function updateExifDisplay() {
@@ -186,7 +292,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (focal) focalLength.value = focal;
     if (currentExif.ISOSpeedRatings) iso.value = currentExif.ISOSpeedRatings;
     if (currentExif.DateTimeOriginal) {
-      const parts = currentExif.DateTimeOriginal.match(/(\d{4})-(\d{2})-(\d{2}) (\d{2}):(\d{2})/);
+      const parts = currentExif.DateTimeOriginal.match(/(\d{4})[-:](\d{2})[-:](\d{2}) (\d{2}):(\d{2})/);
       if (parts) dateTime.value = `${parts[1]}-${parts[2]}-${parts[3]}T${parts[4]}:${parts[5]}`;
     }
   }
@@ -194,16 +300,24 @@ document.addEventListener('DOMContentLoaded', () => {
   styleCards.forEach(card => {
     card.addEventListener('click', async () => {
       currentStyle = card.dataset.style;
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-      input.onchange = async (e) => {
-        if (e.target.files[0]) {
-          const success = await loadImageWithExif(e.target.files[0]);
+      if (window.electronAPI) {
+        const imagePath = await window.electronAPI.selectImage();
+        if (imagePath) {
+          const success = await loadImageInElectron(imagePath);
           if (success !== false) showEditor();
         }
-      };
-      input.click();
+      } else {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = async (e) => {
+          if (e.target.files[0]) {
+            const success = await loadImageWithExif(e.target.files[0]);
+            if (success !== false) showEditor();
+          }
+        };
+        input.click();
+      }
     });
   });
 
@@ -215,40 +329,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const borderColorSection = document.querySelector('.edit-section:has(#borderColor)');
     if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f' || currentStyle === 'type-g' || currentStyle === 'type-h' || currentStyle === 'type-i' || currentStyle === 'type-j' || currentStyle === 'type-k' || currentStyle === 'type-l') ? 'none' : 'block';
     
-    // Type F: 调用面板配置模块
-    if (currentStyle === 'type-f') {
-      configureTypeF();
-    }
-    
-    // Type G: 调用面板配置模块
-    if (currentStyle === 'type-g') {
-      configureTypeG();
-    }
-    
-    // Type H: 调用面板配置模块
-    if (currentStyle === 'type-h') {
-      configureTypeH();
-    }
-    
-    // Type I: 调用面板配置模块
-    if (currentStyle === 'type-i') {
-      configureTypeI();
-    }
-    
-    // Type J: 调用面板配置模块
-    if (currentStyle === 'type-j') {
-      configureTypeJ();
-    }
-    
-    // Type K: 调用面板配置模块
-    if (currentStyle === 'type-k') {
-      configureTypeK();
-    }
-    
-    // Type L: 调用面板配置模块
-    if (currentStyle === 'type-l') {
-      configureTypeL();
-    }
+    // 调用对应样式的面板配置模块
+    const panelConfigurers = {
+      'type-f': configureTypeF, 'type-g': configureTypeG,
+      'type-h': configureTypeH, 'type-i': configureTypeI,
+      'type-j': configureTypeJ, 'type-k': configureTypeK,
+      'type-l': configureTypeL
+    };
+    panelConfigurers[currentStyle]?.();
     
     // Type B: 隐藏 Logo、拍摄参数、时间开关
     if (currentStyle === 'type-b') {
@@ -276,39 +364,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       });
     }
-    if (userImage.complete) updateBorder();
+    if (userImage.complete) {
+      updateBorder();
+      applyDynamicBackground(userImage);
+    }
   }
 
   function hideEditor() {
     // 移除窗口大小变化监听
     window.removeEventListener('resize', updateBorder);
-    appContainer.style.display = 'flex';
-    editorView.classList.add('hidden');
-    userImage.src = '';
-    const previousStyle = currentStyle;
-    currentStyle = null;
-    currentExif = null;
-    currentFile = null;
-    editPanel.classList.remove('visible');
-    
-    // 根据之前的样式重置
-    const preview = getPreview(previousStyle);
-    if (previousStyle === 'type-b') {
-      typeBPreview.reset();
-    } else if (previousStyle === 'type-e') {
-      // Type E 重置
-      if (preview && preview.reset) preview.reset();
-    } else if (preview && preview.reset) {
-      preview.reset();
-    } else {
-      // 重置 frameWrapper 类名
-      const frameWrapper = document.getElementById('frameWrapper');
-      if (frameWrapper) {
-        frameWrapper.classList.remove('type-b');
-        frameWrapper.classList.add(previousStyle || 'type-a');
-      }
+    // 释放 Object URL 内存
+    if (userImage.src && userImage.src.startsWith('blob:')) {
+      URL.revokeObjectURL(userImage.src);
     }
-    resetForm();
+    // 重载页面，彻底重置所有 DOM 状态（避免样式切换后 UI 互相干扰）
+    location.reload();
   }
 
   function resetForm() {
@@ -324,16 +394,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   btnTemplate.addEventListener('click', hideEditor);
-  btnReselect.addEventListener('click', () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e) => { if (e.target.files[0]) loadImageWithExif(e.target.files[0]); };
-    input.click();
+  btnReselect.addEventListener('click', async () => {
+    if (window.electronAPI) {
+      const imagePath = await window.electronAPI.selectImage();
+      if (imagePath) await loadImageInElectron(imagePath);
+    } else {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'image/*';
+      input.onchange = (e) => { if (e.target.files[0]) loadImageWithExif(e.target.files[0]); };
+      input.click();
+    }
   });
   btnEdit.addEventListener('click', () => editPanel.classList.toggle('visible'));
   document.getElementById('btnClosePanel')?.addEventListener('click', () => editPanel.classList.remove('visible'));
 
+  // 边框颜色预设按钮事件（仅 data-color 属性）
   document.querySelectorAll('.color-preset[data-color]').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.color-preset[data-color]').forEach(b => b.classList.remove('active'));
@@ -342,6 +418,17 @@ document.addEventListener('DOMContentLoaded', () => {
       updateBorder();
     });
   });
+  
+  // 文字颜色预设按钮事件（仅 Type G 使用）
+  document.getElementById('textColorPresets')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-text-color]');
+    if (!btn) return;
+    document.querySelectorAll('#textColorPresets .color-preset').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('textColor').value = btn.dataset.textColor;
+    updateBorderContent();
+  });
+  
   document.getElementById('aspectRatio')?.addEventListener('change', updateBorder);
 
   function updateBorder() {
@@ -393,20 +480,22 @@ document.addEventListener('DOMContentLoaded', () => {
         photoFooter: photoFooter,
         borderContent: borderContent
       });
-      // 画布原始尺寸（基于图片，不受窗口影响）
-      // 纵向图片照片占 90%（白色区域减半），横向图片照片占 80%（默认）
-      const canvasW = userImage.naturalWidth;
-      const isPortraitF = userImage.naturalHeight > userImage.naturalWidth;
-      const heightRatioF = isPortraitF ? 0.9 : 0.8;
-      const canvasH = Math.round(userImage.naturalHeight / heightRatioF);
-      // 每次 resize 动态计算显示尺寸（等比缩放）
+      // 只在首次加载或切换图片时计算原始画布尺寸
+      if (!typeFCachedSize) {
+        typeFCachedSize = preview.calcSize({
+          naturalWidth: userImage.naturalWidth,
+          naturalHeight: userImage.naturalHeight
+        });
+      }
+      const { squareSize: canvasW, canvasHeight: canvasH } = typeFCachedSize;
+      // 根据当前预览区域大小计算显示尺寸
       const previewArea = frameWrapper?.parentElement;
       const availW = (previewArea?.clientWidth || 500) * 0.96;
       const availH = (previewArea?.clientHeight || 600) * 0.96;
       const displayScale = Math.min(availW / canvasW, availH / canvasH, 1);
       const displayW = Math.round(canvasW * displayScale);
       const displayH = Math.round(canvasH * displayScale);
-      // 设置显示尺寸（字号和 CSS 百分比基于此）
+      // 设置 frameWrapper 为显示尺寸（与预览区域匹配）
       preview.updateFrameWrapper(displayW, displayH);
       preview.updatePreview(displayW, displayH, {
         naturalWidth: userImage.naturalWidth,
@@ -424,20 +513,22 @@ document.addEventListener('DOMContentLoaded', () => {
         photoFooter: photoFooter,
         borderContent: borderContent
       });
-      // 画布原始尺寸（基于图片，不受窗口影响）
-      // 纵向图片照片占 90%（白色区域减半），横向图片照片占 80%（默认）
-      const canvasW = userImage.naturalWidth;
-      const isPortraitG = userImage.naturalHeight > userImage.naturalWidth;
-      const heightRatioG = isPortraitG ? 0.9 : 0.8;
-      const canvasH = Math.round(userImage.naturalHeight / heightRatioG);
-      // 每次 resize 动态计算显示尺寸（等比缩放）
+      // 只在首次加载或切换图片时计算原始画布尺寸
+      if (!typeGCachedSize) {
+        typeGCachedSize = preview.calcSize({
+          naturalWidth: userImage.naturalWidth,
+          naturalHeight: userImage.naturalHeight
+        });
+      }
+      const { squareSize: gCanvasW, canvasHeight: gCanvasH } = typeGCachedSize;
+      // 根据当前预览区域大小计算显示尺寸
       const gPreviewArea = frameWrapper?.parentElement;
       const gAvailW = (gPreviewArea?.clientWidth || 500) * 0.96;
       const gAvailH = (gPreviewArea?.clientHeight || 600) * 0.96;
-      const gDisplayScale = Math.min(gAvailW / canvasW, gAvailH / canvasH, 1);
-      const gDisplayW = Math.round(canvasW * gDisplayScale);
-      const gDisplayH = Math.round(canvasH * gDisplayScale);
-      // 设置显示尺寸（字号和 CSS 百分比基于此）
+      const gDisplayScale = Math.min(gAvailW / gCanvasW, gAvailH / gCanvasH, 1);
+      const gDisplayW = Math.round(gCanvasW * gDisplayScale);
+      const gDisplayH = Math.round(gCanvasH * gDisplayScale);
+      // 设置 frameWrapper 为显示尺寸（与预览区域匹配）
       preview.updateFrameWrapper(gDisplayW, gDisplayH);
       preview.updatePreview(gDisplayW, gDisplayH, {
         naturalWidth: userImage.naturalWidth,
@@ -446,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
       frameWrapper.style.transform = 'none';
       updateBorderContent();
     } else if (currentStyle === 'type-h') {
-      // 使用 Type H Preview 模块（画布=原始大小，无白色边框）
+      // 使用 Type H Preview 模块
       const frameWrapper = document.getElementById('frameWrapper');
       const borderContent = document.getElementById('borderContent');
       preview.init({
@@ -455,17 +546,19 @@ document.addEventListener('DOMContentLoaded', () => {
         photoFooter: photoFooter,
         borderContent: borderContent
       });
-      // 画布原始尺寸（Type H 直接使用图片大小）
-      const canvasW = userImage.naturalWidth;
-      const canvasH = userImage.naturalHeight;
-      // 每次 resize 动态计算显示尺寸（等比缩放）
+      if (!typeHCachedSize) {
+        typeHCachedSize = preview.calcSize({
+          naturalWidth: userImage.naturalWidth,
+          naturalHeight: userImage.naturalHeight
+        });
+      }
+      const { squareSize: hCanvasW, canvasHeight: hCanvasH } = typeHCachedSize;
       const hPreviewArea = frameWrapper?.parentElement;
       const hAvailW = (hPreviewArea?.clientWidth || 500) * 0.96;
       const hAvailH = (hPreviewArea?.clientHeight || 600) * 0.96;
-      const hDisplayScale = Math.min(hAvailW / canvasW, hAvailH / canvasH, 1);
-      const hDisplayW = Math.round(canvasW * hDisplayScale);
-      const hDisplayH = Math.round(canvasH * hDisplayScale);
-      // 设置显示尺寸（字号和 CSS 百分比基于此）
+      const hDisplayScale = Math.min(hAvailW / hCanvasW, hAvailH / hCanvasH, 1);
+      const hDisplayW = Math.round(hCanvasW * hDisplayScale);
+      const hDisplayH = Math.round(hCanvasH * hDisplayScale);
       preview.updateFrameWrapper(hDisplayW, hDisplayH);
       preview.updatePreview(hDisplayW, hDisplayH, {
         naturalWidth: userImage.naturalWidth,
@@ -473,8 +566,8 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       frameWrapper.style.transform = 'none';
       updateBorderContent();
-    } else if (currentStyle === 'type-i' || currentStyle === 'type-j') {
-      // 使用 Type I/J Preview 模块（画布=原始大小，无白色边框）
+    } else if (currentStyle === 'type-i') {
+      // 使用 Type I Preview 模块（与 Type H 相同的缩放逻辑）
       const frameWrapper = document.getElementById('frameWrapper');
       const borderContent = document.getElementById('borderContent');
       preview.init({
@@ -483,18 +576,51 @@ document.addEventListener('DOMContentLoaded', () => {
         photoFooter: photoFooter,
         borderContent: borderContent
       });
-      // 画布原始尺寸（Type I/J 直接使用图片大小）
-      const canvasW = userImage.naturalWidth;
-      const canvasH = userImage.naturalHeight;
-      // 每次 resize 动态计算显示尺寸（等比缩放）
-      const ijPreviewArea = frameWrapper?.parentElement;
-      const ijAvailW = (ijPreviewArea?.clientWidth || 500) * 0.96;
-      const ijAvailH = (ijPreviewArea?.clientHeight || 600) * 0.96;
-      const ijDisplayScale = Math.min(ijAvailW / canvasW, ijAvailH / canvasH, 1);
-      const ijDisplayW = Math.round(canvasW * ijDisplayScale);
-      const ijDisplayH = Math.round(canvasH * ijDisplayScale);
-      preview.updateFrameWrapper(ijDisplayW, ijDisplayH);
-      preview.updatePreview(ijDisplayW, ijDisplayH, {
+      if (!typeICachedSize) {
+        typeICachedSize = preview.calcSize({
+          naturalWidth: userImage.naturalWidth,
+          naturalHeight: userImage.naturalHeight
+        });
+      }
+      const { squareSize: iCanvasW, canvasHeight: iCanvasH } = typeICachedSize;
+      const iPreviewArea = frameWrapper?.parentElement;
+      const iAvailW = (iPreviewArea?.clientWidth || 500) * 0.96;
+      const iAvailH = (iPreviewArea?.clientHeight || 600) * 0.96;
+      const iDisplayScale = Math.min(iAvailW / iCanvasW, iAvailH / iCanvasH, 1);
+      const iDisplayW = Math.round(iCanvasW * iDisplayScale);
+      const iDisplayH = Math.round(iCanvasH * iDisplayScale);
+      preview.updateFrameWrapper(iDisplayW, iDisplayH);
+      preview.updatePreview(iDisplayW, iDisplayH, {
+        naturalWidth: userImage.naturalWidth,
+        naturalHeight: userImage.naturalHeight
+      });
+      frameWrapper.style.transform = 'none';
+      updateBorderContent();
+    } else if (currentStyle === 'type-j') {
+      // 使用 Type J Preview 模块（与 Type H 相同的缩放逻辑）
+      const frameWrapper = document.getElementById('frameWrapper');
+      const borderContent = document.getElementById('borderContent');
+      preview.init({
+        img: userImage,
+        frameWrapper: frameWrapper,
+        photoFooter: photoFooter,
+        borderContent: borderContent
+      });
+      if (!typeJCachedSize) {
+        typeJCachedSize = preview.calcSize({
+          naturalWidth: userImage.naturalWidth,
+          naturalHeight: userImage.naturalHeight
+        });
+      }
+      const { squareSize: jCanvasW, canvasHeight: jCanvasH } = typeJCachedSize;
+      const jPreviewArea = frameWrapper?.parentElement;
+      const jAvailW = (jPreviewArea?.clientWidth || 500) * 0.96;
+      const jAvailH = (jPreviewArea?.clientHeight || 600) * 0.96;
+      const jDisplayScale = Math.min(jAvailW / jCanvasW, jAvailH / jCanvasH, 1);
+      const jDisplayW = Math.round(jCanvasW * jDisplayScale);
+      const jDisplayH = Math.round(jCanvasH * jDisplayScale);
+      preview.updateFrameWrapper(jDisplayW, jDisplayH);
+      preview.updatePreview(jDisplayW, jDisplayH, {
         naturalWidth: userImage.naturalWidth,
         naturalHeight: userImage.naturalHeight
       });
@@ -510,8 +636,13 @@ document.addEventListener('DOMContentLoaded', () => {
         photoFooter: photoFooter,
         borderContent: borderContent
       });
-      const kCanvasW = userImage.naturalWidth;
-      const kCanvasH = userImage.naturalHeight;
+      if (!typeKCachedSize) {
+        typeKCachedSize = preview.calcSize({
+          naturalWidth: userImage.naturalWidth,
+          naturalHeight: userImage.naturalHeight
+        });
+      }
+      const { squareSize: kCanvasW, canvasHeight: kCanvasH } = typeKCachedSize;
       const kPreviewArea = frameWrapper?.parentElement;
       const kAvailW = (kPreviewArea?.clientWidth || 500) * 0.96;
       const kAvailH = (kPreviewArea?.clientHeight || 600) * 0.96;
@@ -535,10 +666,13 @@ document.addEventListener('DOMContentLoaded', () => {
         photoFooter: photoFooter,
         borderContent: borderContent
       });
-      const isPortraitL = userImage.naturalHeight > userImage.naturalWidth;
-      const heightRatioL = isPortraitL ? 0.9 : 0.8;
-      const lCanvasW = userImage.naturalWidth;
-      const lCanvasH = Math.round(userImage.naturalHeight / heightRatioL);
+      if (!typeLCachedSize) {
+        typeLCachedSize = preview.calcSize({
+          naturalWidth: userImage.naturalWidth,
+          naturalHeight: userImage.naturalHeight
+        });
+      }
+      const { squareSize: lCanvasW, canvasHeight: lCanvasH } = typeLCachedSize;
       const lPreviewArea = frameWrapper?.parentElement;
       const lAvailW = (lPreviewArea?.clientWidth || 500) * 0.96;
       const lAvailH = (lPreviewArea?.clientHeight || 600) * 0.96;
@@ -590,7 +724,7 @@ document.addEventListener('DOMContentLoaded', () => {
       showTime: document.getElementById('switchTime')?.classList.contains('active'),
       dateTime: dateTime?.value || '',
       signatureText: signatureText?.value || '',
-      textColor: document.getElementById('textColor')?.value || '#ffffff'
+      textColor: document.getElementById('textColor')?.value || '#000000'
     };
   }
 
@@ -622,9 +756,9 @@ document.addEventListener('DOMContentLoaded', () => {
           focalLength: focalLength?.value || '',
           showTime: document.getElementById('switchTime')?.classList.contains('active'),
           dateTime: dateTime?.value || '',
-          signatureText: signatureText?.value || '',
-          textColor: document.getElementById('textColor')?.value || '#ffffff',
-          borderColor: borderColor.value
+      signatureText: signatureText?.value || '',
+      borderColor: borderColor.value,
+      textColor: document.getElementById('textColor')?.value || '#000000'
         }
       );
     }
@@ -632,24 +766,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   borderColor.addEventListener('input', updateBorder);
   borderHeight.addEventListener('input', updateBorder);
-  userImage.addEventListener('load', updateBorder);
+  userImage.addEventListener('load', () => {
+    updateBorder();
+    applyDynamicBackground(userImage);
+  });
 
   ['customModel', 'fNumber', 'exposureTime', 'focalLength', 'iso', 'dateTime', 'signatureText'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', updateBorderContent);
   });
   document.querySelectorAll('.switch').forEach(sw => {
     sw.addEventListener('click', () => { sw.classList.toggle('active'); updateBorderContent(); });
-  });
-
-  // 文字颜色预设按钮事件（Type H 使用）
-  document.querySelectorAll('#textColorPresets .color-preset').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('#textColorPresets .color-preset').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      const textColorInput = document.getElementById('textColor');
-      if (textColorInput) textColorInput.value = btn.dataset.textColor;
-      updateBorderContent();
-    });
   });
 
   function getEditSettings() {
@@ -668,10 +794,10 @@ document.addEventListener('DOMContentLoaded', () => {
       dateTime: dateTime?.value || '',
       showSignature: document.getElementById('switchSignature')?.classList.contains('active') ?? false,
       signatureText: signatureText?.value || '',
-      textColor: document.getElementById('textColor')?.value || '#ffffff',
       borderColor: borderColor?.value || '#ffffff',
       borderHeight: borderHeight?.value || 12,
-      aspectRatio: document.getElementById('aspectRatio')?.value || 'default'
+      aspectRatio: document.getElementById('aspectRatio')?.value || 'default',
+      textColor: document.getElementById('textColor')?.value || '#000000'
     };
   }
 
@@ -686,7 +812,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const settings = getEditSettings();
       const exportOptions = {
         file: currentFile,
-        imagePath: null,
+        imagePath: currentImagePath,
         borderColor: settings.borderColor,
         borderHeight: settings.borderHeight,
         quality: 1.0,
@@ -700,17 +826,36 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       const blob = await exportImage(userImage, exportOptions);
-      const exportFilename = currentFile?.name
-        ? `${currentFile.name.replace(/\.[^.]+$/, '')}-OneFrame.jpg`
-        : 'output-OneFrame.jpg';
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = exportFilename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      if (window.electronAPI) {
+        // Electron 环境
+        let exportFilename = 'output-OneFrame.jpg';
+        if (currentImagePath) {
+          const nameWithoutExt = currentImagePath.replace(/\\/g, '/').split('/').pop().replace(/\.[^.]+$/, '');
+          exportFilename = `${nameWithoutExt}-OneFrame.jpg`;
+        } else if (currentFile?.name) {
+          exportFilename = `${currentFile.name.replace(/\.[^.]+$/, '')}-OneFrame.jpg`;
+        }
+        const savePath = await window.electronAPI.saveImage(exportFilename);
+        if (savePath) {
+          const buffer = Array.from(new Uint8Array(await blob.arrayBuffer()));
+          const result = await window.electronAPI.saveBlob(buffer, savePath);
+          if (result.success) alert('导出成功！\n保存至: ' + result.path);
+          else alert('导出失败: ' + result.error);
+        }
+      } else {
+        // 浏览器环境：直接下载
+        const exportFilename = currentFile?.name
+          ? `${currentFile.name.replace(/\.[^.]+$/, '')}-OneFrame.jpg`
+          : 'output-OneFrame.jpg';
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = exportFilename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
     } catch (error) {
       alert('导出失败: ' + error.message);
     } finally {
@@ -733,30 +878,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // ========== 标签页筛选逻辑 ==========
-  const tabBtns = document.querySelectorAll('.tab-btn');
-  const allStyleCards = document.querySelectorAll('.style-card');
-
-  function filterCards(category) {
-    allStyleCards.forEach(card => {
-      if (card.dataset.category === category) {
-        card.classList.remove('hidden');
-      } else {
-        card.classList.add('hidden');
-      }
-    });
-  }
-
-  tabBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      tabBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      filterCards(btn.dataset.tab);
-    });
-  });
-
-  // 默认激活"参数"标签并筛选
-  filterCards('params');
 
   // ========== 关于模态框逻辑 ==========
   const aboutBtn = document.getElementById('aboutBtn');

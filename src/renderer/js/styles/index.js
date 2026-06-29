@@ -10,30 +10,30 @@
  * - 导出用 EXIF：exif-exporter.js (piexifjs)
  */
 
-import { typeAPreview } from './type-a-preview.js';
-import { typeAExport } from './type-a-export.js';
-import { typeBPreview } from './type-b-preview.js';
-import { typeBExport } from './type-b-export.js';
-import { typeCPreview } from './type-c-preview.js';
-import { typeCExport } from './type-c-export.js';
-import { typeDPreview } from './type-d-preview.js';
-import { typeDExport } from './type-d-export.js';
-import { typeEPreview } from './type-e-preview.js';
-import { typeEExport } from './type-e-export.js';
-import { typeFPreview } from './type-f-preview.js';
-import { typeFExport } from './type-f-export.js';
-import { typeGPreview } from './type-g-preview.js';
-import { typeGExport } from './type-g-export.js';
-import { typeHPreview } from './type-h-preview.js';
-import { typeHExport } from './type-h-export.js';
-import { typeIPreview } from './type-i-preview.js';
-import { typeIExport } from './type-i-export.js';
-import { typeJPreview } from './type-j-preview.js';
-import { typeJExport } from './type-j-export.js';
-import { typeKPreview } from './type-k-preview.js';
-import { typeKExport } from './type-k-export.js';
-import { typeLPreview } from './type-l-preview.js';
-import { typeLExport } from './type-l-export.js';
+import { typeAPreview } from './type-A-preview.js';
+import { typeAExport } from './type-A-export.js';
+import { typeBPreview } from './type-B-preview.js';
+import { typeBExport } from './type-B-export.js';
+import { typeCPreview } from './type-C-preview.js';
+import { typeCExport } from './type-C-export.js';
+import { typeDPreview } from './type-D-preview.js';
+import { typeDExport } from './type-D-export.js';
+import { typeEPreview } from './type-E-preview.js';
+import { typeEExport } from './type-E-export.js';
+import { typeFPreview } from './type-F-preview.js';
+import { typeFExport } from './type-F-export.js';
+import { typeGPreview } from './type-G-preview.js';
+import { typeGExport } from './type-G-export.js';
+import { typeHPreview } from './type-H-preview.js';
+import { typeHExport } from './type-H-export.js';
+import { typeIPreview } from './type-I-preview.js';
+import { typeIExport } from './type-I-export.js';
+import { typeJPreview } from './type-J-preview.js';
+import { typeJExport } from './type-J-export.js';
+import { typeKPreview } from './type-K-preview.js';
+import { typeKExport } from './type-K-export.js';
+import { typeLPreview } from './type-L-preview.js';
+import { typeLExport } from './type-L-export.js';
 
 /**
  * @typedef {Object} StyleModule
@@ -132,35 +132,32 @@ export function getAllStyles() {
 }
 
 // 重新导出 Type B Preview（供 app.js 直接使用）
-export { typeBPreview } from './type-b-preview.js';
+export { typeBPreview } from './type-B-preview.js';
 
 // 重新导出 Type A Preview（供 editor.js 使用）
-export { typeAPreview } from './type-a-preview.js';
+export { typeAPreview } from './type-A-preview.js';
 
 // 重新导出 Type C Preview
-export { typeCPreview } from './type-c-preview.js';
+export { typeCPreview } from './type-C-preview.js';
 
 // 重新导出 Type D Preview
-export { typeDPreview } from './type-d-preview.js';
+export { typeDPreview } from './type-D-preview.js';
 
 // 重新导出 Type E Preview
-export { typeEPreview } from './type-e-preview.js';
+export { typeEPreview } from './type-E-preview.js';
 
 // 重新导出 Type F Preview
-export { typeFPreview } from './type-f-preview.js';
+export { typeFPreview } from './type-F-preview.js';
 
 // 重新导出 Type G Preview
-export { typeGPreview } from './type-g-preview.js';
+export { typeGPreview } from './type-G-preview.js';
 
-// 重新导出 Type H Preview
-export { typeHPreview } from './type-h-preview.js';
+export { typeHPreview } from './type-H-preview.js';
 
-// 重新导出 Type I Preview
-export { typeIPreview } from './type-i-preview.js';
+export { typeIPreview } from './type-I-preview.js';
 
-// 重新导出 Type J Preview
-export { typeJPreview } from './type-j-preview.js';
+export { typeJPreview } from './type-J-preview.js';
 
-export { typeKPreview } from './type-k-preview.js';
+export { typeKPreview } from './type-K-preview.js';
 
-export { typeLPreview } from './type-l-preview.js';
+export { typeLPreview } from './type-L-preview.js';

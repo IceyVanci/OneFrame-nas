@@ -4,7 +4,7 @@
 
 本项目是 [OneFrame](https://github.com/IceyVanci/OneFrame) 的 NAS/Docker 移植版本，从 Electron 桌面应用迁移为纯前端 Web 应用，通过 Docker 容器化部署在 NAS 上，局域网内设备可通过浏览器访问。
 
-![Version](https://img.shields.io/badge/version-1.08--nas-blue.svg)
+![Version](https://img.shields.io/badge/version-1.10--nas-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Docker](https://img.shields.io/badge/Docker-nginx:alpine-2496ED.svg)
 
@@ -144,8 +144,7 @@ docker compose up --build -d
 
 ### 1. 选择边框样式
 打开浏览器访问应用后，点击首页的样式卡片。
-- **参数**标签：Type A、Type C、Type D、Type F、Type G、Type H、Type I、Type J、Type K、Type L
-- **海报**标签：Type B（黑色下边框）、Type E（3:2 纵向）
+所有 12 种样式（Type A-L）同时显示在首页图片墙中
 
 ### 2. 选择图片
 选择样式后，系统会弹出文件选择器，选择要处理的图片。
@@ -235,6 +234,8 @@ docker compose up --build
 - [docs/AI_PROJECT_GUIDE.md](./docs/AI_PROJECT_GUIDE.md) - AI 项目认知指南
 - [docs/function_analysis.md](./docs/function_analysis.md) - 函数分析文档
 - [docs/migration-guide.md](./docs/migration-guide.md) - Electron → Docker 移植指南
+- [docs/V1.10-NAS_CHANGES.md](./docs/V1.10-NAS_CHANGES.md) - v1.10 同步变更（编辑器动态背景色）
+- [docs/V1.09-NAS_CHANGES.md](./docs/V1.09-NAS_CHANGES.md) - v1.09 同步变更（图片墙重构+文件名大写化）
 - [docs/V1.08-NAS_CHANGES.md](./docs/V1.08-NAS_CHANGES.md) - v1.08 同步变更（Type K/L）
 - [docs/V1.07-NAS_CHANGES.md](./docs/V1.07-NAS_CHANGES.md) - v1.07 同步变更（Type I/J）
 - [docs/V1.06-NAS_CHANGES.md](./docs/V1.06-NAS_CHANGES.md) - v1.06 同步变更（Type H）

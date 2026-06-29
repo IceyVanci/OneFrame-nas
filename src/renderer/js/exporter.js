@@ -4,18 +4,18 @@
  */
 
 import { readExifFromFile, embedExif, dumpExif, hasExifData } from './exif-exporter.js';
-import { typeAExport } from './styles/type-a-export.js';
-import { typeBExport } from './styles/type-b-export.js';
-import { typeCExport } from './styles/type-c-export.js';
-import { typeDExport } from './styles/type-d-export.js';
-import { typeEExport } from './styles/type-e-export.js';
-import { typeFExport } from './styles/type-f-export.js';
-import { typeGExport } from './styles/type-g-export.js';
-import { typeHExport } from './styles/type-h-export.js';
-import { typeIExport } from './styles/type-i-export.js';
-import { typeJExport } from './styles/type-j-export.js';
-import { typeKExport } from './styles/type-k-export.js';
-import { typeLExport } from './styles/type-l-export.js';
+import { typeAExport } from './styles/type-A-export.js';
+import { typeBExport } from './styles/type-B-export.js';
+import { typeCExport } from './styles/type-C-export.js';
+import { typeDExport } from './styles/type-D-export.js';
+import { typeEExport } from './styles/type-E-export.js';
+import { typeFExport } from './styles/type-F-export.js';
+import { typeGExport } from './styles/type-G-export.js';
+import { typeHExport } from './styles/type-H-export.js';
+import { typeIExport } from './styles/type-I-export.js';
+import { typeJExport } from './styles/type-J-export.js';
+import { typeKExport } from './styles/type-K-export.js';
+import { typeLExport } from './styles/type-L-export.js';
 
 // 导出样式映射
 const exportStyles = {
@@ -74,7 +74,7 @@ function dataURLtoBlob(dataUrl) {
  * @param {HTMLImageElement} img - 原始图片元素
  * @param {Object} options - 导出选项
  * @param {File} options.file - 原始图片文件（用于读取 EXIF）
- * @param {string|null} options.imagePath - 图片路径（当前未使用，保留接口兼容性）
+ * @param {string} options.imagePath - 图片路径（Electron 环境）
  * @param {string} options.borderColor - 边框颜色
  * @param {number} options.borderHeight - 边框高度(px)
  * @param {number} options.quality - JPG 质量 (0-1)
@@ -122,9 +122,6 @@ export async function exportImage(img, options) {
   
   if (exifObj && hasExifData(exifObj)) {
     try {
-      // 调试：确认 dataUrl 格式
-      console.log('dataUrl 前 50 字符:', dataUrl.substring(0, 50));
-      console.log('dataUrl 长度:', dataUrl.length);
       const newDataUrl = embedExif(dataUrl, exifObj);
       return dataURLtoBlob(newDataUrl);
     } catch (err) {
