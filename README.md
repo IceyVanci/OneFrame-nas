@@ -104,17 +104,27 @@ docker load -i oneframe-web-v1.08-nas.tar
 docker run -d -p 8888:80 --name oneframe-web --restart unless-stopped oneframe-nas-oneframe:latest
 ```
 
-### 方式三：Docker 命令（从源码构建）
+### 方式三：Cloudflare Pages（免费静态托管）
 
-```bash
-# 构建镜像
-docker build -f docker/Dockerfile -t oneframe-web .
+1. Fork 本仓库到你的 GitHub 账号
+2. 登录 [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**
+3. 选择 Fork 的仓库，配置构建设置：
+   - **Build command**：留空
+   - **Build output directory**：`src/renderer`
+4. 点击 **Save and Deploy**
+5. 部署完成后会分配 `*.pages.dev` 域名，可在 **Custom domains** 中修改子域名或绑定自定义域名
 
-# 运行容器
-docker run -d -p 8888:80 --name oneframe-web --restart unless-stopped oneframe-web
-```
+### 方式四：Netlify（免费静态托管）
 
-### 访问
+1. Fork 本仓库到你的 GitHub 账号
+2. 登录 [app.netlify.com](https://app.netlify.com) → **Add new site** → **Import an existing project**
+3. 选择 Fork 的仓库，配置构建设置：
+   - **Build command**：留空
+   - **Publish directory**：`src/renderer`
+4. 点击 **Deploy site**
+5. 部署完成后可在 **Site settings** → **Change site name** 修改域名
+
+### 访问（Docker）
 
 在局域网内任何设备的浏览器中访问：
 
