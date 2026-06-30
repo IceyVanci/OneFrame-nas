@@ -884,18 +884,18 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnExportTop')?.addEventListener('click', exportImageHandler);
   initLogoGrid();
 
-  document.querySelectorAll('.style-preview .frame-container img').forEach(img => {
-    function setFooterHeight() {
+  // 首页预览图：只为需要白色边框的样式（Type A/B/C/D/E）设置 footer 高度
+  document.querySelectorAll('.style-card[data-style="type-a"] .frame-container img, \
+  .style-card[data-style="type-b"] .frame-container img, \
+  .style-card[data-style="type-c"] .frame-container img, \
+  .style-card[data-style="type-d"] .frame-container img, \
+  .style-card[data-style="type-e"] .frame-container img').forEach(img => {
+    img.addEventListener('load', function() {
       const footer = this.nextElementSibling;
       if (footer?.classList.contains('photo-footer')) {
         footer.style.height = `${Math.round(Math.min(this.clientWidth, this.clientHeight) * 0.12)}px`;
       }
-    }
-    if (img.complete) {
-      setFooterHeight.call(img);
-    } else {
-      img.addEventListener('load', setFooterHeight);
-    }
+    });
   });
 
 

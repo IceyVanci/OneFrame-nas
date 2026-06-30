@@ -188,6 +188,18 @@ body {
   background: #000;
 }
 
+/* 首页预览：Type F~M 不需要白色下边框，默认隐藏 */
+.style-card[data-style="type-f"] .photo-footer,
+.style-card[data-style="type-g"] .photo-footer,
+.style-card[data-style="type-h"] .photo-footer,
+.style-card[data-style="type-i"] .photo-footer,
+.style-card[data-style="type-j"] .photo-footer,
+.style-card[data-style="type-k"] .photo-footer,
+.style-card[data-style="type-l"] .photo-footer,
+.style-card[data-style="type-m"] .photo-footer {
+  height: 0;
+}
+
 .coming-soon {
   height: 150px;
   display: flex;
