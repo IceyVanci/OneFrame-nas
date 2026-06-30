@@ -594,9 +594,9 @@ function updateDragHint() {
     hint.className = 'type-e-drag-hint';
     
     if (isPortrait) {
-      hint.textContent = '↑↓ 拖动选择区域 ↓↑';
+      hint.textContent = '↑↓ 纵向图像暂时无法使用 ↓↑';
     } else {
-      hint.textContent = '←→ 拖动选择区域 →←';
+      hint.textContent = '←→ 拖动功能暂时失效 →←';
     }
     
     // 插入到 frameWrapper 后面（画布外）
