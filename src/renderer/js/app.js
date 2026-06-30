@@ -885,12 +885,17 @@ document.addEventListener('DOMContentLoaded', () => {
   initLogoGrid();
 
   document.querySelectorAll('.style-preview .frame-container img').forEach(img => {
-    img.addEventListener('load', function() {
+    function setFooterHeight() {
       const footer = this.nextElementSibling;
       if (footer?.classList.contains('photo-footer')) {
         footer.style.height = `${Math.round(Math.min(this.clientWidth, this.clientHeight) * 0.12)}px`;
       }
-    });
+    }
+    if (img.complete) {
+      setFooterHeight.call(img);
+    } else {
+      img.addEventListener('load', setFooterHeight);
+    }
   });
 
 
