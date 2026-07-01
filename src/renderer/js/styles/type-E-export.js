@@ -303,8 +303,8 @@ export async function renderImage(img, options) {
   
   const baseOffsetX = (squareSize - drawWidth) / 2;
   const baseOffsetY = (squareSize - drawHeight) / 2;
-  const drawOffsetX = baseOffsetX + imageOffset.x * squareSize;
-  const drawOffsetY = baseOffsetY + imageOffset.y * squareSize;
+  const drawOffsetX = baseOffsetX - imageOffset.x * squareSize;
+  const drawOffsetY = baseOffsetY - imageOffset.y * squareSize;
   
   ctx.drawImage(img, drawOffsetX, drawOffsetY, drawWidth, drawHeight);
   ctx.restore();

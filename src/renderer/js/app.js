@@ -16,6 +16,27 @@ let currentExif = null;
 let currentFile = null;
 let currentImagePath = null;
 let currentStyle = null;
+let imageLoadSequence = 0;
+
+/**
+ * 将 EXIF 日期或文件时间转换为 datetime-local 输入框格式
+ * @param {string|Date|number} value
+ * @returns {string}
+ */
+function formatDateTimeForInput(value) {
+  if (!value) return '';
+
+  const str = String(value).trim();
+  const parts = str.match(/(\d{4})[-:](\d{2})[-:](\d{2})[ T](\d{2}):(\d{2})/);
+  if (parts) {
+    return `${parts[1]}-${parts[2]}-${parts[3]}T${parts[4]}:${parts[5]}`;
+  }
+
+  const dt = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(dt.getTime())) return '';
+
+  return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}T${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
+}
 
 /**
  * 提取图片主色调并设置为编辑器背景色
@@ -192,8 +213,11 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function loadImageWithExif(file) {
+    const loadId = ++imageLoadSequence;
+
     if (currentStyle === 'type-b') {
       const orientation = await checkImageOrientation(file);
+      if (loadId !== imageLoadSequence) return false;
       if (!orientation.isPortrait) {
         alert('目前本样式只适配纵向图像哦');
         return false;
@@ -214,19 +238,28 @@ document.addEventListener('DOMContentLoaded', () => {
       URL.revokeObjectURL(userImage.src);
     }
     resetForm();
+    if (currentStyle === 'type-e') {
+      typeEPreview.resetImageOffset();
+    }
     userImage.src = URL.createObjectURL(file);
     try {
-      currentExif = await getExif(file);
+      const nextExif = await getExif(file);
+      if (loadId !== imageLoadSequence) return false;
+      currentExif = nextExif || {};
       updateExifDisplay();
     } catch (error) {
+      if (loadId !== imageLoadSequence) return false;
       currentExif = {};
     }
     return true;
   }
 
   async function loadImageInElectron(imagePath) {
+    const loadId = ++imageLoadSequence;
+
     if (currentStyle === 'type-b') {
       const orientation = await checkImageOrientation(imagePath);
+      if (loadId !== imageLoadSequence) return false;
       if (!orientation.isPortrait) {
         alert('目前本样式只适配纵向图像哦');
         return false;
@@ -241,34 +274,52 @@ document.addEventListener('DOMContentLoaded', () => {
     typeJCachedSize = null;  // 清除 Type J 图框缓存
     typeKCachedSize = null;  // 清除 Type K 图框缓存
     typeLCachedSize = null;  // 清除 Type L 图框缓存
+    typeMCachedSize = null;  // 清除 Type M 图框缓存
+    let nextExif = {};
+    let fallbackDateTimeValue = '';
     try {
       const exifTags = await window.electronAPI.readExif(imagePath);
+      if (loadId !== imageLoadSequence) return false;
       if (exifTags && Object.keys(exifTags).length > 0) {
-        currentExif = {};
+        nextExif = {};
         for (const key in exifTags) {
-          if (exifTags[key]?.description) currentExif[key] = exifTags[key].description;
-          else if (exifTags[key]?.value !== undefined) currentExif[key] = exifTags[key].value;
+          if (exifTags[key]?.description) nextExif[key] = exifTags[key].description;
+          else if (exifTags[key]?.value !== undefined) nextExif[key] = exifTags[key].value;
         }
       } else {
-        currentExif = {};
+        nextExif = {};
         const fileMtime = await window.electronAPI.getFileMtime(imagePath);
+        if (loadId !== imageLoadSequence) return false;
         if (fileMtime) {
-          const dt = new Date(fileMtime);
-          dateTime.value = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}T${String(dt.getHours()).padStart(2, '0')}:${String(dt.getMinutes()).padStart(2, '0')}`;
+          fallbackDateTimeValue = formatDateTimeForInput(fileMtime);
         }
       }
     } catch (error) {
-      currentExif = {};
+      nextExif = {};
     }
+    if (loadId !== imageLoadSequence) return false;
+
+    currentExif = nextExif;
     resetForm();
+    if (currentStyle === 'type-e') {
+      typeEPreview.resetImageOffset();
+    }
+    updateExifDisplay();
+    if (!currentExif.DateTimeOriginal && fallbackDateTimeValue) {
+      dateTime.value = fallbackDateTimeValue;
+    }
     userImage.src = `file://${imagePath}`;
     if (userImage.complete) {
-      updateExifDisplay();
       updateBorder();
       applyDynamicBackground(userImage);
     } else {
-      userImage.addEventListener('load', () => { updateExifDisplay(); updateBorder(); applyDynamicBackground(userImage); }, { once: true });
+      userImage.addEventListener('load', () => {
+        if (loadId !== imageLoadSequence) return;
+        updateBorder();
+        applyDynamicBackground(userImage);
+      }, { once: true });
     }
+    return true;
   }
 
   function updateExifDisplay() {
@@ -295,8 +346,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (focal) focalLength.value = focal;
     if (currentExif.ISOSpeedRatings) iso.value = currentExif.ISOSpeedRatings;
     if (currentExif.DateTimeOriginal) {
-      const parts = currentExif.DateTimeOriginal.match(/(\d{4})[-:](\d{2})[-:](\d{2}) (\d{2}):(\d{2})/);
-      if (parts) dateTime.value = `${parts[1]}-${parts[2]}-${parts[3]}T${parts[4]}:${parts[5]}`;
+      const formattedDateTime = formatDateTimeForInput(currentExif.DateTimeOriginal);
+      if (formattedDateTime) dateTime.value = formattedDateTime;
     }
   }
 
@@ -406,7 +457,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
-      input.onchange = (e) => { if (e.target.files[0]) loadImageWithExif(e.target.files[0]); };
+      input.onchange = async (e) => { if (e.target.files[0]) await loadImageWithExif(e.target.files[0]); };
       input.click();
     }
   });
