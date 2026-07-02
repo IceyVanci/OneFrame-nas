@@ -9,3 +9,5 @@ docker/.dockerignore
 *.tgz
 *.md
 src/renderer/assets/package
+src/renderer/Sample_backup
+src/renderer/Samplearchive

@@ -12,12 +12,25 @@ import { configureEditPanel as configureTypeL } from './components/type-L-editor
 import { configureEditPanel as configureTypeM } from './components/type-M-editor-panel.js';
 import { exportImage } from './exporter.js';
 import { initHomepageThumbnails } from './thumbnail-selector.js';
+import { EXPORT_NAMING_MODE } from './config.js';
 
 let currentExif = null;
 let currentFile = null;
 let currentImagePath = null;
 let currentStyle = null;
 let imageLoadSequence = 0;
+
+/**
+ * styleId（如 'type-a'）转换为 Type 名称（如 'TypeA'）。
+ * 用于导出文件命名。
+ * @param {string} styleId
+ * @returns {string}
+ */
+function styleIdToTypeName(styleId) {
+  const match = styleId.match(/^type-(.)(.*)$/);
+  if (!match) return styleId.charAt(0).toUpperCase() + styleId.slice(1);
+  return 'Type' + match[1].toUpperCase() + match[2];
+}
 
 /**
  * 将 EXIF 日期或文件时间转换为 datetime-local 输入框格式
@@ -248,6 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (loadId !== imageLoadSequence) return false;
       currentExif = nextExif || {};
       updateExifDisplay();
+      updateBorderContent();
     } catch (error) {
       if (loadId !== imageLoadSequence) return false;
       currentExif = {};
@@ -893,14 +907,21 @@ document.addEventListener('DOMContentLoaded', () => {
       }
       
       const blob = await exportImage(userImage, exportOptions);
+      const styleTypeName = styleIdToTypeName(currentStyle || 'type-a');
+
       if (window.electronAPI) {
         // Electron 环境
         let exportFilename = 'output-OneFrame.jpg';
         if (currentImagePath) {
           const nameWithoutExt = currentImagePath.replace(/\\/g, '/').split('/').pop().replace(/\.[^.]+$/, '');
-          exportFilename = `${nameWithoutExt}-OneFrame.jpg`;
+          exportFilename = EXPORT_NAMING_MODE === 1
+            ? `${nameWithoutExt}-${styleTypeName}-sample.jpg`
+            : `${nameWithoutExt}-OneFrame.jpg`;
         } else if (currentFile?.name) {
-          exportFilename = `${currentFile.name.replace(/\.[^.]+$/, '')}-OneFrame.jpg`;
+          const baseName = currentFile.name.replace(/\.[^.]+$/, '');
+          exportFilename = EXPORT_NAMING_MODE === 1
+            ? `${baseName}-${styleTypeName}-sample.jpg`
+            : `${baseName}-OneFrame.jpg`;
         }
         const savePath = await window.electronAPI.saveImage(exportFilename);
         if (savePath) {
@@ -911,9 +932,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       } else {
         // 浏览器环境：直接下载
-        const exportFilename = currentFile?.name
-          ? `${currentFile.name.replace(/\.[^.]+$/, '')}-OneFrame.jpg`
-          : 'output-OneFrame.jpg';
+        const baseName = currentFile?.name?.replace(/\.[^.]+$/, '') || 'output';
+        const exportFilename = EXPORT_NAMING_MODE === 1
+          ? `${baseName}-${styleTypeName}-sample.jpg`
+          : `${baseName}-OneFrame.jpg`;
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
