@@ -1,5 +1,29 @@
 # OneFrame NAS Edition 更新日志
 
+## v1.13.1 (2026-07-02)
+
+### ⚡ 性能优化
+
+#### 首页缩略图加载优化（manifest 清单法）
+- 将缩略图随机选择从暴力探测法（最多 2,574 次 HEAD 请求）优化为 manifest 清单法（1 次 fetch 请求）
+- 新增 `Sample/sample-manifest.json` 清单文件，列出所有 33 个样本文件按样式分组
+- `thumbnail-selector.js` 重写：新增 `fetchManifest()` + `selectRandomFromManifest()`，移除 `getDefaultImageIdList()`、`collectCandidatesForStyle()`、`assignUniqueIdThumbnails()`
+- API 保持不变，`app.js` 无需修改
+- manifest 获取失败时自动回退到 `data-fallback-src` 默认图
+
+#### 首页缩略图无闪烁改进
+- HTML img src 改为透明 GIF 占位符 + `data-fallback-src` 属性
+- 消除随机化完成前默认图闪现的问题
+
+### 🔧 修改文件
+
+| 文件 | 变更类型 | 说明 |
+|------|----------|------|
+| `js/thumbnail-selector.js` | 重写 | 使用 manifest 清单替代暴力探测，性能提升 99%+ |
+| `Sample/sample-manifest.json` | 新增 | 样本图片清单（33 个文件，13 种样式） |
+
+---
+
 ## v1.13 (2026-07-02)
 
 ### ✨ 新功能

@@ -1,6 +1,5 @@
 // OneFrame NAS 首页缩略图选择器
-// 基于原始项目 thumbnail-selector.js 移植，适配纯 Web 环境
-// 使用 fetch HEAD 探测文件存在性，兼容 .jpg 和 .jpeg 扩展名
+// 使用 sample-manifest.json 清单文件替代暴力探测，1 次 fetch 替代 2,574 次 HEAD 请求
 
 /**
  * styleId（如 'type-l'）转换为 Type 名称（如 'TypeL'）。
@@ -13,43 +12,6 @@ function styleIdToTypeName(styleId) {
     return styleId.charAt(0).toUpperCase() + styleId.slice(1);
   }
   return 'Type' + match[1].toUpperCase() + match[2];
-}
-
-/**
- * 生成默认 ID 探测列表，例如 '001' 到 maxNumericId 的 3 位零填充字符串。
- * @param {number} maxNumericId
- * @returns {string[]}
- */
-function getDefaultImageIdList(maxNumericId = 99) {
-  const ids = [];
-  for (let i = 1; i <= maxNumericId; i++) {
-    ids.push(String(i).padStart(3, '0'));
-  }
-  return ids;
-}
-
-/**
- * 构建候选缩略图相对路径。
- * @param {string} imageId - 3 位 ID 字符串，如 '001'
- * @param {string} typeName - 如 'TypeL'
- * @param {object} [options]
- * @param {string} [options.sampleBasePath='Sample/']
- * @param {string} [options.extension='.jpeg']
- * @returns {string} 相对 URL，如 'Sample/001-TypeL-sample_compressed.jpeg'
- */
-function buildCandidatePath(imageId, typeName, options = {}) {
-  const { sampleBasePath = 'Sample/', extension = '.jpeg' } = options;
-  return `${sampleBasePath}${imageId}-${typeName}-sample_compressed${extension}`;
-}
-
-/**
- * 验证文件名是否符合 {imageId}-TypeX-sample_compressed.{ext} 格式。
- * 兼容 .jpeg、.jpg、.png、.webp 扩展名。
- * @param {string} filename
- * @returns {boolean}
- */
-function isValidSampleFilename(filename) {
-  return /^\d{3}-Type[A-Z]-sample_compressed\.(jpeg|jpg|png|webp)$/.test(filename);
 }
 
 /**
@@ -67,21 +29,6 @@ function shuffle(array) {
 }
 
 /**
- * 检测候选缩略图文件是否存在。
- * 使用 fetch HEAD 请求探测，不加载图片体，避免页面闪烁和二次随机问题。
- * @param {string} url - 相对 URL，如 'Sample/001-TypeA-sample_compressed.jpeg'
- * @returns {Promise<boolean>}
- */
-async function checkFileExists(url) {
-  try {
-    const resp = await fetch(url, { method: 'HEAD' });
-    return resp.ok;
-  } catch {
-    return false;
-  }
-}
-
-/**
  * 从单个 .style-card 解析样式缩略图元信息。
  * @param {HTMLElement} card
  * @returns {{ styleId: string, typeName: string, basePath: string } | null}
@@ -95,13 +42,10 @@ function buildStyleThumbnailMeta(card) {
   let typeName = '';
 
   if (img) {
-    // 优先从 data-fallback-src 读取回退路径（HTML 中 src 为透明占位图）
     const fallbackSrc = img.getAttribute('data-fallback-src') || '';
     const src = fallbackSrc || img.getAttribute('src') || '';
     if (src && !src.startsWith('data:')) {
-      // 保留完整相对路径作为回退路径（含 Sample/ 前缀）
       basePath = src;
-      // 从完整路径中提取 Type 名称（如 TypeA）
       const typeMatch = src.match(/(Type[A-Z])-/);
       if (typeMatch) {
         typeName = typeMatch[1];
@@ -121,81 +65,61 @@ function buildStyleThumbnailMeta(card) {
 }
 
 /**
- * 为单个样式收集实际存在的 ID 前缀缩略图候选（逐个探测）。
- * NAS 版本：移除 Electron IPC 依赖，仅使用 Image 对象探测。
- * 先尝试 .jpeg 扩展名，再回退尝试 .jpg 扩展名。
- * @param {{ styleId: string, typeName: string, basePath: string }} meta
- * @param {string[]} imageIdList
- * @param {object} [options]
- * @returns {Promise<Array<{ imageId: string, styleId: string, typeName: string, filename: string, path: string }>>}
+ * 获取 sample-manifest.json 清单文件。
+ * @param {string} manifestUrl - 清单文件 URL
+ * @returns {Promise<Object|null>}
  */
-async function collectCandidatesForStyle(meta, imageIdList, options = {}) {
-  const candidates = [];
-  const { sampleBasePath = 'Sample/' } = options;
-
-  for (const imageId of imageIdList) {
-    // 先尝试 .jpeg 扩展名
-    const jpegPath = buildCandidatePath(imageId, meta.typeName, { ...options, extension: '.jpeg' });
-    const jpegFilename = jpegPath.split('/').pop() || '';
-    if (isValidSampleFilename(jpegFilename)) {
-      const exists = await checkFileExists(jpegPath);
-      if (exists) {
-        candidates.push({
-          imageId,
-          styleId: meta.styleId,
-          typeName: meta.typeName,
-          filename: jpegFilename,
-          path: jpegPath
-        });
-        continue;
-      }
+async function fetchManifest(manifestUrl) {
+  try {
+    const resp = await fetch(manifestUrl);
+    if (!resp.ok) return null;
+    const manifest = await resp.json();
+    if (manifest && manifest.samples && typeof manifest.samples === 'object') {
+      return manifest;
     }
-
-    // 回退尝试 .jpg 扩展名
-    const jpgPath = buildCandidatePath(imageId, meta.typeName, { ...options, extension: '.jpg' });
-    const jpgFilename = jpgPath.split('/').pop() || '';
-    if (isValidSampleFilename(jpgFilename)) {
-      const exists = await checkFileExists(jpgPath);
-      if (exists) {
-        candidates.push({
-          imageId,
-          styleId: meta.styleId,
-          typeName: meta.typeName,
-          filename: jpgFilename,
-          path: jpgPath
-        });
-      }
-    }
+    return null;
+  } catch {
+    return null;
   }
-
-  return candidates;
 }
 
 /**
- * 从所有样式候选中全局分配缩略图，保证不同样式不重复使用 imageId。
- * @param {Map<string, Array<{ imageId: string, path: string }>>} styleCandidatesMap
- * @param {Map<string, string>} fallbackMap - styleId → 回退基础图路径
+ * 从 manifest 清单中为每个样式随机选取缩略图，保证不同样式尽量不重复 imageId。
+ * @param {Object} manifest - { samples: { TypeA: ["01","022"], ... } }
+ * @param {Array<{ styleId: string, typeName: string, basePath: string }>} metaList
  * @returns {Map<string, string>} styleId → 最终缩略图路径
  */
-function assignUniqueIdThumbnails(styleCandidatesMap, fallbackMap) {
+function selectRandomFromManifest(manifest, metaList) {
   const usedImageIds = new Set();
   const assignments = new Map();
-  const styleIds = shuffle([...styleCandidatesMap.keys()]);
+  const shuffledMetas = shuffle(metaList);
 
-  for (const styleId of styleIds) {
-    const candidates = styleCandidatesMap.get(styleId) || [];
-    const shuffled = shuffle(candidates);
+  for (const meta of shuffledMetas) {
+    const candidates = manifest.samples[meta.typeName];
+    if (!candidates || candidates.length === 0) {
+      assignments.set(meta.styleId, meta.basePath);
+      continue;
+    }
+
+    const shuffledCandidates = shuffle(candidates);
     let assigned = false;
-    for (const candidate of shuffled) {
-      if (!usedImageIds.has(candidate.imageId)) {
-        usedImageIds.add(candidate.imageId);
-        assignments.set(styleId, candidate.path);
+
+    for (const imageId of shuffledCandidates) {
+      if (!usedImageIds.has(imageId)) {
+        usedImageIds.add(imageId);
+        const path = `Sample/${imageId}-${meta.typeName}-sample_compressed.jpeg`;
+        assignments.set(meta.styleId, path);
         assigned = true;
         break;
       }
     }
+
+    // 所有候选 ID 都已被其他样式使用，回退到 basePath
     if (!assigned) {
-      assignments.set(styleId, fallbackMap.get(styleId) || '');
+      // 允许重复使用 ID（所有候选都被占用了）
+      const fallbackId = shuffledCandidates[0];
+      const path = `Sample/${fallbackId}-${meta.typeName}-sample_compressed.jpeg`;
+      assignments.set(meta.styleId, path);
     }
   }
 
@@ -204,51 +128,46 @@ function assignUniqueIdThumbnails(styleCandidatesMap, fallbackMap) {
 
 /**
  * 首页缩略图初始化入口。
- * 遍历样式卡片，收集候选，全局分配不重复 ID 的缩略图，并写回 <img> src。
- * NAS 版本：仅使用 Image 对象探测模式（移除 Electron IPC 依赖）。
+ * 从 sample-manifest.json 获取样本清单，随机选取后写入 <img> src。
  * @param {NodeList|HTMLElement[]} styleCards - .style-card 元素集合
  * @param {object} [options]
- * @param {string} [options.sampleBasePath='Sample/']
- * @param {string[]} [options.imageIdList] - 显式 ID 列表
- * @param {number} [options.maxNumericId=99] - 默认 ID 范围上限
- * @param {string} [options.extension='.jpeg']
+ * @param {string} [options.manifestUrl='Sample/sample-manifest.json'] - 清单文件 URL
  * @returns {Promise<Map<string, string>>} styleId → 最终缩略图路径
  */
 export async function initHomepageThumbnails(styleCards, options = {}) {
   const {
-    sampleBasePath = 'Sample/',
-    imageIdList: explicitIdList = null,
-    maxNumericId = 99,
-    extension = '.jpeg'
+    manifestUrl = 'Sample/sample-manifest.json'
   } = options;
 
-  const imageIdList = explicitIdList || getDefaultImageIdList(maxNumericId);
-  const selectorOptions = { sampleBasePath, extension };
-
+  // 解析所有样式卡片的元信息
   const metas = [];
-  const fallbackMap = new Map();
   for (const card of styleCards) {
     const meta = buildStyleThumbnailMeta(card);
     if (meta) {
       metas.push(meta);
-      fallbackMap.set(meta.styleId, meta.basePath);
     }
   }
 
-  // NAS 环境：仅使用 Image 对象探测模式
-  const candidatePromises = metas.map(meta =>
-    collectCandidatesForStyle(meta, imageIdList, selectorOptions)
-      .then(candidates => ({ styleId: meta.styleId, candidates }))
-  );
-  const results = await Promise.all(candidatePromises);
+  if (metas.length === 0) return new Map();
 
-  const styleCandidatesMap = new Map();
-  for (const { styleId, candidates } of results) {
-    styleCandidatesMap.set(styleId, candidates);
+  // 获取 manifest 清单
+  const manifest = await fetchManifest(manifestUrl);
+
+  let assignments;
+
+  if (manifest) {
+    // manifest 获取成功，从中随机选取
+    assignments = selectRandomFromManifest(manifest, metas);
+  } else {
+    // manifest 获取失败，使用 data-fallback-src 回退
+    console.warn('sample-manifest.json 加载失败，使用默认缩略图');
+    assignments = new Map();
+    for (const meta of metas) {
+      assignments.set(meta.styleId, meta.basePath);
+    }
   }
 
-  const assignments = assignUniqueIdThumbnails(styleCandidatesMap, fallbackMap);
-
+  // 写入 img.src
   for (const card of styleCards) {
     const styleId = card.dataset.style;
     if (!styleId) continue;
