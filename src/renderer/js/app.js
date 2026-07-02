@@ -11,6 +11,7 @@ import { configureEditPanel as configureTypeK } from './components/type-K-editor
 import { configureEditPanel as configureTypeL } from './components/type-L-editor-panel.js';
 import { configureEditPanel as configureTypeM } from './components/type-M-editor-panel.js';
 import { exportImage } from './exporter.js';
+import { initHomepageThumbnails } from './thumbnail-selector.js';
 
 let currentExif = null;
 let currentFile = null;
@@ -935,19 +936,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnExportTop')?.addEventListener('click', exportImageHandler);
   initLogoGrid();
 
-  // 首页预览图：只为需要白色边框的样式（Type A/B/C/D/E）设置 footer 高度
-  document.querySelectorAll('.style-card[data-style="type-a"] .frame-container img, \
-  .style-card[data-style="type-b"] .frame-container img, \
-  .style-card[data-style="type-c"] .frame-container img, \
-  .style-card[data-style="type-d"] .frame-container img, \
-  .style-card[data-style="type-e"] .frame-container img').forEach(img => {
-    img.addEventListener('load', function() {
-      const footer = this.nextElementSibling;
-      if (footer?.classList.contains('photo-footer')) {
-        footer.style.height = `${Math.round(Math.min(this.clientWidth, this.clientHeight) * 0.12)}px`;
-      }
-    });
-  });
+  // 首页缩略图随机选择（异步执行，不阻塞页面加载）
+  initHomepageThumbnails(styleCards).catch(console.warn);
 
 
   // ========== 关于模态框逻辑 ==========
