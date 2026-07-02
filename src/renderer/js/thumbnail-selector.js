@@ -175,6 +175,10 @@ export async function initHomepageThumbnails(styleCards, options = {}) {
     if (!path) continue;
     const img = card.querySelector('.preview-image');
     if (img) {
+      img.classList.add('loading');
+      const cleanup = () => img.classList.remove('loading');
+      img.addEventListener('load', cleanup, { once: true });
+      img.addEventListener('error', cleanup, { once: true });
       img.src = path;
     }
   }

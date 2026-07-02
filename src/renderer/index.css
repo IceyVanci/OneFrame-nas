@@ -6,23 +6,29 @@
 /* 导入 MiSans 字体 */
 @font-face {
   font-family: 'MiSans';
-  src: url('fonts/MiSans-Normal.ttf') format('truetype');
+  src: url('fonts/MiSans-Normal.woff2') format('woff2'),
+       url('fonts/MiSans-Normal.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'MiSans';
-  src: url('fonts/MiSans-Medium.ttf') format('truetype');
+  src: url('fonts/MiSans-Medium.woff2') format('woff2'),
+       url('fonts/MiSans-Medium.ttf') format('truetype');
   font-weight: 500;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
   font-family: 'MiSans';
-  src: url('fonts/MiSans-Semibold.ttf') format('truetype');
+  src: url('fonts/MiSans-Semibold.woff2') format('woff2'),
+       url('fonts/MiSans-Semibold.ttf') format('truetype');
   font-weight: 600;
   font-style: normal;
+  font-display: swap;
 }
 
 * {
@@ -873,4 +879,16 @@ select:focus {
   color: #888;
   font-size: 12px;
   font-style: italic;
+}
+
+/* ========== 缩略图加载动画（Shimmer） ========== */
+.style-card .preview-image.loading {
+  background: linear-gradient(110deg, #1a1a1a 8%, #2a2a2a 18%, #1a1a1a 33%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
 }
