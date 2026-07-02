@@ -1,5 +1,64 @@
 # OneFrame NAS Edition 更新日志
 
+## v1.13 (2026-07-02)
+
+### ✨ 新功能
+
+#### 首页缩略图随机选取
+- 基于原始项目 v1.13 移植缩略图选择器（thumbnail-selector.js）
+- 首页 13 个样式卡片每次刷新随机显示不同缩略图
+- 全局 imageId 去重：不同样式尽量不重复使用同一张图片
+- Fisher-Yates 洗牌算法保证均匀随机
+- 兼容 .jpeg 和 .jpg 两种扩展名
+
+#### 首页缩略图路径修正
+- 修复样式卡片 img src 指向不存在的根目录文件的问题
+- 所有卡片指向 Sample/ 目录下实际存在的图片文件
+- 移除样式卡片中多余的 photo-footer 元素
+
+### 🐛 Bug 修复
+
+#### 修复刷新页面时缩略图闪烁两次
+- 将 checkFileExists() 从 Image 对象探测改为 fetch HEAD 请求
+- HEAD 请求只获取 HTTP 头信息，不加载图片体，避免视觉闪烁
+
+#### 修复部分样式导出遗失焦距单位 mm
+- 在 getFocalLength() 中统一确保返回值带 "mm" 后缀
+- 修复 FocalLengthIn35mmFilm 返回纯数字时导出图片缺少单位的问题
+
+### 🔧 修改文件
+
+| 文件 | 变更类型 | 说明 |
+|------|----------|------|
+| `index.html` | 修改 | 修正13个样式卡片 img src 路径，移除 photo-footer，版本号 v1.13 |
+| `js/thumbnail-selector.js` | 新增 | 首页缩略图随机选择器模块 |
+| `js/app.js` | 修改 | 导入并调用 initHomepageThumbnails，移除首页 photo-footer 高度计算 |
+| `js/exif.js` | 修改 | getFocalLength() 统一添加 mm 后缀 |
+| `docs/V1.13-NAS_CHANGES.md` | 新增 | 记录 NAS v1.13 变更内容 |
+| `CHANGELOG.md` | 修改 | 添加 v1.13 条目 |
+
+---
+
+## v1.12 (2026-07-01)
+
+### 🐛 Bug 修复
+
+#### Type E 预览拖动边界修复
+- 修复预览端坐标系混用（原始像素 vs CSS 像素）问题
+- 统一偏移模型：maxOffset 使用 rendered CSS 像素计算
+- 修复拖动提示文字（从临时禁用恢复为正常提示）
+
+#### Type E 导出偏移方向修复
+- 修复导出裁剪区域与预览方向相反的问题
+- drawOffset 从加法改为减法，与 CSS object-position 语义一致
+
+#### 重选图片 EXIF 刷新与偏移重置
+- 新增 imageLoadSequence 防止旧异步结果覆盖新图片
+- Type E 重选图片时重置拖动偏移
+- 统一日期格式化（formatDateTimeForInput）
+
+---
+
 ## v1.11 (2026-06-30)
 
 ### ✨ 新功能

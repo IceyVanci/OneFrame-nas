@@ -143,15 +143,18 @@ export function formatDateTime(dateStr) {
  * @returns {string|null}
  */
 export function getFocalLength(exif) {
+  let focal;
   // 优先使用等效焦距
   if (exif['FocalLengthIn35mmFilm']) {
-    return exif.FocalLengthIn35mmFilm;
+    focal = exif.FocalLengthIn35mmFilm;
+  } else if (exif.FocalLength) {
+    // 回退到物理焦距
+    focal = exif.FocalLength;
   }
-  // 回退到物理焦距
-  if (exif.FocalLength) {
-    return exif.FocalLength;
-  }
-  return null;
+  if (!focal) return null;
+  // 统一确保带 mm 后缀（FocalLengthIn35mmFilm 可能返回纯数字）
+  const str = String(focal).trim();
+  return str.endsWith('mm') ? str : `${str}mm`;
 }
 
 /**

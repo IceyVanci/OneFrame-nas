@@ -99,7 +99,7 @@ docker compose up --build -d
 ```bash
 # 下载镜像文件（在 Release 页面下载 .tar 文件）
 # 导入镜像
-docker load -i oneframe-web-v1.08-nas.tar
+docker load -i oneframe-web-v1.13-nas.tar
 
 # 运行容器
 docker run -d -p 8888:80 --name oneframe-web --restart unless-stopped oneframe-nas-oneframe:latest
@@ -245,6 +245,8 @@ docker compose up --build
 - [docs/AI_PROJECT_GUIDE.md](./docs/AI_PROJECT_GUIDE.md) - AI 项目认知指南
 - [docs/function_analysis.md](./docs/function_analysis.md) - 函数分析文档
 - [docs/migration-guide.md](./docs/migration-guide.md) - Electron → Docker 移植指南
+- [docs/V1.13-NAS_CHANGES.md](./docs/V1.13-NAS_CHANGES.md) - v1.13 同步变更（缩略图随机选取 + 焦距单位修复）
+- [docs/V1.12-NAS_CHANGES.md](./docs/V1.12-NAS_CHANGES.md) - v1.12 同步变更（Type E 拖动/导出/EXIF 修复）
 - [docs/V1.11-NAS_CHANGES.md](./docs/V1.11-NAS_CHANGES.md) - v1.11 同步变更（Type M + 圆角 + 模糊修复）
 - [docs/V1.10-NAS_CHANGES.md](./docs/V1.10-NAS_CHANGES.md) - v1.10 同步变更（编辑器动态背景色）
 - [docs/V1.09-NAS_CHANGES.md](./docs/V1.09-NAS_CHANGES.md) - v1.09 同步变更（图片墙重构+文件名大写化）

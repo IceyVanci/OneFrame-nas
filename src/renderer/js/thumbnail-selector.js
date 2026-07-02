@@ -1,6 +1,6 @@
 // OneFrame NAS 首页缩略图选择器
 // 基于原始项目 thumbnail-selector.js 移植，适配纯 Web 环境
-// 移除 Electron IPC 依赖，使用 Image 对象探测，兼容 .jpg 和 .jpeg 扩展名
+// 使用 fetch HEAD 探测文件存在性，兼容 .jpg 和 .jpeg 扩展名
 
 /**
  * styleId（如 'type-l'）转换为 Type 名称（如 'TypeL'）。
@@ -68,27 +68,17 @@ function shuffle(array) {
 
 /**
  * 检测候选缩略图文件是否存在。
- * 使用 Image 对象加载探测，兼容纯 Web 环境。
+ * 使用 fetch HEAD 请求探测，不加载图片体，避免页面闪烁和二次随机问题。
  * @param {string} url - 相对 URL，如 'Sample/001-TypeA-sample_compressed.jpeg'
  * @returns {Promise<boolean>}
  */
 async function checkFileExists(url) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    const timeout = setTimeout(() => {
-      img.src = '';
-      resolve(false);
-    }, 2000);
-    img.onload = () => {
-      clearTimeout(timeout);
-      resolve(true);
-    };
-    img.onerror = () => {
-      clearTimeout(timeout);
-      resolve(false);
-    };
-    img.src = url;
-  });
+  try {
+    const resp = await fetch(url, { method: 'HEAD' });
+    return resp.ok;
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -105,8 +95,10 @@ function buildStyleThumbnailMeta(card) {
   let typeName = '';
 
   if (img) {
-    const src = img.getAttribute('src') || '';
-    if (src) {
+    // 优先从 data-fallback-src 读取回退路径（HTML 中 src 为透明占位图）
+    const fallbackSrc = img.getAttribute('data-fallback-src') || '';
+    const src = fallbackSrc || img.getAttribute('src') || '';
+    if (src && !src.startsWith('data:')) {
       // 保留完整相对路径作为回退路径（含 Sample/ 前缀）
       basePath = src;
       // 从完整路径中提取 Type 名称（如 TypeA）
