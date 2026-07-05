@@ -496,6 +496,15 @@ document.addEventListener('DOMContentLoaded', () => {
     editPanel.classList.remove('visible');
     if (isMobile) unlockBodyScroll();
   });
+  // 移动端：点击画布区域关闭编辑面板
+  if (isMobile) {
+    document.querySelector('.preview-area')?.addEventListener('click', (e) => {
+      if (editPanel.classList.contains('visible')) {
+        editPanel.classList.remove('visible');
+        unlockBodyScroll();
+      }
+    });
+  }
 
   // 边框颜色预设按钮事件（仅 data-color 属性）
   document.querySelectorAll('.color-preset[data-color]').forEach(btn => {

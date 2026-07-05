@@ -927,20 +927,17 @@ select:focus {
 /* --- 编辑器：底部操作栏 --- */
 .is-mobile .float-actions {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 12px;
+  left: 12px;
+  right: 12px;
   top: auto;
   transform: none;
   flex-direction: row;
   justify-content: space-around;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
-  background: rgba(17, 17, 17, 0.95);
-  border-top: 1px solid #333;
+  padding: 0;
   z-index: 10;
-  height: 64px;
 }
 .is-mobile .float-btn {
   width: 56px;
@@ -1027,11 +1024,10 @@ select:focus {
   .style-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
   .preview-area { padding: 12px 12px 80px 12px; padding-right: 12px; }
   .float-actions {
-    position: fixed; bottom: 0; left: 0; right: 0; top: auto;
+    position: fixed; bottom: 12px; left: 12px; right: 12px; top: auto;
     transform: none; flex-direction: row; justify-content: space-around;
-    gap: 8px; padding: 8px 12px;
-    background: rgba(17,17,17,0.95); border-top: 1px solid #333;
-    z-index: 10; height: 64px;
+    gap: 8px; padding: 0;
+    z-index: 10;
   }
   .float-btn { width: 56px; height: 56px; border-radius: 12px; }
   .edit-panel {

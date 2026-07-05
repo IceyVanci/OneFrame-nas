@@ -311,3 +311,59 @@ CSS 层面通过 `.is-mobile` class 前缀覆盖样式（所有移动端选择�
 
 6. ⬜ **更新文档**
    - ⬜ `docs/V1.15-NAS_CHANGES.md`（暂不需要，用户明确指示）
+
+---
+
+## 问题 3：预览缩放文字大小异常 — 逐样式分析
+
+### 根因
+
+所有样式预览模块的字体大小是基于 `squareSize`（画布宽度）按比例计算的。移动端 `preview-area` 可用空间缩小（padding 从 `40px 120px` 改为 `12px 12px 80px 12px`），导致 `squareSize` 变小，字体按比例缩小后可能过小。
+
+### 各样式缩放逻辑
+
+| 样式 | calcSize 输入 | 字体缩放公式 | 问题 |
+|------|--------------|-------------|------|
+| **Type A/C** | 直接使用 img 尺寸 | `shortSide * borderPercent` | 字体大小由 CSS 控制，不受 squareSize 影响 ✅ |
+| **Type B** | `typeBPreview.update()` | 由模块内部计算 | 需检查模块内是否有 fontSize 计算 |
+| **Type D** | 类似 Type A | CSS 控制 | ✅ |
+| **Type E** | `Math.min(availW, availH*2/3)` | `Math.max(8, Math.round(24 * squareSize / 480))` | squareSize 从 ~480 降到 ~300 时，字体从 24px 降到 15px ⚠️ |
+| **Type F** | `Math.min(availW, availH)` | `Math.max(8, Math.round(14 * squareSize / 900))` | squareSize 从 ~900 降到 ~400 时，字体从 14px 降到 6px ❌ |
+| **Type G** | 类似 Type F | 类似 Type F | 同 Type F ⚠️ |
+| **Type H** | `Math.min(availW, availH)` | 需检查 | 需检查 |
+| **Type I/J/K** | 类似 Type H | 类似 Type H | 同 Type H ⚠️ |
+| **Type L** | 类似 Type G | 类似 Type G | 同 Type G ⚠️ |
+| **Type M** | 类似 Type F | 类似 Type F | 同 Type F ⚠️ |
+
+### 问题核心
+
+Type F/G/H/I/J/K/L/M 的 `fontSize = Math.max(8, Math.round(N * squareSize / M))` 公式中，基准分母 M 是基于 PC 端 full-size 画布计算的。移动端画布缩小后，字体降到 8px（Math.max 下限），但 8px 在手机上仍然太小。
+
+### 修复方案选项
+
+**方案 A：提高移动端最小字体下限**
+- 在各模块的 fontSize 计算中，当 `isMobile` 时将 `Math.max(8, ...)` 改为 `Math.max(12, ...)`
+- 优点：简单直接
+- 缺点：需要修改每个模块
+
+**方案 B：CSS override（推荐）**
+- 在 `.is-mobile .border-content` 中设置 `font-size: 12px !important` 覆盖 JS 计算的值
+- 优点：只改 CSS，不改 JS
+- 缺点：`!important` 覆盖可能导致导出时字号不一致
+
+**方案 C：在 updateBorderContent 中检测 isMobile 并传入 scale 参数**
+- 让各模块的 `updateContentPreview()` 接受一个 `fontScale` 参数
+- 移动端传入 `fontScale = 1.5` 或更高
+- 优点：精确控制
+- 缺点：需要修改所有模块的接口
+
+**方案 D：移动端使用固定的预览缩放比例**
+- 移动端 `preview-area` 不缩小画布，而是用 `transform: scale()` 整体缩小预览区
+- 字体保持原始大小（因为 scale 只影响视觉，不影响计算）
+- 优点：零代码改动，画布和字体比例完全正确
+- 缺点：之前分析过 scale 有布局溢出和模糊问题
+
+**推荐方案：A + 移动端 padding 调整**
+1. 各模块 fontSize 公式中，移动端最小下限从 8px 提高到 12px
+2. 移动端 `preview-area` 的 `padding-bottom` 从 80px 减小到 60px（给画布更多空间）
+3. 在 `mobile.js` 中导出 `isMobile`，各模块导入后判断
