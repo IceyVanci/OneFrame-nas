@@ -13,6 +13,7 @@ import { configureEditPanel as configureTypeM } from './components/type-M-editor
 import { exportImage } from './exporter.js';
 import { initHomepageThumbnails } from './thumbnail-selector.js';
 import { EXPORT_NAMING_MODE } from './config.js';
+import { isMobile, initMobileLayout, initSwipeToClose, lockBodyScroll, unlockBodyScroll } from './mobile.js';
 
 let currentExif = null;
 let currentFile = null;
@@ -149,6 +150,9 @@ async function isLogoLight(logoName) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // 移动端检测和初始化
+  if (isMobile) initMobileLayout();
+  
   const appContainer = document.querySelector('.app-container');
   const editorView = document.getElementById('editor-view');
   const styleCards = document.querySelectorAll('.style-card:not(.disabled)');
@@ -476,8 +480,22 @@ document.addEventListener('DOMContentLoaded', () => {
       input.click();
     }
   });
-  btnEdit.addEventListener('click', () => editPanel.classList.toggle('visible'));
-  document.getElementById('btnClosePanel')?.addEventListener('click', () => editPanel.classList.remove('visible'));
+  btnEdit.addEventListener('click', () => {
+    editPanel.classList.toggle('visible');
+    if (isMobile && editPanel.classList.contains('visible')) {
+      lockBodyScroll();
+      initSwipeToClose(editPanel, () => {
+        editPanel.classList.remove('visible');
+        unlockBodyScroll();
+      });
+    } else if (isMobile) {
+      unlockBodyScroll();
+    }
+  });
+  document.getElementById('btnClosePanel')?.addEventListener('click', () => {
+    editPanel.classList.remove('visible');
+    if (isMobile) unlockBodyScroll();
+  });
 
   // 边框颜色预设按钮事件（仅 data-color 属性）
   document.querySelectorAll('.color-preset[data-color]').forEach(btn => {
