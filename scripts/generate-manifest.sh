@@ -3,7 +3,7 @@
 # Runs inside Docker build (alpine)
 
 DIR="/usr/share/nginx/html/Sample"
-OUT="$DIR/sample-manifest.json"
+OUT="/usr/share/nginx/html/sample-manifest.json"
 echo '{"version":1,"samples":{' > "$OUT"
 first=1
 for t in TypeA TypeB TypeC TypeD TypeE TypeF TypeG TypeH TypeI TypeJ TypeK TypeL TypeM; do

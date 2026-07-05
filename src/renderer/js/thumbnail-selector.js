@@ -131,12 +131,12 @@ function selectRandomFromManifest(manifest, metaList) {
  * 从 sample-manifest.json 获取样本清单，随机选取后写入 <img> src。
  * @param {NodeList|HTMLElement[]} styleCards - .style-card 元素集合
  * @param {object} [options]
- * @param {string} [options.manifestUrl='Sample/sample-manifest.json'] - 清单文件 URL
+ * @param {string} [options.manifestUrl='sample-manifest.json'] - 清单文件 URL
  * @returns {Promise<Map<string, string>>} styleId → 最终缩略图路径
  */
 export async function initHomepageThumbnails(styleCards, options = {}) {
   const {
-    manifestUrl = 'Sample/sample-manifest.json'
+    manifestUrl = 'sample-manifest.json'
   } = options;
 
   // 解析所有样式卡片的元信息
