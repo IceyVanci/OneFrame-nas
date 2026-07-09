@@ -1,5 +1,50 @@
 # OneFrame NAS Edition 更新日志
 
+## v1.15 (2026-07-09)
+
+### ✨ 新功能
+
+#### Type N 样式 — 上下对称边框
+- 基于 Type G 演变的上下对称边框布局
+- 顶部 7.5% 白色边框（Logo 居中）+ 中部 85% 照片区（12px 圆角）+ 底部 7.5% 文字区
+- 纵向图片自适应：顶部 3.75% + 中部 92.5% + 底部 3.75%
+- 混合字重参数行：标签 Medium（500）+ 数值 Normal（400）
+- 参数格式：`Aperture f/1.8 Focal 50mm Shutter 1/100s ISO 100`
+- 署名固定在参数行下方，不影响参数位置
+- 编辑面板隐藏：边框颜色、边框高度、比例设置、设备型号、时间设置
+
+#### Type N 样本图片
+- 新增 10 张 Type N 样本图片（压缩至 34-98KB）
+
+### 🔧 Bug 修复
+
+#### Type N 导出署名位置修复
+- 修复导出图片中署名文字跑到边框外面的问题
+- 参数行+署名两行整体在底部文字区域垂直居中
+
+### 📁 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `src/renderer/css/type-N.css` | Type N CSS 样式 |
+| `src/renderer/js/styles/type-N-preview.js` | Type N 预览模块 |
+| `src/renderer/js/styles/type-N-export.js` | Type N 导出模块 |
+| `src/renderer/js/components/type-N-editor-panel.js` | Type N 编辑面板配置 |
+| `docs/V1.15-NAS_CHANGES.md` | v1.15 变更说明 |
+| `docs/release-v1.15-nas.md` | v1.15 Release 文档 |
+
+### 🔧 修改文件
+
+| 文件 | 说明 |
+|------|------|
+| `src/renderer/index.html` | type-N.css 链接 + 第14个样式卡片 + 版本号 v1.15 |
+| `src/renderer/js/styles/index.js` | 注册 Type N 预览和导出模块 |
+| `src/renderer/js/exporter.js` | 注册 Type N 导出样式 |
+| `src/renderer/js/app.js` | Type N 分支逻辑 |
+| `README.md` | 版本号 + 样式数量 13→14 + 相关文档链接 |
+
+---
+
 ## v1.13.1 (2026-07-02)
 
 ### ⚡ 性能优化

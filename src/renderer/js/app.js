@@ -10,6 +10,7 @@ import { configureEditPanel as configureTypeJ } from './components/type-J-editor
 import { configureEditPanel as configureTypeK } from './components/type-K-editor-panel.js';
 import { configureEditPanel as configureTypeL } from './components/type-L-editor-panel.js';
 import { configureEditPanel as configureTypeM } from './components/type-M-editor-panel.js';
+import { configureEditPanel as configureTypeN } from './components/type-N-editor-panel.js';
 import { exportImage } from './exporter.js';
 import { initHomepageThumbnails } from './thumbnail-selector.js';
 import { EXPORT_NAMING_MODE } from './config.js';
@@ -185,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let typeKCachedSize = null;  // Type K 图框尺寸缓存
   let typeLCachedSize = null;  // Type L 图框尺寸缓存
   let typeMCachedSize = null;  // Type M 图框尺寸缓存
+  let typeNCachedSize = null;  // Type N 图框尺寸缓存
 
   async function initLogoGrid() {
     let logos = getAllLogos();
@@ -251,6 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
     typeKCachedSize = null;  // 清除 Type K 图框缓存
     typeLCachedSize = null;  // 清除 Type L 图框缓存
     typeMCachedSize = null;  // 清除 Type M 图框缓存
+    typeNCachedSize = null;  // 清除 Type N 图框缓存
     // 释放旧的 Object URL 内存
     if (userImage.src && userImage.src.startsWith('blob:')) {
       URL.revokeObjectURL(userImage.src);
@@ -294,6 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
     typeKCachedSize = null;  // 清除 Type K 图框缓存
     typeLCachedSize = null;  // 清除 Type L 图框缓存
     typeMCachedSize = null;  // 清除 Type M 图框缓存
+    typeNCachedSize = null;  // 清除 Type N 图框缓存
     let nextExif = {};
     let fallbackDateTimeValue = '';
     try {
@@ -400,7 +404,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 监听窗口大小变化，重新计算预览布局
     window.addEventListener('resize', updateBorder);
     const borderColorSection = document.querySelector('.edit-section:has(#borderColor)');
-    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f' || currentStyle === 'type-g' || currentStyle === 'type-h' || currentStyle === 'type-i' || currentStyle === 'type-j' || currentStyle === 'type-k' || currentStyle === 'type-l' || currentStyle === 'type-m') ? 'none' : 'block';
+    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f' || currentStyle === 'type-g' || currentStyle === 'type-h' || currentStyle === 'type-i' || currentStyle === 'type-j' || currentStyle === 'type-k' || currentStyle === 'type-l' || currentStyle === 'type-m' || currentStyle === 'type-n') ? 'none' : 'block';
     
     // 调用对应样式的面板配置模块
     const panelConfigurers = {
@@ -408,7 +412,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'type-h': configureTypeH, 'type-i': configureTypeI,
       'type-j': configureTypeJ, 'type-k': configureTypeK,
       'type-l': configureTypeL,
-      'type-m': configureTypeM
+      'type-m': configureTypeM,
+      'type-n': configureTypeN
     };
     panelConfigurers[currentStyle]?.();
     
@@ -794,6 +799,36 @@ document.addEventListener('DOMContentLoaded', () => {
       const mDW = Math.round(mW*mA); const mDH = Math.round(mH*mA);
       preview.updateFrameWrapper(mDW, mDH); preview.updatePreview(mDW, mDH, {naturalWidth: userImage.naturalWidth, naturalHeight: userImage.naturalHeight});
       frameWrapper.style.transform = 'none'; updateBorderContent();
+    } else if (currentStyle === 'type-n') {
+      // 使用 Type N Preview 模块（与 Type G 相同的缩放逻辑）
+      const frameWrapper = document.getElementById('frameWrapper');
+      const borderContent = document.getElementById('borderContent');
+      preview.init({
+        img: userImage,
+        frameWrapper: frameWrapper,
+        photoFooter: photoFooter,
+        borderContent: borderContent
+      });
+      if (!typeNCachedSize) {
+        typeNCachedSize = preview.calcSize({
+          naturalWidth: userImage.naturalWidth,
+          naturalHeight: userImage.naturalHeight
+        });
+      }
+      const { squareSize: nCanvasW, canvasHeight: nCanvasH } = typeNCachedSize;
+      const nPreviewArea = frameWrapper?.parentElement;
+      const nAvailW = (nPreviewArea?.clientWidth || 500) * 0.96;
+      const nAvailH = (nPreviewArea?.clientHeight || 600) * 0.96;
+      const nDisplayScale = Math.min(nAvailW / nCanvasW, nAvailH / nCanvasH, 1);
+      const nDisplayW = Math.round(nCanvasW * nDisplayScale);
+      const nDisplayH = Math.round(nCanvasH * nDisplayScale);
+      preview.updateFrameWrapper(nDisplayW, nDisplayH);
+      preview.updatePreview(nDisplayW, nDisplayH, {
+        naturalWidth: userImage.naturalWidth,
+        naturalHeight: userImage.naturalHeight
+      });
+      frameWrapper.style.transform = 'none';
+      updateBorderContent();
     } else {
       // 使用对应样式 Preview 模块
       const frameWrapper = document.getElementById('frameWrapper');

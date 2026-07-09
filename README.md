@@ -4,7 +4,7 @@
 
 本项目是 [OneFrame](https://github.com/IceyVanci/OneFrame) 的 NAS/Docker 移植版本，从 Electron 桌面应用迁移为纯前端 Web 应用，通过 Docker 容器化部署在 NAS 上，局域网内设备可通过浏览器访问。
 
-![Version](https://img.shields.io/badge/version-1.11--nas-blue.svg)
+![Version](https://img.shields.io/badge/version-1.15--nas-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Docker](https://img.shields.io/badge/Docker-nginx:alpine-2496ED.svg)
 
@@ -18,7 +18,7 @@
 - 自动读取拍摄时间和设备型号
 
 ### 🎨 边框样式
-支持 12 种边框样式：
+支持 14 种边框样式：
 - **Type A**：白色下边框 - 可调节边框高度（5%-30%），完整编辑面板
 - **Type B**：黑色下边框 - 正方形画布，图片居左，右侧显示参数和 Logo
 - **Type C**：横向布局 - Logo 在左侧，参数在右侧，纵向图片自动缩放字体
@@ -32,6 +32,7 @@
 - **Type K**：左下角 Logo + 双行文字 - Logo 底部左下角，右侧署名+日期 / 机型+参数，字重区分
 - **Type L**：高斯模糊背景 - 照片高斯模糊外框 + 清晰照片居中 + 白色文字
 - **Type M**：模糊边框+顶部Logo - 四边模糊背景各5%，清晰照片居中90%，底部署名+参数行
+- **Type N**：上下对称边框 - 顶部Logo居中+中部照片+底部参数+署名，混合字重（标签Medium/数值Normal）
 
 ### 📝 边框信息编辑
 - Logo 显示开关
@@ -155,7 +156,7 @@ docker compose up --build -d
 
 ### 1. 选择边框样式
 打开浏览器访问应用后，点击首页的样式卡片。
-所有 13 种样式（Type A-M）同时显示在首页图片墙中
+所有 14 种样式（Type A-N）同时显示在首页图片墙中
 
 ### 2. 选择图片
 选择样式后，系统会弹出文件选择器，选择要处理的图片。
@@ -245,6 +246,10 @@ docker compose up --build
 - [docs/AI_PROJECT_GUIDE.md](./docs/AI_PROJECT_GUIDE.md) - AI 项目认知指南
 - [docs/function_analysis.md](./docs/function_analysis.md) - 函数分析文档
 - [docs/migration-guide.md](./docs/migration-guide.md) - Electron → Docker 移植指南
+- [docs/V1.15-NAS_CHANGES.md](./docs/V1.15-NAS_CHANGES.md) - v1.15 同步变更（Type N 上下对称边框）
+- [docs/release-v1.15-nas.md](./docs/release-v1.15-nas.md) - v1.15 Release 说明
+- [docs/V1.14-NAS_CHANGES.md](./docs/V1.14-NAS_CHANGES.md) - v1.14 同步变更（样本压缩+导出命名+Manifest自动化）
+- [docs/release-v1.14-nas.md](./docs/release-v1.14-nas.md) - v1.14 Release 说明
 - [docs/V1.13-NAS_CHANGES.md](./docs/V1.13-NAS_CHANGES.md) - v1.13 同步变更（缩略图随机选取 + 焦距单位修复）
 - [docs/V1.12-NAS_CHANGES.md](./docs/V1.12-NAS_CHANGES.md) - v1.12 同步变更（Type E 拖动/导出/EXIF 修复）
 - [docs/V1.11-NAS_CHANGES.md](./docs/V1.11-NAS_CHANGES.md) - v1.11 同步变更（Type M + 圆角 + 模糊修复）
