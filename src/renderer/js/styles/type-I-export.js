@@ -4,32 +4,7 @@
  * 基于 Type H 调整：Logo 移至顶部，移除参数、机型和时间
  */
 
-const opentype = window.opentype;
-
-let fontSemibold = null;
-let fontMedium = null;
-let fontNormal = null;
-
-async function loadFonts() {
-  try {
-    if (!fontSemibold) {
-      const semiboldUrl = new URL('../../fonts/MiSans-Semibold.ttf', import.meta.url).href;
-      fontSemibold = await opentype.load(semiboldUrl);
-    }
-    if (!fontMedium) {
-      const mediumUrl = new URL('../../fonts/MiSans-Medium.ttf', import.meta.url).href;
-      fontMedium = await opentype.load(mediumUrl);
-    }
-    if (!fontNormal) {
-      const normalUrl = new URL('../../fonts/MiSans-Normal.ttf', import.meta.url).href;
-      fontNormal = await opentype.load(normalUrl);
-    }
-    return { fontSemibold, fontMedium, fontNormal };
-  } catch (error) {
-    console.error('Font loading failed:', error);
-    throw error;
-  }
-}
+import { ensureCssFontsReady } from './font-loader.js';
 
 /**
  * 使用 ctx.fillText 绘制文字
@@ -113,7 +88,7 @@ function drawLogoI(ctx, logoName, centerX, centerY, maxHeight) {
 export async function renderImage(img, options) {
   const { quality = 1.0, settings = {} } = options;
   
-  const fonts = await loadFonts();
+  const fonts = await ensureCssFontsReady();
   
   if (!img.complete || img.naturalWidth === 0) {
     throw new Error('图片尚未加载完成');

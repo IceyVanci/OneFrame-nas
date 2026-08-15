@@ -25,13 +25,13 @@ let originalImageDimensions = { naturalWidth: 0, naturalHeight: 0 };
 let yearText = '';
 
 // Logo 加载完成后检测形状并应用对应样式
-window.handleLogoLoad = function(img) {
+function onLogoLoad(img) {
   const ratio = img.naturalWidth / img.naturalHeight;
   console.log('[TypeE] Logo loaded, ratio:', ratio, 'naturalSize:', img.naturalWidth, 'x', img.naturalHeight);
   
   // 从 borderContent 读取动态基准字号（替代硬编码 24）
   const baseFontSize = state.borderContent
-    ? parseFloat(getComputedStyle(state.borderContent).fontSize)
+    ? (parseFloat(getComputedStyle(state.borderContent).fontSize) || 14)
     : 24;
   const yearFontSize = baseFontSize;
   const yearFont = `${yearFontSize}px MiSans Medium, sans-serif`;
@@ -58,7 +58,7 @@ window.handleLogoLoad = function(img) {
     img.style.height = ''; // 清空
     console.log('[TypeE] Landscape logo: width =', logoWidth);
   }
-};
+}
 
 /**
  * 初始化 Type E 预览
@@ -76,7 +76,10 @@ export function init(elements) {
     borderContent: !!state.borderContent
   });
   
-  // 添加拖动事件监听
+  // 添加拖动事件监听（幂等：先移除再添加，避免 updateBorder 重复调用 init 时累积监听器）
+  state.img.removeEventListener('mousedown', startDrag);
+  window.removeEventListener('mousemove', onDrag);
+  window.removeEventListener('mouseup', endDrag);
   state.img.addEventListener('mousedown', startDrag);
   window.addEventListener('mousemove', onDrag);
   window.addEventListener('mouseup', endDrag);
@@ -253,33 +256,34 @@ export function updateContentPreview(elements, settings) {
 
   // 清空并重建 borderContent
   if (state.borderContent) {
+    // 无日期时清空年份缓存，避免旧图片年份残留影响 Logo 尺寸
+    if (!(dateTime && showTime)) yearText = '';
+
     state.borderContent.innerHTML = `
       <div class="type-e-content-wrapper">
         <div class="type-e-left">
           ${dateTime && showTime ? getDateRows(dateTime) : ''}
-          ${selectedLogo && showLogo ? `<div class="type-e-logo"><img src="logos/${selectedLogo}.svg" alt="" onload="handleLogoLoad(this)"></div>` : ''}
+          ${selectedLogo && showLogo ? `<div class="type-e-logo"><img src="logos/${selectedLogo}.svg" alt="" class="type-e-logo-img"></div>` : ''}
         </div>
         <div class="type-e-right" id="typeEParams">
           ${getRightParams(fNumber, focalLength, exposureTime, iso, customModel, showModel, signatureText)}
         </div>
       </div>
     `;
+
+    // Logo 加载完成后调整形状（addEventListener 替代内联 onload，避免全局函数泄漏）
+    const logoImg = state.borderContent.querySelector('.type-e-logo img');
+    if (logoImg) {
+      logoImg.addEventListener('load', () => onLogoLoad(logoImg), { once: true });
+    }
     
-    // 计算年份顶部位置，让右侧参数与年份顶部对齐
-    // 使用 document.fonts.ready + requestAnimationFrame 确保字体加载且浏览器完成布局后再测量
-    document.fonts.ready.then(() => {
-      requestAnimationFrame(() => {
-        const yearEl = state.borderContent.querySelector('.type-e-year');
-        const paramsEl = state.borderContent.querySelector('#typeEParams');
-        if (yearEl && paramsEl) {
-          const yearRect = yearEl.getBoundingClientRect();
-          const paramsRect = paramsEl.getBoundingClientRect();
-          // 计算年份与参数的相对位置差，而非年份的绝对位置
-          paramsEl.style.marginTop = `${yearRect.top - paramsRect.top}px`;
-          console.log('[TypeE] Params aligned to year top, offset:', yearRect.top - paramsRect.top);
-        }
-      });
-    });
+    // 确定性对齐：右侧参数块顶部与年份文字顶部对齐（与导出端 yearY = paddingTop + monthFontSize + 8*scale 一致）
+    // 不再依赖 document.fonts.ready + getBoundingClientRect 一次性测量，避免字体/布局时序导致的漂移
+    const paramsEl = state.borderContent.querySelector('#typeEParams');
+    if (paramsEl) {
+      const baseFontSize = parseFloat(getComputedStyle(state.borderContent).fontSize) || 14;
+      paramsEl.style.marginTop = (dateTime && showTime) ? `${Math.round(2.333 * baseFontSize)}px` : '';
+    }
 
     console.log('[TypeE] borderContent updated');
   } else {
@@ -292,6 +296,7 @@ export function updateContentPreview(elements, settings) {
  */
 function getDateRows(dateTimeStr) {
   const dt = new Date(dateTimeStr);
+  if (Number.isNaN(dt.getTime())) return '';
   const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
                       'July', 'August', 'September', 'October', 'November', 'December'];
   const month = monthNames[dt.getMonth()];

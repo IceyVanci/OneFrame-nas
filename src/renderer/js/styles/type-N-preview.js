@@ -110,7 +110,13 @@ export function updatePreview(squareSize, canvasHeight, imgDimensions = {}) {
   }
   
   // 同步设置顶部 Logo 区域高度（纵向 3.75%，横向由 CSS 默认 7.5%）
-  const topArea = state.frameWrapper?.querySelector('.type-n-top');
+  // 确保元素已创建（首次渲染时 updateContentPreview 尚未执行，避免首帧顺序耦合）
+  let topArea = state.frameWrapper?.querySelector('.type-n-top');
+  if (!topArea && state.frameWrapper && state.img) {
+    topArea = document.createElement('div');
+    topArea.className = 'type-n-top';
+    state.frameWrapper.insertBefore(topArea, state.img);
+  }
   if (topArea) {
     topArea.style.height = isPortrait ? '3.75%' : '';
   }

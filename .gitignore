@@ -28,3 +28,15 @@ npm-debug.log*
 # Temporary files
 *.tmp
 *.bak
+
+# Test copy workspace
+v4ftest/
+
+# Root plan documents (not part of release)
+implementation_plan.md
+CODE_REVIEW_FIX_PLAN.md
+MOBILE_SCALING_FIX_PLAN.md
+V1.16-NAS_IMPLEMENTATION_PLAN.md
+
+# Packaged Docker images
+*.tar

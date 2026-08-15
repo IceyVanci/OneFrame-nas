@@ -6,32 +6,8 @@
  * - Bottom 15% text area (white text)
  */
 
-const opentype = window.opentype;
-
-let fontSemibold = null;
-let fontMedium = null;
-let fontNormal = null;
-
-async function loadFonts() {
-  try {
-    if (!fontSemibold) {
-      const semiboldUrl = new URL('../../fonts/MiSans-Semibold.ttf', import.meta.url).href;
-      fontSemibold = await opentype.load(semiboldUrl);
-    }
-    if (!fontMedium) {
-      const mediumUrl = new URL('../../fonts/MiSans-Medium.ttf', import.meta.url).href;
-      fontMedium = await opentype.load(mediumUrl);
-    }
-    if (!fontNormal) {
-      const normalUrl = new URL('../../fonts/MiSans-Normal.ttf', import.meta.url).href;
-      fontNormal = await opentype.load(normalUrl);
-    }
-    return { fontSemibold, fontMedium, fontNormal };
-  } catch (error) {
-    console.error('Font loading failed:', error);
-    throw error;
-  }
-}
+import { ensureCssFontsReady } from './font-loader.js';
+import { roundedRectPath } from './canvas-utils.js';
 
 function drawText(ctx, text, x, y, fontSize, options = {}) {
   const color = options.color || '#ffffff';
@@ -120,7 +96,7 @@ async function drawBorderContent(ctx, canvasWidth, canvasHeight, settings, fonts
   if (settings.showModel && settings.customModel) line2Parts.push(settings.customModel);
   const line2Text = line2Parts.join(' | ');
   const signatureText = settings.signatureText || '';
-  const line3Text = signatureText ? `© ${signatureText}` : '';
+  const line3Text = (signatureText && settings.showSignature !== false) ? `© ${signatureText}` : '';
   const groupHeight = (hasLogo ? lineHeight1 : 0) + lineGap + (line2Text ? lineHeight2 : 0);
   const line1Y = textCenterY - groupHeight / 2 + (hasLogo ? lineHeight1 / 2 : 0);
   const line2Y = line1Y + lineHeight1 / 2 + lineGap + lineHeight2 / 2;
@@ -144,7 +120,7 @@ async function drawBorderContent(ctx, canvasWidth, canvasHeight, settings, fonts
 
 export async function renderImage(img, options) {
   const { quality = 1.0, settings = {} } = options;
-  const fonts = await loadFonts();
+  const fonts = await ensureCssFontsReady();
   if (!img.complete || img.naturalWidth === 0) {
     throw new Error('Image not loaded');
   }
@@ -176,7 +152,7 @@ export async function renderImage(img, options) {
   const cornerRadiusL = Math.round(12 * baseScaleL);
   ctx.save();
   ctx.beginPath();
-  ctx.roundRect(photoX, photoY, photoWidth, photoHeight, cornerRadiusL);
+  roundedRectPath(ctx, photoX, photoY, photoWidth, photoHeight, cornerRadiusL);
   ctx.clip();
   ctx.drawImage(img, srcX, srcY, srcW, srcH, photoX, photoY, photoWidth, photoHeight);
   ctx.restore();

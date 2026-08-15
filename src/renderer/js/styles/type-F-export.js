@@ -4,32 +4,8 @@
  * 文字：第一行 "Shot on" 灰色 + 品牌黑色 + 机型黑色，第二行参数灰色
  */
 
-const opentype = window.opentype;
-
-let fontSemibold = null;
-let fontMedium = null;
-let fontNormal = null;
-
-async function loadFonts() {
-  try {
-    if (!fontSemibold) {
-      const semiboldUrl = new URL('../../fonts/MiSans-Semibold.ttf', import.meta.url).href;
-      fontSemibold = await opentype.load(semiboldUrl);
-    }
-    if (!fontMedium) {
-      const mediumUrl = new URL('../../fonts/MiSans-Medium.ttf', import.meta.url).href;
-      fontMedium = await opentype.load(mediumUrl);
-    }
-    if (!fontNormal) {
-      const normalUrl = new URL('../../fonts/MiSans-Normal.ttf', import.meta.url).href;
-      fontNormal = await opentype.load(normalUrl);
-    }
-    return { fontSemibold, fontMedium, fontNormal };
-  } catch (error) {
-    console.error('Font loading failed:', error);
-    throw error;
-  }
-}
+import { ensureCssFontsReady } from './font-loader.js';
+import { roundedRectPath } from './canvas-utils.js';
 
 /**
  * 使用 ctx.fillText 绘制文字
@@ -150,7 +126,7 @@ async function drawBorderContent(ctx, canvasWidth, canvasHeight, settings, fonts
   
   // 构建第三行文字
   const signatureText = settings.signatureText || '';
-  const line3Text = signatureText ? `© ${signatureText}` : '';
+  const line3Text = (signatureText && settings.showSignature !== false) ? `© ${signatureText}` : '';
   
   // 计算前两行的总高度（lines-group）
   const groupHeight = (line1Text ? lineHeight1 : 0) + lineGap + (line2Text ? lineHeight2 : 0);
@@ -204,7 +180,7 @@ async function drawBorderContent(ctx, canvasWidth, canvasHeight, settings, fonts
 export async function renderImage(img, options) {
   const { quality = 1.0, settings = {} } = options;
   
-  const fonts = await loadFonts();
+  const fonts = await ensureCssFontsReady();
   
   if (!img.complete || img.naturalWidth === 0) {
     throw new Error('图片尚未加载完成');
@@ -252,7 +228,7 @@ export async function renderImage(img, options) {
   const cornerRadiusF = Math.round(12 * baseScaleF);
   ctx.save();
   ctx.beginPath();
-  ctx.roundRect(photoX, photoY, photoWidth, photoHeight, cornerRadiusF);
+  roundedRectPath(ctx, photoX, photoY, photoWidth, photoHeight, cornerRadiusF);
   ctx.clip();
   ctx.drawImage(img, srcX, srcY, srcW, srcH, photoX, photoY, photoWidth, photoHeight);
   ctx.restore();

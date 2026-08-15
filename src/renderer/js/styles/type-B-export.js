@@ -4,34 +4,8 @@
  * 当前与 Type A 相同，稍后可自定义
  */
 
-// 使用全局 opentype 变量（从 CDN 加载）
-const opentype = window.opentype;
-
-// 预加载字体
-let fontSemibold = null;
-let fontMedium = null;
-let fontNormal = null;
-
-async function loadFonts() {
-  try {
-    if (!fontSemibold) {
-      const semiboldUrl = new URL('../../fonts/MiSans-Semibold.ttf', import.meta.url).href;
-      fontSemibold = await opentype.load(semiboldUrl);
-    }
-    if (!fontMedium) {
-      const mediumUrl = new URL('../../fonts/MiSans-Medium.ttf', import.meta.url).href;
-      fontMedium = await opentype.load(mediumUrl);
-    }
-    if (!fontNormal) {
-      const normalUrl = new URL('../../fonts/MiSans-Normal.ttf', import.meta.url).href;
-      fontNormal = await opentype.load(normalUrl);
-    }
-    return { fontSemibold, fontMedium, fontNormal };
-  } catch (error) {
-    console.error('Font loading failed:', error);
-    throw error;
-  }
-}
+import { loadMiSansFonts } from './font-loader.js';
+import { roundedRectPath } from './canvas-utils.js';
 
 /**
  * 使用 ctx.fillText 绘制文字（与 CSS 样式一致）
@@ -295,7 +269,7 @@ export async function renderImage(img, options) {
     settings = {}
   } = options;
 
-  const fonts = await loadFonts();
+  const fonts = await loadMiSansFonts();
 
   if (!img.complete || img.naturalWidth === 0) {
     throw new Error('图片尚未加载完成');
@@ -315,8 +289,10 @@ export async function renderImage(img, options) {
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, squareSize, squareSize);
   
-  // 图片居左显示，上下左三边距为 2.5%
-  const imgAvailableWidth = squareSize - margin * 2;
+  // 图片居左显示，左侧 85% 区域（与预览一致），上下左三边距为 2.5%
+  const rightAreaPercent = 0.15;
+  const leftAreaWidth = squareSize * (1 - rightAreaPercent);
+  const imgAvailableWidth = leftAreaWidth - margin * 2;
   const imgAvailableHeight = squareSize - margin * 2;
   
   // 根据图片原始比例计算正确的显示尺寸
@@ -342,15 +318,13 @@ export async function renderImage(img, options) {
   const cornerRadiusB = Math.round(12 * baseScaleB);
   ctx.save();
   ctx.beginPath();
-  ctx.roundRect(drawX, drawY, drawWidth, drawHeight, cornerRadiusB);
+  roundedRectPath(ctx, drawX, drawY, drawWidth, drawHeight, cornerRadiusB);
   ctx.clip();
   ctx.drawImage(img, drawX, drawY, drawWidth, drawHeight);
   ctx.restore();
   
   // Type B 的边框内容位置调整（右侧白色区域）
   // 右侧预留约 15% 宽度
-  const rightAreaPercent = 0.15;
-  const leftAreaWidth = squareSize * (1 - rightAreaPercent);
   const contentLeft = leftAreaWidth;
   const contentWidth = squareSize - leftAreaWidth;
   
@@ -421,10 +395,7 @@ async function drawBorderContentTypeB(ctx, canvasWidth, canvasHeight, settings, 
   // 垂直方向：靠下，从底部 5% 开始
   const bottomMarginPx = canvasHeight * 0.05;
   let y = canvasHeight - bottomMarginPx;
-  
-  // Logo - 在最下方，距离底部 5%
-  let logoY = y;
-  
+
   // 先计算需要多少行来确定起始位置（从下往上排）
   const rows = [];
   

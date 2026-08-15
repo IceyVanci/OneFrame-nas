@@ -15,31 +15,7 @@ const TYPE_E_STYLES = {
   signature: { fontSize: 18, color: '#888888' },  // .type-e-signature: color #888888
 };
 
-const opentype = window.opentype;
-let fontSemibold = null;
-let fontMedium = null;
-let fontNormal = null;
-
-async function loadFonts() {
-  try {
-    if (!fontSemibold) {
-      const semiboldUrl = new URL('../../fonts/MiSans-Semibold.ttf', import.meta.url).href;
-      fontSemibold = await opentype.load(semiboldUrl);
-    }
-    if (!fontMedium) {
-      const mediumUrl = new URL('../../fonts/MiSans-Medium.ttf', import.meta.url).href;
-      fontMedium = await opentype.load(mediumUrl);
-    }
-    if (!fontNormal) {
-      const normalUrl = new URL('../../fonts/MiSans-Normal.ttf', import.meta.url).href;
-      fontNormal = await opentype.load(normalUrl);
-    }
-    return { fontSemibold, fontMedium, fontNormal };
-  } catch (error) {
-    console.error('Font loading failed:', error);
-    throw error;
-  }
-}
+import { loadMiSansFonts } from './font-loader.js';
 
 function borderColorIsLight(color) {
   if (!color) return true;
@@ -268,7 +244,7 @@ async function drawLogoTypeEFixed(ctx, logoName, x, bottomY, scale, yearFontSize
 
 export async function renderImage(img, options) {
   const { quality = 1.0, settings = {}, imageOffset = { x: 0, y: 0 }, previewSquareSize = 0 } = options;
-  const fonts = await loadFonts();
+  const fonts = await loadMiSansFonts();
   if (!img.complete || img.naturalWidth === 0) throw new Error('图片尚未加载完成');
   
   const imgShortEdge = Math.min(img.naturalWidth, img.naturalHeight);

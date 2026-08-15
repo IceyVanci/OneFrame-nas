@@ -4,7 +4,7 @@
 
 本项目是 [OneFrame](https://github.com/IceyVanci/OneFrame) 的 NAS/Docker 移植版本，从 Electron 桌面应用迁移为纯前端 Web 应用，通过 Docker 容器化部署在 NAS 上，局域网内设备可通过浏览器访问。
 
-![Version](https://img.shields.io/badge/version-1.15--nas-blue.svg)
+![Version](https://img.shields.io/badge/version-1.16--nas-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Docker](https://img.shields.io/badge/Docker-nginx:alpine-2496ED.svg)
 
@@ -115,16 +115,6 @@ docker run -d -p 8888:80 --name oneframe-web --restart unless-stopped oneframe-n
    - **Build output directory**：`src/renderer`
 4. 点击 **Save and Deploy**
 5. 部署完成后会分配 `*.pages.dev` 域名，可在 **Custom domains** 中修改子域名或绑定自定义域名
-
-### 方式四：Netlify（免费静态托管）
-
-1. Fork 本仓库到你的 GitHub 账号
-2. 登录 [app.netlify.com](https://app.netlify.com) → **Add new site** → **Import an existing project**
-3. 选择 Fork 的仓库，配置构建设置：
-   - **Build command**：留空
-   - **Publish directory**：`src/renderer`
-4. 点击 **Deploy site**
-5. 部署完成后可在 **Site settings** → **Change site name** 修改域名
 
 ### 访问（Docker）
 
@@ -248,6 +238,8 @@ docker compose up --build
 - [docs/migration-guide.md](./docs/migration-guide.md) - Electron → Docker 移植指南
 - [docs/V1.15-NAS_CHANGES.md](./docs/V1.15-NAS_CHANGES.md) - v1.15 同步变更（Type N 上下对称边框）
 - [docs/release-v1.15-nas.md](./docs/release-v1.15-nas.md) - v1.15 Release 说明
+- [docs/V1.16-NAS_CHANGES.md](./docs/V1.16-NAS_CHANGES.md) - v1.16 修复变更（导出开关/Type E/B 一致性/字体重构/TypeN 清单）
+- [docs/release-v1.16-nas.md](./docs/release-v1.16-nas.md) - v1.16 Release 说明
 - [docs/V1.14-NAS_CHANGES.md](./docs/V1.14-NAS_CHANGES.md) - v1.14 同步变更（样本压缩+导出命名+Manifest自动化）
 - [docs/release-v1.14-nas.md](./docs/release-v1.14-nas.md) - v1.14 Release 说明
 - [docs/V1.13-NAS_CHANGES.md](./docs/V1.13-NAS_CHANGES.md) - v1.13 同步变更（缩略图随机选取 + 焦距单位修复）

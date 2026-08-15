@@ -73,7 +73,7 @@
   font-weight: 500;
   color: #000000;
   line-height: 1;
-  margin-bottom: 0.333em; /* 8/24≈0.333，相对于基准字号 */
+  margin-bottom: 0.1665em; /* em 相对月份自身字号(2em)：0.1665×2=0.333×基准，匹配导出端 8px 间距 */
 }
 
 /* 年份 */
@@ -124,7 +124,8 @@
   font-size: 0.75em;  /* 18/24=0.75，相对于基准字号 24px */
   font-weight: 500;
   color: #000000;
-  line-height: 1.5;
+  line-height: 1;     /* 与年份文字顶对齐（导出端 textBaseline: top） */
+  margin-bottom: 0.5em; /* 18×0.5=9px 行距，匹配导出端 fontSize+lineGap */
   white-space: nowrap;
 }
 

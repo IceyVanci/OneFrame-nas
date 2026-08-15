@@ -176,11 +176,24 @@ src/renderer/
 
 | 函数名 | 状态 | 说明 |
 |--------|------|------|
-| `loadFonts()` | ✅ | 预加载 MiSans 字体 |
+| `loadMiSansFonts()`（font-loader.js） | ✅ | 共享 opentype 加载 MiSans 字体（woff2，Type E 测宽用） |
 | `drawBorderContentTypeE(ctx, canvasWidth, canvasHeight, settings, fonts)` | ✅ | 绘制 Type E 底部参数 |
 | `drawLogoTypeEFixed(ctx, logoName, x, bottomY, scale, yearFontSize)` | ✅ | 绘制 Logo（固定在底部） |
 | `drawLogoTypeE(ctx, logoName, x, y, scale, yearFontSize)` | ⚠️ | 已废弃，改用 drawLogoTypeEFixed |
 | `renderImage(img, options)` | ✅ | Type E Canvas 导出（3:2 纵向） |
+
+### styles/font-loader.js（公共字体加载，v1.16 新增）
+
+| 函数名 | 状态 | 说明 |
+|--------|------|------|
+| `loadMiSansFonts()` | ✅ | opentype 加载 MiSans woff2（Semibold/Medium/Normal），模块级缓存 + Promise 去重，失败返回 null 不抛出（Type B/E 专用） |
+| `ensureCssFontsReady()` | ✅ | 等待 CSS @font-face 字体就绪，返回 null 字体对象（fillText 渲染模块用） |
+
+### styles/canvas-utils.js（Canvas 工具，v1.16 新增）
+
+| 函数名 | 状态 | 说明 |
+|--------|------|------|
+| `roundedRectPath(ctx, x, y, w, h, r)` | ✅ | 圆角矩形路径，兼容不支持 `ctx.roundRect` 的老浏览器（arcTo 降级） |
 
 ### styles/type-f-preview.js（画中画风格，动态字号缩放）
 
@@ -197,7 +210,7 @@ src/renderer/
 
 | 函数名 | 状态 | 说明 |
 |--------|------|------|
-| `loadFonts()` | ✅ | 预加载 MiSans 字体（Normal + Medium） |
+| `ensureCssFontsReady()`（font-loader.js） | ✅ | 等待 CSS @font-face 字体就绪（fillText 渲染） |
 | `borderColorIsLight(color)` | ✅ | 检测边框颜色亮度 |
 | `drawText(ctx, text, x, y, fontSize, options)` | ✅ | 绘制单行文字（opentype.js 路径渲染） |
 | `drawBorderContent(ctx, canvasWidth, canvasHeight, settings, fonts)` | ✅ | 绘制 Type F 底部文字区（Shot on + 参数 + 署名） |
@@ -218,7 +231,7 @@ src/renderer/
 
 | 函数名 | 状态 | 说明 |
 |--------|------|------|
-| `loadFonts()` | ✅ | 预加载 MiSans 字体（Semibold/Medium/Normal） |
+| `ensureCssFontsReady()`（font-loader.js） | ✅ | 等待 CSS @font-face 字体就绪（fillText 渲染） |
 | `drawText(ctx, text, x, y, fontSize, options)` | ✅ | 使用 ctx.fillText 绘制文字 |
 | `detectLogoBrightness(logoPath)` | ✅ | 检测 logo 图片的平均亮度 |
 | `borderColorIsLight(color)` | ✅ | 判断颜色是否为浅色 |

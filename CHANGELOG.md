@@ -1,5 +1,51 @@
 # OneFrame NAS Edition 更新日志
 
+## v1.16 (2026-08-15)
+
+### 🔧 Bug 修复
+
+#### 导出"显示开关"失效
+- 修复关闭开关后导出仍输出对应内容：署名开关（A/C/D、F/G/H/L）、时间开关（J/K/M）、Logo 开关（M）
+
+#### Type B 导出与预览布局不一致
+- 导出图片绘制对齐预览左侧 85% 区域，修复右侧文字区坍缩/溢出
+
+#### Type E 预览与交互修复
+- 拖动事件监听器重复注册（幂等化）、移除 `window.handleLogoLoad` 全局泄漏
+- 非法日期不再抛 TypeError
+- 参数/署名位置确定性对齐，修复依赖字体时序导致的位置漂移
+
+#### Type N 顶部 Logo 区首帧顺序修复
+
+### ⚡ 性能与健壮性
+
+- **字体加载重构**：新增 `js/styles/font-loader.js`，woff2 + 共享缓存 + Promise 去重；12 个导出模块移除无用 opentype 加载（每次导出省 24MB 字体下载/解析）
+- **`ctx.roundRect` 兼容**：新增 `js/styles/canvas-utils.js`，老浏览器降级手绘圆角
+- **manifest 扫描式生成**：`generate-manifest.sh` 改为从 Sample 目录扫描，修复 Docker 构建遗漏 TypeN
+
+### 📁 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `src/renderer/js/styles/font-loader.js` | 公共字体加载模块 |
+| `src/renderer/js/styles/canvas-utils.js` | 圆角路径兼容工具 |
+| `docs/V1.16-NAS_CHANGES.md` | v1.16 变更说明 |
+
+### 🔧 修改文件
+
+- `scripts/generate-manifest.sh` — 扫描式生成（补 TypeN）
+- `src/renderer/css/type-E.css` — 月份间距/参数行高对齐导出
+- `src/renderer/js/styles/type-{A,C,D,F,G,H,I,J,K,L,M,N}-export.js` — 开关修复 + 字体策略
+- `src/renderer/js/styles/type-{B,E}-export.js` — 共享 opentype 加载（B 布局一致）
+- `src/renderer/js/styles/type-E-preview.js` — 监听幂等/日期守卫/确定性对齐
+- `src/renderer/js/styles/type-N-preview.js` — 首帧顺序
+- `README.md` — 版本号、删除 Netlify、文档链接
+- `src/renderer/index.html` — 版本号 v1.16
+- `docs/AI_PROJECT_GUIDE.md` — 完整重构
+- `docs/function_analysis.md` — 字体模块条目更新
+
+---
+
 ## v1.15 (2026-07-09)
 
 ### ✨ 新功能
