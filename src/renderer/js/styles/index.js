@@ -38,6 +38,8 @@ import { typeMPreview } from './type-M-preview.js';
 import { typeMExport } from './type-M-export.js';
 import { typeNPreview } from './type-N-preview.js';
 import { typeNExport } from './type-N-export.js';
+import { typeOPreview } from './type-O-preview.js';
+import { typeOExport } from './type-O-export.js';
 
 /**
  * @typedef {Object} StyleModule
@@ -102,6 +104,10 @@ export const styles = {
   'type-n': {
     preview: typeNPreview,
     export: typeNExport
+  },
+  'type-o': {
+    preview: typeOPreview,
+    export: typeOExport
   }
 };
 /**
@@ -175,3 +181,5 @@ export { typeLPreview } from './type-L-preview.js';
 export { typeMPreview } from './type-M-preview.js';
 
 export { typeNPreview } from './type-N-preview.js';
+
+export { typeOPreview } from './type-O-preview.js';

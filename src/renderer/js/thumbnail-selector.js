@@ -36,6 +36,8 @@ function shuffle(array) {
 function buildStyleThumbnailMeta(card) {
   const styleId = card.dataset.style;
   if (!styleId) return null;
+  // Type O 不参与随机缩略图（无 TypeO 样本，先以其他样式缩略图占位）
+  if (styleId === 'type-o') return null;
 
   const img = card.querySelector('.preview-image');
   let basePath = '';
@@ -171,16 +173,17 @@ export async function initHomepageThumbnails(styleCards, options = {}) {
   for (const card of styleCards) {
     const styleId = card.dataset.style;
     if (!styleId) continue;
-    const path = assignments.get(styleId);
-    if (!path) continue;
     const img = card.querySelector('.preview-image');
-    if (img) {
-      img.classList.add('loading');
-      const cleanup = () => img.classList.remove('loading');
-      img.addEventListener('load', cleanup, { once: true });
-      img.addEventListener('error', cleanup, { once: true });
-      img.src = path;
-    }
+    if (!img) continue;
+    let path = assignments.get(styleId);
+    // 未参与随机缩略图的样式（如 Type O）：使用自身 data-fallback-src 静态显示
+    if (!path) path = img.getAttribute('data-fallback-src');
+    if (!path) continue;
+    img.classList.add('loading');
+    const cleanup = () => img.classList.remove('loading');
+    img.addEventListener('load', cleanup, { once: true });
+    img.addEventListener('error', cleanup, { once: true });
+    img.src = path;
   }
 
   return assignments;

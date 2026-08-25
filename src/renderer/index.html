@@ -17,6 +17,7 @@
 <link rel="stylesheet" href="css/type-L.css">
 <link rel="stylesheet" href="css/type-M.css">
   <link rel="stylesheet" href="css/type-N.css">
+  <link rel="stylesheet" href="css/type-O.css">
   <link rel="stylesheet" href="assets/font-awesome/css/all.min.css">
   <script src="assets/exifreader.js"></script>
   <script src="assets/piexif.js"></script>
@@ -156,6 +157,15 @@
           <div class="style-preview">
             <div class="frame-container">
               <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-fallback-src="Sample/001-TypeN-sample_compressed.jpeg" alt="示例图片" class="preview-image loading">
+            </div>
+          </div>
+        </div>
+
+        <!-- 样式卡片 15: Type O 胶片参数+机身大字+底部水印（不参与随机缩略图，固定显示自身样本） -->
+        <div class="style-card" data-style="type-o">
+          <div class="style-preview">
+            <div class="frame-container">
+              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-fallback-src="Sample/001-TypeO-sample_compressed.jpeg" alt="示例图片" class="preview-image loading">
             </div>
           </div>
         </div>
@@ -340,6 +350,33 @@
         </div>
       </div>
 
+      <!-- 厂商设置（Type O 专用） -->
+      <div class="edit-section" id="manufacturerSection" style="display:none">
+        <div class="section-title"><i class="fas fa-camera-retro"></i> 厂商</div>
+        <div class="control-group">
+          <label>厂商名称</label>
+          <select id="manufacturerSelect">
+            <option value="">-- 请选择厂商 --</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 胶片设置（Type O 专用，品牌下拉 + 型号可输入也可下拉选择） -->
+      <div class="edit-section" id="filmSection" style="display:none">
+        <div class="section-title"><i class="fas fa-film"></i> 胶片</div>
+        <div class="control-group">
+          <label>胶片品牌</label>
+          <select id="filmBrand">
+            <option value="">-- 选择品牌 --</option>
+          </select>
+        </div>
+        <div class="control-group">
+          <label>胶片型号</label>
+          <input type="text" id="filmStyle" list="filmPresets" placeholder="选择或输入胶片">
+          <datalist id="filmPresets"></datalist>
+        </div>
+      </div>
+
       <!-- 署名设置 -->
       <div class="edit-section">
         <div class="section-title"><i class="fas fa-pen"></i> 署名</div>
@@ -368,7 +405,7 @@
         <button class="modal-close" id="modalClose">&times;</button>
       </div>
       <div class="modal-body">
-<p><strong>OneFrame</strong> v1.16</p>
+<p><strong>OneFrame</strong> v1.17</p>
         <p>一款简洁优雅的图片边框添加工具，为您的照片自动添加精美的底部边框，并智能显示相机 EXIF 信息。</p>
         <hr>
 <p><strong>GitHub：</strong><a href="https://github.com/IceyVanci/OneFrame-nas" target="_blank">OneFrame NAS</a> · <a href="https://github.com/IceyVanci/OneFrame" target="_blank">原始项目</a></p>

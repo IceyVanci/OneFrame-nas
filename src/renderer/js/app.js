@@ -11,6 +11,7 @@ import { configureEditPanel as configureTypeK } from './components/type-K-editor
 import { configureEditPanel as configureTypeL } from './components/type-L-editor-panel.js';
 import { configureEditPanel as configureTypeM } from './components/type-M-editor-panel.js';
 import { configureEditPanel as configureTypeN } from './components/type-N-editor-panel.js';
+import { configureEditPanel as configureTypeO } from './components/type-O-editor-panel.js';
 import { exportImage } from './exporter.js';
 import { initHomepageThumbnails } from './thumbnail-selector.js';
 import { EXPORT_NAMING_MODE } from './config.js';
@@ -187,6 +188,73 @@ document.addEventListener('DOMContentLoaded', () => {
   let typeLCachedSize = null;  // Type L 图框尺寸缓存
   let typeMCachedSize = null;  // Type M 图框尺寸缓存
   let typeNCachedSize = null;  // Type N 图框尺寸缓存
+  let typeOCachedSize = null;  // Type O 图框尺寸缓存
+
+  // Type O 胶片数据 { version, manufacturers, films }
+  let filmsData = { version: 3, manufacturers: [], films: {} };
+
+  /**
+   * 重建胶片型号 datalist：按所选胶片品牌从 films[品牌] 填充 #filmPresets（#filmStyle 可输入也可下拉）
+   */
+  function rebuildFilmModelOptions() {
+    const brandSelect = document.getElementById('filmBrand');
+    const datalist = document.getElementById('filmPresets');
+    if (!datalist) return;
+    const brand = brandSelect?.value || '';
+    const films = (filmsData.films && filmsData.films[brand]) || [];
+    datalist.innerHTML = '';
+    films.forEach(f => {
+      const opt = document.createElement('option');
+      opt.value = f;
+      datalist.appendChild(opt);
+    });
+  }
+
+  /**
+   * 加载 films.json（Type O 厂商/胶片数据），失败时回退空表不影响其他样式
+   */
+  async function initFilms() {
+    try {
+      const resp = await fetch('films.json');
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const data = await resp.json();
+      if (data && Array.isArray(data.manufacturers) && data.films) {
+        filmsData = data;
+        const select = document.getElementById('manufacturerSelect');
+        if (select) {
+          select.innerHTML = '';
+          const placeholder = document.createElement('option');
+          placeholder.value = '';
+          placeholder.textContent = '-- 请选择厂商 --';
+          select.appendChild(placeholder);
+          data.manufacturers.forEach(m => {
+            const opt = document.createElement('option');
+            opt.value = m;
+            opt.textContent = m;
+            select.appendChild(opt);
+          });
+        }
+        // 胶片品牌：取有胶片条目的品牌（多级下拉第 1 级）
+        const brandSelect = document.getElementById('filmBrand');
+        if (brandSelect) {
+          brandSelect.innerHTML = '';
+          const bPlaceholder = document.createElement('option');
+          bPlaceholder.value = '';
+          bPlaceholder.textContent = '-- 选择品牌 --';
+          brandSelect.appendChild(bPlaceholder);
+          Object.keys(data.films).forEach(brand => {
+            const opt = document.createElement('option');
+            opt.value = brand;
+            opt.textContent = brand;
+            brandSelect.appendChild(opt);
+          });
+        }
+        rebuildFilmModelOptions();
+      }
+    } catch (err) {
+      console.warn('films.json 加载失败，Type O 胶片下拉回退为空：', err);
+    }
+  }
 
   async function initLogoGrid() {
     let logos = getAllLogos();
@@ -254,6 +322,7 @@ document.addEventListener('DOMContentLoaded', () => {
     typeLCachedSize = null;  // 清除 Type L 图框缓存
     typeMCachedSize = null;  // 清除 Type M 图框缓存
     typeNCachedSize = null;  // 清除 Type N 图框缓存
+    typeOCachedSize = null;  // 清除 Type O 图框缓存
     // 释放旧的 Object URL 内存
     if (userImage.src && userImage.src.startsWith('blob:')) {
       URL.revokeObjectURL(userImage.src);
@@ -298,6 +367,7 @@ document.addEventListener('DOMContentLoaded', () => {
     typeLCachedSize = null;  // 清除 Type L 图框缓存
     typeMCachedSize = null;  // 清除 Type M 图框缓存
     typeNCachedSize = null;  // 清除 Type N 图框缓存
+    typeOCachedSize = null;  // 清除 Type O 图框缓存
     let nextExif = {};
     let fallbackDateTimeValue = '';
     try {
@@ -359,7 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentStyle === 'type-f' || currentStyle === 'type-j') {
         const makeName = make ? getMakeName(make) : '';
         customModel.value = makeName ? `${makeName} ${modelName}` : modelName;
-      } else {
+      } else if (currentStyle !== 'type-o') {
         customModel.value = modelName;
       }
     }
@@ -413,7 +483,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'type-j': configureTypeJ, 'type-k': configureTypeK,
       'type-l': configureTypeL,
       'type-m': configureTypeM,
-      'type-n': configureTypeN
+      'type-n': configureTypeN,
+      'type-o': configureTypeO
     };
     panelConfigurers[currentStyle]?.();
     
@@ -469,6 +540,12 @@ document.addEventListener('DOMContentLoaded', () => {
     focalLength.value = '';
     iso.value = '';
     dateTime.value = '';
+    const manufacturerSelect = document.getElementById('manufacturerSelect');
+    if (manufacturerSelect) manufacturerSelect.value = '';
+    const filmBrandSelect = document.getElementById('filmBrand');
+    if (filmBrandSelect) filmBrandSelect.value = '';
+    const filmStyleSelect = document.getElementById('filmStyle');
+    if (filmStyleSelect) filmStyleSelect.value = '';
     document.querySelectorAll('.logo-grid-item').forEach(item => item.classList.remove('selected'));
   }
 
@@ -829,6 +906,36 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       frameWrapper.style.transform = 'none';
       updateBorderContent();
+    } else if (currentStyle === 'type-o') {
+      // 使用 Type O Preview 模块（与 Type N 相同的缩放逻辑）
+      const frameWrapper = document.getElementById('frameWrapper');
+      const borderContent = document.getElementById('borderContent');
+      preview.init({
+        img: userImage,
+        frameWrapper: frameWrapper,
+        photoFooter: photoFooter,
+        borderContent: borderContent
+      });
+      if (!typeOCachedSize) {
+        typeOCachedSize = preview.calcSize({
+          naturalWidth: userImage.naturalWidth,
+          naturalHeight: userImage.naturalHeight
+        });
+      }
+      const { squareSize: oCanvasW, canvasHeight: oCanvasH } = typeOCachedSize;
+      const oPreviewArea = frameWrapper?.parentElement;
+      const oAvailW = (oPreviewArea?.clientWidth || 500) * 0.96;
+      const oAvailH = (oPreviewArea?.clientHeight || 600) * 0.96;
+      const oDisplayScale = Math.min(oAvailW / oCanvasW, oAvailH / oCanvasH, 1);
+      const oDisplayW = Math.round(oCanvasW * oDisplayScale);
+      const oDisplayH = Math.round(oCanvasH * oDisplayScale);
+      preview.updateFrameWrapper(oDisplayW, oDisplayH);
+      preview.updatePreview(oDisplayW, oDisplayH, {
+        naturalWidth: userImage.naturalWidth,
+        naturalHeight: userImage.naturalHeight
+      });
+      frameWrapper.style.transform = 'none';
+      updateBorderContent();
     } else {
       // 使用对应样式 Preview 模块
       const frameWrapper = document.getElementById('frameWrapper');
@@ -867,7 +974,9 @@ document.addEventListener('DOMContentLoaded', () => {
       showTime: document.getElementById('switchTime')?.classList.contains('active'),
       dateTime: dateTime?.value || '',
       signatureText: signatureText?.value || '',
-      textColor: document.getElementById('textColor')?.value || '#000000'
+      textColor: document.getElementById('textColor')?.value || '#000000',
+      manufacturer: document.getElementById('manufacturerSelect')?.value || '',
+      filmStyle: document.getElementById('filmStyle')?.value || ''
     };
   }
 
@@ -899,9 +1008,11 @@ document.addEventListener('DOMContentLoaded', () => {
           focalLength: focalLength?.value || '',
           showTime: document.getElementById('switchTime')?.classList.contains('active'),
           dateTime: dateTime?.value || '',
-      signatureText: signatureText?.value || '',
-      borderColor: borderColor.value,
-      textColor: document.getElementById('textColor')?.value || '#000000'
+          signatureText: signatureText?.value || '',
+          borderColor: borderColor.value,
+          textColor: document.getElementById('textColor')?.value || '#000000',
+          manufacturer: document.getElementById('manufacturerSelect')?.value || '',
+          filmStyle: document.getElementById('filmStyle')?.value || ''
         }
       );
     }
@@ -914,8 +1025,17 @@ document.addEventListener('DOMContentLoaded', () => {
     applyDynamicBackground(userImage);
   });
 
-  ['customModel', 'fNumber', 'exposureTime', 'focalLength', 'iso', 'dateTime', 'signatureText'].forEach(id => {
+  ['customModel', 'fNumber', 'exposureTime', 'focalLength', 'iso', 'dateTime', 'signatureText', 'filmStyle'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', updateBorderContent);
+  });
+  // 厂商 change：仅更新预览（第 2 行厂商+机型）
+  document.getElementById('manufacturerSelect')?.addEventListener('change', () => {
+    updateBorderContent();
+  });
+  // 胶片品牌 change：重建胶片型号 datalist + 更新预览（品牌 → 型号）
+  document.getElementById('filmBrand')?.addEventListener('change', () => {
+    rebuildFilmModelOptions();
+    updateBorderContent();
   });
   document.querySelectorAll('.switch').forEach(sw => {
     sw.addEventListener('click', () => { sw.classList.toggle('active'); updateBorderContent(); });
@@ -940,7 +1060,9 @@ document.addEventListener('DOMContentLoaded', () => {
       borderColor: borderColor?.value || '#ffffff',
       borderHeight: borderHeight?.value || 12,
       aspectRatio: document.getElementById('aspectRatio')?.value || 'default',
-      textColor: document.getElementById('textColor')?.value || '#000000'
+      textColor: document.getElementById('textColor')?.value || '#000000',
+      manufacturer: document.getElementById('manufacturerSelect')?.value || '',
+      filmStyle: document.getElementById('filmStyle')?.value || ''
     };
   }
 
@@ -1019,6 +1141,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnExport')?.addEventListener('click', exportImageHandler);
   document.getElementById('btnExportTop')?.addEventListener('click', exportImageHandler);
   initLogoGrid();
+  initFilms();
 
   // 首页缩略图随机选择（异步执行，不阻塞页面加载）
   initHomepageThumbnails(styleCards).catch(console.warn);

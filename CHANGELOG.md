@@ -1,5 +1,41 @@
 # OneFrame NAS Edition 更新日志
 
+## v1.17 (2026-08-25)
+
+### 🎨 新特性
+
+#### 新增 Type O 样式（胶片参数 · 机身大字 · 底部水印）
+- 第 15 种边框样式；三行文字水平居中：胶片型号（机型字号 80%）→ 厂商+机型（大字 Semibold）→ 黑色署名水印
+- 横图照片 84%×68%（2px 黑描边）；纵图照片 81%×76.7%（左右白边减半、底部白边减 1/3）
+- 编辑面板顺序：胶片（品牌 → 型号级联下拉 + 可手输）→ 厂商 → 设备型号 → 署名；厂商与机型**不读取 EXIF**
+- 新增 `films.json`：13 家厂商 + 11 个胶片品牌共 60 款
+
+#### 首页缩略图
+- Type O 固定显示自身样本，不参与随机缩略图
+
+### 📁 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `src/renderer/films.json` | 厂商 + 胶片数据表 |
+| `src/renderer/css/type-O.css` | Type O 样式 |
+| `src/renderer/js/styles/type-O-preview.js` | Type O 预览模块 |
+| `src/renderer/js/styles/type-O-export.js` | Type O 导出模块 |
+| `src/renderer/js/components/type-O-editor-panel.js` | Type O 编辑面板配置 |
+| `src/renderer/Sample/001-TypeO-sample_compressed.jpeg` | Type O 预览样本 |
+| `docs/V1.17-NAS_CHANGES.md` | v1.17 变更说明 |
+
+### 🔧 修改文件
+
+- `src/renderer/index.html` — type-O.css 链接 + 第 15 个样式卡片 + 厂商/胶片编辑区 + 版本号 v1.17
+- `src/renderer/js/app.js` — films.json 加载 + 胶片级联 + type-o 分支 + 厂商/机型不读 EXIF
+- `src/renderer/js/styles/index.js` — 注册 Type O
+- `src/renderer/js/exporter.js` — 注册 Type O 导出
+- `src/renderer/js/thumbnail-selector.js` — Type O 静态样本回退
+- `README.md` — 版本号 + 样式数量 14→15 + 文档链接
+
+---
+
 ## v1.16 (2026-08-15)
 
 ### 🔧 Bug 修复

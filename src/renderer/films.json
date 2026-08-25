@@ -1,0 +1,43 @@
+{
+  "version": 3,
+  "manufacturers": [
+    "Canon", "Kodak", "Fujifilm", "Nikon", "Leica", "Hasselblad",
+    "Pentax", "Olympus", "Rollei", "Ilford", "Cinestill", "Lucky", "Fomapan"
+  ],
+  "films": {
+    "Kodak": [
+      "Kodak Portra 400", "Kodak Portra 160", "Kodak Portra 800",
+      "Kodak Ektar 100", "Kodak Gold 200", "Kodak ColorPlus 200",
+      "Kodak Ultramax 400", "Kodak Pro Image 100",
+      "Kodak Vision3 500T", "Kodak Vision3 250D", "Kodak Tri-X 400",
+      "Kodak T-Max 400", "Kodak Ektachrome E100"
+    ],
+    "Fujifilm": [
+      "Fujifilm C200", "Fujifilm Superia X-TRA 400", "Fujifilm Superia 200",
+      "Fujifilm Color 100", "Fujifilm Pro 400H", "Fujifilm Industrial 100",
+      "Fujifilm Velvia 50", "Fujifilm Provia 100F",
+      "Fujifilm Neopan 400", "Fujifilm ACROS 100"
+    ],
+    "Ilford": [
+      "Ilford HP5 Plus 400", "Ilford Delta 400", "Ilford FP4 Plus 125",
+      "Ilford Delta 3200", "Ilford Pan F Plus 50", "Ilford XP2 Super 400",
+      "Ilford Kentmere 400"
+    ],
+    "Cinestill": ["Cinestill 800T", "Cinestill 400D", "Cinestill 50D"],
+    "Lomography": [
+      "Lomography 400", "Lomography Color Negative 800", "Lomography CN 100",
+      "LomoChrome Purple", "LomoChrome Metropolis", "Lomography Earl Grey 100"
+    ],
+    "Agfa": [
+      "AgfaPhoto APX 400", "AgfaPhoto APX 100",
+      "AgfaPhoto Vista 200", "AgfaPhoto Color 200"
+    ],
+    "Rollei": [
+      "Rollei RPX 100", "Rollei RPX 400", "Rollei Retro 80S", "Rollei CN 200"
+    ],
+    "Adox": ["Adox CHS 100 II", "Adox Color Mission 200", "Adox HR-50"],
+    "Orwo": ["Orwo Wolfen NC500", "Orwo UN 54"],
+    "Lucky": ["Lucky 200", "Lucky 400", "Lucky SHD 100", "Lucky SHD 400"],
+    "Fomapan": ["FOMAPAN 100", "FOMAPAN 200", "FOMAPAN 400", "FOMAPAN ORTHO 400"]
+  }
+}
