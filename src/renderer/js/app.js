@@ -12,6 +12,8 @@ import { configureEditPanel as configureTypeL } from './components/type-L-editor
 import { configureEditPanel as configureTypeM } from './components/type-M-editor-panel.js';
 import { configureEditPanel as configureTypeN } from './components/type-N-editor-panel.js';
 import { configureEditPanel as configureTypeO } from './components/type-O-editor-panel.js';
+import { configureEditPanel as configureTypeP } from './components/type-P-editor-panel.js';
+import { configureEditPanel as configureTypeQ } from './components/type-Q-editor-panel.js';
 import { exportImage } from './exporter.js';
 import { initHomepageThumbnails } from './thumbnail-selector.js';
 import { EXPORT_NAMING_MODE } from './config.js';
@@ -189,6 +191,8 @@ document.addEventListener('DOMContentLoaded', () => {
   let typeMCachedSize = null;  // Type M 图框尺寸缓存
   let typeNCachedSize = null;  // Type N 图框尺寸缓存
   let typeOCachedSize = null;  // Type O 图框尺寸缓存
+  let typePCachedSize = null;  // Type P 图框尺寸缓存
+  let typeQCachedSize = null;  // Type Q 图框尺寸缓存
 
   // Type O 胶片数据 { version, manufacturers, films }
   let filmsData = { version: 3, manufacturers: [], films: {} };
@@ -323,6 +327,8 @@ document.addEventListener('DOMContentLoaded', () => {
     typeMCachedSize = null;  // 清除 Type M 图框缓存
     typeNCachedSize = null;  // 清除 Type N 图框缓存
     typeOCachedSize = null;  // 清除 Type O 图框缓存
+    typePCachedSize = null;  // 清除 Type P 图框缓存
+    typeQCachedSize = null;  // 清除 Type Q 图框缓存
     // 释放旧的 Object URL 内存
     if (userImage.src && userImage.src.startsWith('blob:')) {
       URL.revokeObjectURL(userImage.src);
@@ -368,6 +374,8 @@ document.addEventListener('DOMContentLoaded', () => {
     typeMCachedSize = null;  // 清除 Type M 图框缓存
     typeNCachedSize = null;  // 清除 Type N 图框缓存
     typeOCachedSize = null;  // 清除 Type O 图框缓存
+    typePCachedSize = null;  // 清除 Type P 图框缓存
+    typeQCachedSize = null;  // 清除 Type Q 图框缓存
     let nextExif = {};
     let fallbackDateTimeValue = '';
     try {
@@ -474,7 +482,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 监听窗口大小变化，重新计算预览布局
     window.addEventListener('resize', updateBorder);
     const borderColorSection = document.querySelector('.edit-section:has(#borderColor)');
-    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f' || currentStyle === 'type-g' || currentStyle === 'type-h' || currentStyle === 'type-i' || currentStyle === 'type-j' || currentStyle === 'type-k' || currentStyle === 'type-l' || currentStyle === 'type-m' || currentStyle === 'type-n') ? 'none' : 'block';
+    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f' || currentStyle === 'type-g' || currentStyle === 'type-h' || currentStyle === 'type-i' || currentStyle === 'type-j' || currentStyle === 'type-k' || currentStyle === 'type-l' || currentStyle === 'type-m' || currentStyle === 'type-n' || currentStyle === 'type-p' || currentStyle === 'type-q') ? 'none' : 'block';
     
     // 调用对应样式的面板配置模块
     const panelConfigurers = {
@@ -484,7 +492,9 @@ document.addEventListener('DOMContentLoaded', () => {
       'type-l': configureTypeL,
       'type-m': configureTypeM,
       'type-n': configureTypeN,
-      'type-o': configureTypeO
+      'type-o': configureTypeO,
+      'type-p': configureTypeP,
+      'type-q': configureTypeQ
     };
     panelConfigurers[currentStyle]?.();
     
@@ -605,6 +615,16 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('#textColorPresets .color-preset').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('textColor').value = btn.dataset.textColor;
+    updateBorderContent();
+  });
+
+  // Q 署名颜色预设按钮事件（仅 Type Q 使用：黑/白/主色）
+  document.getElementById('qSignatureColorPresets')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-qcolor]');
+    if (!btn) return;
+    document.querySelectorAll('#qSignatureColorPresets .color-preset').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('qSignatureColor').value = btn.dataset.qcolor;
     updateBorderContent();
   });
   
@@ -936,6 +956,66 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       frameWrapper.style.transform = 'none';
       updateBorderContent();
+    } else if (currentStyle === 'type-p') {
+      // 使用 Type P Preview 模块（与 Type O 相同的缩放逻辑）
+      const frameWrapper = document.getElementById('frameWrapper');
+      const borderContent = document.getElementById('borderContent');
+      preview.init({
+        img: userImage,
+        frameWrapper: frameWrapper,
+        photoFooter: photoFooter,
+        borderContent: borderContent
+      });
+      if (!typePCachedSize) {
+        typePCachedSize = preview.calcSize({
+          naturalWidth: userImage.naturalWidth,
+          naturalHeight: userImage.naturalHeight
+        });
+      }
+      const { squareSize: pCanvasW, canvasHeight: pCanvasH } = typePCachedSize;
+      const pPreviewArea = frameWrapper?.parentElement;
+      const pAvailW = (pPreviewArea?.clientWidth || 500) * 0.96;
+      const pAvailH = (pPreviewArea?.clientHeight || 600) * 0.96;
+      const pDisplayScale = Math.min(pAvailW / pCanvasW, pAvailH / pCanvasH, 1);
+      const pDisplayW = Math.round(pCanvasW * pDisplayScale);
+      const pDisplayH = Math.round(pCanvasH * pDisplayScale);
+      preview.updateFrameWrapper(pDisplayW, pDisplayH);
+      preview.updatePreview(pDisplayW, pDisplayH, {
+        naturalWidth: userImage.naturalWidth,
+        naturalHeight: userImage.naturalHeight
+      });
+      frameWrapper.style.transform = 'none';
+      updateBorderContent();
+    } else if (currentStyle === 'type-q') {
+      // 使用 Type Q Preview 模块（与 Type O 相同的缩放逻辑，边框底色 = 图片主色）
+      const frameWrapper = document.getElementById('frameWrapper');
+      const borderContent = document.getElementById('borderContent');
+      preview.init({
+        img: userImage,
+        frameWrapper: frameWrapper,
+        photoFooter: photoFooter,
+        borderContent: borderContent
+      });
+      if (!typeQCachedSize) {
+        typeQCachedSize = preview.calcSize({
+          naturalWidth: userImage.naturalWidth,
+          naturalHeight: userImage.naturalHeight
+        });
+      }
+      const { squareSize: qCanvasW, canvasHeight: qCanvasH } = typeQCachedSize;
+      const qPreviewArea = frameWrapper?.parentElement;
+      const qAvailW = (qPreviewArea?.clientWidth || 500) * 0.96;
+      const qAvailH = (qPreviewArea?.clientHeight || 600) * 0.96;
+      const qDisplayScale = Math.min(qAvailW / qCanvasW, qAvailH / qCanvasH, 1);
+      const qDisplayW = Math.round(qCanvasW * qDisplayScale);
+      const qDisplayH = Math.round(qCanvasH * qDisplayScale);
+      preview.updateFrameWrapper(qDisplayW, qDisplayH);
+      preview.updatePreview(qDisplayW, qDisplayH, {
+        naturalWidth: userImage.naturalWidth,
+        naturalHeight: userImage.naturalHeight
+      });
+      frameWrapper.style.transform = 'none';
+      updateBorderContent();
     } else {
       // 使用对应样式 Preview 模块
       const frameWrapper = document.getElementById('frameWrapper');
@@ -976,7 +1056,9 @@ document.addEventListener('DOMContentLoaded', () => {
       signatureText: signatureText?.value || '',
       textColor: document.getElementById('textColor')?.value || '#000000',
       manufacturer: document.getElementById('manufacturerSelect')?.value || '',
-      filmStyle: document.getElementById('filmStyle')?.value || ''
+      filmStyle: document.getElementById('filmStyle')?.value || '',
+      showSignatureQ: document.getElementById('switchSignatureQ')?.classList.contains('active') ?? true,
+      signatureColorQ: document.getElementById('qSignatureColor')?.value || '#000000'
     };
   }
 
@@ -1012,7 +1094,9 @@ document.addEventListener('DOMContentLoaded', () => {
           borderColor: borderColor.value,
           textColor: document.getElementById('textColor')?.value || '#000000',
           manufacturer: document.getElementById('manufacturerSelect')?.value || '',
-          filmStyle: document.getElementById('filmStyle')?.value || ''
+          filmStyle: document.getElementById('filmStyle')?.value || '',
+          showSignatureQ: document.getElementById('switchSignatureQ')?.classList.contains('active') ?? true,
+          signatureColorQ: document.getElementById('qSignatureColor')?.value || '#000000'
         }
       );
     }
@@ -1062,7 +1146,9 @@ document.addEventListener('DOMContentLoaded', () => {
       aspectRatio: document.getElementById('aspectRatio')?.value || 'default',
       textColor: document.getElementById('textColor')?.value || '#000000',
       manufacturer: document.getElementById('manufacturerSelect')?.value || '',
-      filmStyle: document.getElementById('filmStyle')?.value || ''
+      filmStyle: document.getElementById('filmStyle')?.value || '',
+      showSignatureQ: document.getElementById('switchSignatureQ')?.classList.contains('active') ?? true,
+      signatureColorQ: document.getElementById('qSignatureColor')?.value || '#000000'
     };
   }
 

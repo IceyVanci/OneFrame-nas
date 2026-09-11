@@ -1,0 +1,114 @@
+/**
+ * Type P 样式（参数布局）
+ * 白色边框 + 照片区（左右 3.5% / 上 4% / 高 76.5%）+ 底部 19.5% 文字区
+ * - 第 1 行：机型（Semibold #000）+ 细分隔线 + 品牌 Logo
+ * - 第 2 行：4 个圆角参数胶囊 + 下方浅灰小标签
+ * 尺寸与垂直位置由 JS inline style 控制
+ */
+
+/* Type P 布局容器，尺寸由 JS 通过 inline style 设置 */
+.frame-wrapper.type-p {
+  display: block !important;
+  position: relative;
+  background: #ffffff;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+/* 照片区：无边框、0 圆角、cover 填满 */
+.frame-wrapper.type-p > img {
+  position: absolute;
+  top: 4%;
+  left: 3.5%;
+  width: 93%;
+  height: 76.5%;
+  object-fit: cover;
+  object-position: center center;
+  max-width: none;
+  max-height: none;
+  border: none;
+  border-radius: 0;
+  box-sizing: border-box;
+}
+
+/* 隐藏 Type P 的 photoFooter */
+.frame-wrapper.type-p .photo-footer {
+  display: none;
+}
+
+/* 文字容器：铺满整个画布，内部元素由 JS 绝对定位 */
+.frame-wrapper.type-p .border-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* 第 1 行：机型 + 分隔线 + Logo，flex 水平居中 */
+.type-p-line1 {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+  font-family: 'MiSans Semibold', 'MiSans', sans-serif;
+}
+
+.type-p-model {
+  font-size: 1em;
+  color: #000000;
+}
+
+.type-p-divider {
+  display: inline-block;
+  width: 1px;
+  background: #dddddd;
+  margin: 0 0.55em;
+}
+
+.type-p-logo {
+  display: block;
+  width: auto;
+}
+
+/* 参数胶囊行：flex 水平居中 */
+.type-p-pills {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  font-family: 'MiSans Normal', 'MiSans', sans-serif;
+}
+
+.type-p-pill-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.type-p-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 0.75em;
+  border: 1px solid #cccccc;
+  border-radius: 0.385em;
+  background: #ffffff;
+  box-sizing: border-box;
+  font-size: 0.72em;
+  color: #000000;
+  white-space: nowrap;
+}
+
+.type-p-label {
+  font-size: 0.42em;
+  color: #999999;
+  line-height: 1.2;
+}

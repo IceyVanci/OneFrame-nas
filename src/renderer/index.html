@@ -18,6 +18,8 @@
 <link rel="stylesheet" href="css/type-M.css">
   <link rel="stylesheet" href="css/type-N.css">
   <link rel="stylesheet" href="css/type-O.css">
+  <link rel="stylesheet" href="css/type-P.css">
+  <link rel="stylesheet" href="css/type-Q.css">
   <link rel="stylesheet" href="assets/font-awesome/css/all.min.css">
   <script src="assets/exifreader.js"></script>
   <script src="assets/piexif.js"></script>
@@ -166,6 +168,24 @@
           <div class="style-preview">
             <div class="frame-container">
               <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-fallback-src="Sample/001-TypeO-sample_compressed.jpeg" alt="示例图片" class="preview-image loading">
+            </div>
+          </div>
+        </div>
+
+        <!-- 样式卡片 16: Type P 参数布局（机型+品牌+参数胶囊，不参与随机缩略图，固定显示自身样本） -->
+        <div class="style-card" data-style="type-p">
+          <div class="style-preview">
+            <div class="frame-container">
+              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-fallback-src="Sample/00424-TypeP-sample_compressed.jpeg" alt="示例图片" class="preview-image loading">
+            </div>
+          </div>
+        </div>
+
+        <!-- 样式卡片 17: Type Q 简洁布局（主色边框+右下署名，不参与随机缩略图，固定显示自身样本） -->
+        <div class="style-card" data-style="type-q">
+          <div class="style-preview">
+            <div class="frame-container">
+              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-fallback-src="Sample/00308-TypeQ-sample_compressed.jpeg" alt="示例图片" class="preview-image loading">
             </div>
           </div>
         </div>
@@ -377,6 +397,26 @@
         </div>
       </div>
 
+      <!-- Q 署名设置（Type Q 专用：显示开关 + 颜色三选一 黑/白/主色） -->
+      <div class="edit-section" id="qSignatureSection" style="display:none">
+        <div class="section-title"><i class="fas fa-pen"></i> 署名显示</div>
+        <div class="control-group">
+          <div class="switch-group">
+            <label>显示署名</label>
+            <div class="switch active" id="switchSignatureQ"></div>
+          </div>
+        </div>
+        <div class="control-group">
+          <label>署名颜色</label>
+          <div class="color-preset-group" id="qSignatureColorPresets">
+            <button class="color-preset active" data-qcolor="#000000" style="background:#000000;color:#fff">黑</button>
+            <button class="color-preset" data-qcolor="#ffffff" style="background:#ffffff;color:#000;border:1px solid #ccc">白</button>
+            <button class="color-preset" data-qcolor="dominant" style="background:linear-gradient(135deg,#c9a86a,#8a6d3b);color:#fff">主色</button>
+          </div>
+          <input type="hidden" id="qSignatureColor" value="#000000">
+        </div>
+      </div>
+
       <!-- 署名设置 -->
       <div class="edit-section">
         <div class="section-title"><i class="fas fa-pen"></i> 署名</div>
@@ -405,7 +445,7 @@
         <button class="modal-close" id="modalClose">&times;</button>
       </div>
       <div class="modal-body">
-<p><strong>OneFrame</strong> v1.17</p>
+<p><strong>OneFrame</strong> v1.18</p>
         <p>一款简洁优雅的图片边框添加工具，为您的照片自动添加精美的底部边框，并智能显示相机 EXIF 信息。</p>
         <hr>
 <p><strong>GitHub：</strong><a href="https://github.com/IceyVanci/OneFrame-nas" target="_blank">OneFrame NAS</a> · <a href="https://github.com/IceyVanci/OneFrame" target="_blank">原始项目</a></p>

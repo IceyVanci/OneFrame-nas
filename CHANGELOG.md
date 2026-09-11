@@ -1,5 +1,57 @@
 # OneFrame NAS Edition 更新日志
 
+## v1.18 (2026-09-12)
+
+### 🎨 新特性
+
+#### 新增 Type P 样式（参数布局 · 机型 + 品牌 Logo + 参数胶囊）
+- 第 16 种边框样式；白色边框，照片区 93%×76.5%（左右 3.5% / 上 4% / 底部 19.5% 文字区）
+- 第 1 行：机型（Semibold 黑）+ 细分隔线 + 品牌 Logo（沿用现有 Logo 选择器），水平居中
+- 第 2 行：4 个圆角参数胶囊（细灰描边）+ 下方浅灰小标签（s / ISO / mm / f），胶囊高 1.75×基准、字号 0.72×基准、圆角 22%
+- 参数沿用现有 EXIF 流程（快门 / ISO / 焦距 / 光圈），空值隐藏对应胶囊
+- **照片按原图比例完整显示无裁切**：预览端内联 px 比例精确尺寸，导出端全图 1:1 drawImage
+- 编辑面板：Logo + 设备型号（EXIF 自动读取，可手输）+ 拍摄参数；其余隐藏
+
+#### 新增 Type Q 样式（简洁布局 · 主色边框 + 右下署名）
+- 第 17 种边框样式；四边等宽 2.5% 边框，颜色自动取**图片主色**，照片区 95%×95%
+- 署名 "Foto by {署名}" 叠照片内右下角（Semibold，字号 0.021×画布宽）
+- 署名颜色三选一：黑 / 白 / 图片主色；可开关显示/隐藏
+- 主色提取：新增 `js/utils/dominant-color.js`，32×32 采样 + 4bit/通道分桶量化，按 `img.src` 缓存
+- 编辑面板：署名 + 署名颜色/开关；其余隐藏
+
+#### 首页缩略图
+- Type P / Type Q **不参与随机缩略图**，固定显示自身样本（`Sample/00424-TypeP-sample_compressed.jpeg` / `Sample/00308-TypeQ-sample_compressed.jpeg`）
+- 移除 Type P/Q 的随机占位逻辑，与 Type O 一致回退 `data-fallback-src`
+
+### 📁 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `src/renderer/css/type-P.css` | Type P 样式 |
+| `src/renderer/css/type-Q.css` | Type Q 样式 |
+| `src/renderer/js/styles/type-P-preview.js` | Type P 预览模块 |
+| `src/renderer/js/styles/type-P-export.js` | Type P 导出模块 |
+| `src/renderer/js/styles/type-Q-preview.js` | Type Q 预览模块 |
+| `src/renderer/js/styles/type-Q-export.js` | Type Q 导出模块 |
+| `src/renderer/js/components/type-P-editor-panel.js` | Type P 编辑面板配置 |
+| `src/renderer/js/components/type-Q-editor-panel.js` | Type Q 编辑面板配置 |
+| `src/renderer/js/utils/dominant-color.js` | 图片主色提取工具（Type Q 共用） |
+| `src/renderer/Sample/00424-TypeP-sample_compressed.jpeg` | Type P 预览样本 |
+| `src/renderer/Sample/00308-TypeQ-sample_compressed.jpeg` | Type Q 预览样本 |
+| `docs/V1.18-NAS_CHANGES.md` | v1.18 变更说明 |
+| `docs/release-v1.18-nas.md` | v1.18 Release 文档 |
+
+### 🔧 修改文件
+
+- `src/renderer/index.html` — type-P/type-Q.css 链接 + 第 16/17 个样式卡片 + Type Q 署名编辑区 + 版本号 v1.18
+- `src/renderer/js/app.js` — Type P/Q 预览分支、缓存变量、面板配置、updateBorder 分支、签名颜色设置
+- `src/renderer/js/styles/index.js` — 注册 Type P / Type Q
+- `src/renderer/js/exporter.js` — 注册 Type P / Type Q 导出
+- `src/renderer/js/thumbnail-selector.js` — Type P/Q 静态样本回退（移除随机占位）
+- `README.md` — 版本号 + 样式数量 15→17 + 文档链接
+
+---
+
 ## v1.17 (2026-08-25)
 
 ### 🎨 新特性

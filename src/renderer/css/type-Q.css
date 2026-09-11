@@ -1,0 +1,55 @@
+/**
+ * Type Q 样式（简洁布局）
+ * 主色边框（四边等宽 2.5%，底色由 JS inline 设置为图片主色）+ 照片区（95%×95%）
+ * 署名 "Foto by {署名}" 叠照片内右下角（Semibold，颜色由 JS inline 设置）
+ */
+
+/* Type Q 布局容器，尺寸与底色由 JS 通过 inline style 设置 */
+.frame-wrapper.type-q {
+  display: block !important;
+  position: relative;
+  background: #ffffff;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+/* 照片区：无边框、0 圆角、cover 填满（四周各留 2.5% 主色边框） */
+.frame-wrapper.type-q > img {
+  position: absolute;
+  top: 2.5%;
+  left: 2.5%;
+  width: 95%;
+  height: 95%;
+  object-fit: cover;
+  object-position: center center;
+  max-width: none;
+  max-height: none;
+  border: none;
+  border-radius: 0;
+  box-sizing: border-box;
+}
+
+/* 隐藏 Type Q 的 photoFooter */
+.frame-wrapper.type-q .photo-footer {
+  display: none;
+}
+
+/* 文字容器：铺满整个画布 */
+.frame-wrapper.type-q .border-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* 署名：照片内右下角（top/right/font-size/color 由 JS inline 设置） */
+.type-q-signature {
+  position: absolute;
+  transform: translateY(-50%);
+  font-family: 'MiSans Semibold', 'MiSans', sans-serif;
+  line-height: 1.2;
+  white-space: nowrap;
+}
