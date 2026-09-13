@@ -44,6 +44,8 @@ import { typePPreview } from './type-P-preview.js';
 import { typePExport } from './type-P-export.js';
 import { typeQPreview } from './type-Q-preview.js';
 import { typeQExport } from './type-Q-export.js';
+import { typeRPreview } from './type-R-preview.js';
+import { typeRExport } from './type-R-export.js';
 
 /**
  * @typedef {Object} StyleModule
@@ -120,6 +122,10 @@ export const styles = {
   'type-q': {
     preview: typeQPreview,
     export: typeQExport
+  },
+  'type-r': {
+    preview: typeRPreview,
+    export: typeRExport
   }
 };
 /**
@@ -199,3 +205,5 @@ export { typeOPreview } from './type-O-preview.js';
 export { typePPreview } from './type-P-preview.js';
 
 export { typeQPreview } from './type-Q-preview.js';
+
+export { typeRPreview } from './type-R-preview.js';

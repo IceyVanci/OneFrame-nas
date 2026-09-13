@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="css/type-O.css">
   <link rel="stylesheet" href="css/type-P.css">
   <link rel="stylesheet" href="css/type-Q.css">
+  <link rel="stylesheet" href="css/type-R.css">
   <link rel="stylesheet" href="assets/font-awesome/css/all.min.css">
   <script src="assets/exifreader.js"></script>
   <script src="assets/piexif.js"></script>
@@ -31,7 +32,10 @@
     <!-- 顶部标题栏 -->
     <header class="app-header">
       <h1 class="app-title">OneFrame</h1>
-      <button class="about-btn" id="aboutBtn">关于</button>
+      <div class="header-actions">
+        <button class="about-btn" id="colorphotoBtn">ColorPhoto</button>
+        <button class="about-btn" id="aboutBtn">关于</button>
+      </div>
     </header>
 
      <!-- 边框样式图片墙 -->
@@ -186,6 +190,15 @@
           <div class="style-preview">
             <div class="frame-container">
               <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-fallback-src="Sample/00308-TypeQ-sample_compressed.jpeg" alt="示例图片" class="preview-image loading">
+            </div>
+          </div>
+        </div>
+
+        <!-- 样式卡片 18: Type R 胶片边缘打印（黑底+画面窗口+右带橙色参数，不参与随机缩略图，固定显示自身样本） -->
+        <div class="style-card" data-style="type-r">
+          <div class="style-preview">
+            <div class="frame-container">
+              <img src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" data-fallback-src="Sample/08740-TypeR-sample_compressed.jpeg" alt="示例图片" class="preview-image loading">
             </div>
           </div>
         </div>
@@ -417,6 +430,47 @@
         </div>
       </div>
 
+      <!-- Type R 打印参数（胶片边缘打印，全部可手输覆盖，EXIF 自动预填） -->
+      <div class="edit-section" id="typeRPrintSection" style="display:none">
+        <div class="section-title"><i class="fas fa-film"></i> 胶片打印参数</div>
+        <div class="control-group">
+          <label>序号</label>
+          <input type="text" id="frameNumber" placeholder="01" value="01">
+        </div>
+        <div class="control-group">
+          <label>日期</label>
+          <input type="date" id="printDate">
+        </div>
+        <div class="params-grid">
+          <div class="param-item">
+            <select id="printExposureMode">
+              <option value="">--</option>
+              <option value="M">M</option>
+              <option value="P">P</option>
+              <option value="Av">Av</option>
+              <option value="Tv">Tv</option>
+            </select>
+            <label>模式</label>
+          </div>
+          <div class="param-item">
+            <input type="text" id="printExposureTime" placeholder="1/8">
+            <label>快门</label>
+          </div>
+          <div class="param-item">
+            <input type="text" id="printFNumber" placeholder="F5.6">
+            <label>光圈</label>
+          </div>
+          <div class="param-item">
+            <input type="text" id="printExposureBias" placeholder="0.0Ev">
+            <label>偏差</label>
+          </div>
+          <div class="param-item">
+            <input type="text" id="printFocalLength" placeholder="70mm">
+            <label>焦距</label>
+          </div>
+        </div>
+      </div>
+
       <!-- 署名设置 -->
       <div class="edit-section">
         <div class="section-title"><i class="fas fa-pen"></i> 署名</div>
@@ -445,7 +499,7 @@
         <button class="modal-close" id="modalClose">&times;</button>
       </div>
       <div class="modal-body">
-<p><strong>OneFrame</strong> v1.18</p>
+        <p><strong>OneFrame</strong> v1.19</p>
         <p>一款简洁优雅的图片边框添加工具，为您的照片自动添加精美的底部边框，并智能显示相机 EXIF 信息。</p>
         <hr>
 <p><strong>GitHub：</strong><a href="https://github.com/IceyVanci/OneFrame-nas" target="_blank">OneFrame NAS</a> · <a href="https://github.com/IceyVanci/OneFrame" target="_blank">原始项目</a></p>
@@ -457,6 +511,15 @@
         <p><strong>许可证：</strong>MIT License</p>
       </div>
     </div>
+  </div>
+
+  <!-- ColorPhoto 全屏覆盖层（应用内 iframe 嵌入，首次打开懒加载） -->
+  <div class="cp-overlay hidden" id="colorphotoOverlay">
+    <div class="cp-overlay-bar">
+      <button class="about-btn cp-back" id="colorphotoBack">&larr; 返回 OneFrame</button>
+      <span class="cp-title">ColorPhoto</span>
+    </div>
+    <iframe id="colorphotoFrame" class="cp-frame" title="ColorPhoto" src="about:blank"></iframe>
   </div>
 
   <script type="module" src="js/app.js"></script>

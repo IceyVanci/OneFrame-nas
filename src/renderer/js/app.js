@@ -1,7 +1,7 @@
 ﻿// OneFrame 主程序
-import { getExif, formatDateTime, getFocalLength } from './exif.js';
+import { getExif, formatDateTime, getFocalLength, getPhysicalFocalLength, getExposureModeLabel, formatExposureBias } from './exif.js';
 import { getModelName, getAllLogos, getLogoFilename, getMakeName } from './logo-utils.js';
-import { getStyle, getPreview, typeBPreview, typeEPreview, typeFPreview } from './styles/index.js';
+import { getStyle, getPreview, typeBPreview, typeEPreview, typeFPreview, typeRPreview } from './styles/index.js';
 import { configureEditPanel as configureTypeF } from './components/type-F-editor-panel.js';
 import { configureEditPanel as configureTypeG } from './components/type-G-editor-panel.js';
 import { configureEditPanel as configureTypeH } from './components/type-H-editor-panel.js';
@@ -14,6 +14,7 @@ import { configureEditPanel as configureTypeN } from './components/type-N-editor
 import { configureEditPanel as configureTypeO } from './components/type-O-editor-panel.js';
 import { configureEditPanel as configureTypeP } from './components/type-P-editor-panel.js';
 import { configureEditPanel as configureTypeQ } from './components/type-Q-editor-panel.js';
+import { configureEditPanel as configureTypeR } from './components/type-R-editor-panel.js';
 import { exportImage } from './exporter.js';
 import { initHomepageThumbnails } from './thumbnail-selector.js';
 import { EXPORT_NAMING_MODE } from './config.js';
@@ -193,6 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let typeOCachedSize = null;  // Type O 图框尺寸缓存
   let typePCachedSize = null;  // Type P 图框尺寸缓存
   let typeQCachedSize = null;  // Type Q 图框尺寸缓存
+  let typeRCachedSize = null;  // Type R 图框尺寸缓存
 
   // Type O 胶片数据 { version, manufacturers, films }
   let filmsData = { version: 3, manufacturers: [], films: {} };
@@ -329,6 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
     typeOCachedSize = null;  // 清除 Type O 图框缓存
     typePCachedSize = null;  // 清除 Type P 图框缓存
     typeQCachedSize = null;  // 清除 Type Q 图框缓存
+    typeRCachedSize = null;  // 清除 Type R 图框缓存
     // 释放旧的 Object URL 内存
     if (userImage.src && userImage.src.startsWith('blob:')) {
       URL.revokeObjectURL(userImage.src);
@@ -336,6 +339,8 @@ document.addEventListener('DOMContentLoaded', () => {
     resetForm();
     if (currentStyle === 'type-e') {
       typeEPreview.resetImageOffset();
+    } else if (currentStyle === 'type-r') {
+      typeRPreview.resetImageOffset();
     }
     userImage.src = URL.createObjectURL(file);
     try {
@@ -376,6 +381,7 @@ document.addEventListener('DOMContentLoaded', () => {
     typeOCachedSize = null;  // 清除 Type O 图框缓存
     typePCachedSize = null;  // 清除 Type P 图框缓存
     typeQCachedSize = null;  // 清除 Type Q 图框缓存
+    typeRCachedSize = null;  // 清除 Type R 图框缓存
     let nextExif = {};
     let fallbackDateTimeValue = '';
     try {
@@ -404,6 +410,8 @@ document.addEventListener('DOMContentLoaded', () => {
     resetForm();
     if (currentStyle === 'type-e') {
       typeEPreview.resetImageOffset();
+    } else if (currentStyle === 'type-r') {
+      typeRPreview.resetImageOffset();
     }
     updateExifDisplay();
     if (!currentExif.DateTimeOriginal && fallbackDateTimeValue) {
@@ -450,6 +458,44 @@ document.addEventListener('DOMContentLoaded', () => {
       const formattedDateTime = formatDateTimeForInput(currentExif.DateTimeOriginal);
       if (formattedDateTime) dateTime.value = formattedDateTime;
     }
+    // Type R：预填胶片边缘打印参数（全部可手输覆盖）
+    if (currentStyle === 'type-r') {
+      const frameInput = document.getElementById('frameNumber');
+      if (frameInput && !frameInput.value) frameInput.value = '01';
+      const modeInput = document.getElementById('printExposureMode');
+      if (modeInput) {
+        const mode = getExposureModeLabel(currentExif);
+        if (mode) modeInput.value = mode;
+      }
+      const shutterInput = document.getElementById('printExposureTime');
+      if (shutterInput && currentExif.ExposureTime) shutterInput.value = currentExif.ExposureTime;
+      const apertureInput = document.getElementById('printFNumber');
+      if (apertureInput && currentExif.FNumber) {
+        const f = typeof currentExif.FNumber === 'string' ? currentExif.FNumber.replace('f/', '').replace('F', '') : currentExif.FNumber;
+        apertureInput.value = `F${f}`;
+      }
+      const biasInput = document.getElementById('printExposureBias');
+      if (biasInput) {
+        const bias = formatExposureBias(currentExif);
+        if (bias) biasInput.value = bias;
+      }
+      const focalInput = document.getElementById('printFocalLength');
+      if (focalInput) {
+        const pf = getPhysicalFocalLength(currentExif);
+        if (pf) focalInput.value = pf;
+      }
+      // 日期：EXIF DateTimeOriginal 预填；无则默认今天
+      const dateInput = document.getElementById('printDate');
+      if (dateInput) {
+        const m = String(currentExif.DateTimeOriginal || '').match(/(\d{4})[-:/](\d{2})[-:/](\d{2})/);
+        if (m) {
+          dateInput.value = `${m[1]}-${m[2]}-${m[3]}`;
+        } else if (!dateInput.value) {
+          const now = new Date();
+          dateInput.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        }
+      }
+    }
   }
 
   styleCards.forEach(card => {
@@ -482,7 +528,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 监听窗口大小变化，重新计算预览布局
     window.addEventListener('resize', updateBorder);
     const borderColorSection = document.querySelector('.edit-section:has(#borderColor)');
-    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f' || currentStyle === 'type-g' || currentStyle === 'type-h' || currentStyle === 'type-i' || currentStyle === 'type-j' || currentStyle === 'type-k' || currentStyle === 'type-l' || currentStyle === 'type-m' || currentStyle === 'type-n' || currentStyle === 'type-p' || currentStyle === 'type-q') ? 'none' : 'block';
+    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f' || currentStyle === 'type-g' || currentStyle === 'type-h' || currentStyle === 'type-i' || currentStyle === 'type-j' || currentStyle === 'type-k' || currentStyle === 'type-l' || currentStyle === 'type-m' || currentStyle === 'type-n' || currentStyle === 'type-p' || currentStyle === 'type-q' || currentStyle === 'type-r') ? 'none' : 'block';
     
     // 调用对应样式的面板配置模块
     const panelConfigurers = {
@@ -494,7 +540,8 @@ document.addEventListener('DOMContentLoaded', () => {
       'type-n': configureTypeN,
       'type-o': configureTypeO,
       'type-p': configureTypeP,
-      'type-q': configureTypeQ
+      'type-q': configureTypeQ,
+      'type-r': configureTypeR
     };
     panelConfigurers[currentStyle]?.();
     
@@ -550,6 +597,13 @@ document.addEventListener('DOMContentLoaded', () => {
     focalLength.value = '';
     iso.value = '';
     dateTime.value = '';
+    // Type R 打印参数：序号重置为 01，其余清空（随后由 EXIF 预填）
+    const frameNumberEl = document.getElementById('frameNumber');
+    if (frameNumberEl) frameNumberEl.value = '01';
+    ['printExposureMode', 'printExposureTime', 'printFNumber', 'printExposureBias', 'printFocalLength', 'printDate'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
     const manufacturerSelect = document.getElementById('manufacturerSelect');
     if (manufacturerSelect) manufacturerSelect.value = '';
     const filmBrandSelect = document.getElementById('filmBrand');
@@ -1016,6 +1070,36 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       frameWrapper.style.transform = 'none';
       updateBorderContent();
+    } else if (currentStyle === 'type-r') {
+      // 使用 Type R Preview 模块（与 Type Q 相同的缩放逻辑）
+      const frameWrapper = document.getElementById('frameWrapper');
+      const borderContent = document.getElementById('borderContent');
+      preview.init({
+        img: userImage,
+        frameWrapper: frameWrapper,
+        photoFooter: photoFooter,
+        borderContent: borderContent
+      });
+      if (!typeRCachedSize) {
+        typeRCachedSize = preview.calcSize({
+          naturalWidth: userImage.naturalWidth,
+          naturalHeight: userImage.naturalHeight
+        });
+      }
+      const { squareSize: rCanvasW, canvasHeight: rCanvasH } = typeRCachedSize;
+      const rPreviewArea = frameWrapper?.parentElement;
+      const rAvailW = (rPreviewArea?.clientWidth || 500) * 0.96;
+      const rAvailH = (rPreviewArea?.clientHeight || 600) * 0.96;
+      const rDisplayScale = Math.min(rAvailW / rCanvasW, rAvailH / rCanvasH, 1);
+      const rDisplayW = Math.round(rCanvasW * rDisplayScale);
+      const rDisplayH = Math.round(rCanvasH * rDisplayScale);
+      preview.updateFrameWrapper(rDisplayW, rDisplayH);
+      preview.updatePreview(rDisplayW, rDisplayH, {
+        naturalWidth: userImage.naturalWidth,
+        naturalHeight: userImage.naturalHeight
+      });
+      frameWrapper.style.transform = 'none';
+      updateBorderContent();
     } else {
       // 使用对应样式 Preview 模块
       const frameWrapper = document.getElementById('frameWrapper');
@@ -1058,7 +1142,14 @@ document.addEventListener('DOMContentLoaded', () => {
       manufacturer: document.getElementById('manufacturerSelect')?.value || '',
       filmStyle: document.getElementById('filmStyle')?.value || '',
       showSignatureQ: document.getElementById('switchSignatureQ')?.classList.contains('active') ?? true,
-      signatureColorQ: document.getElementById('qSignatureColor')?.value || '#000000'
+      signatureColorQ: document.getElementById('qSignatureColor')?.value || '#000000',
+      frameNumber: document.getElementById('frameNumber')?.value || '01',
+      printExposureMode: document.getElementById('printExposureMode')?.value || '',
+      printExposureTime: document.getElementById('printExposureTime')?.value || '',
+      printFNumber: document.getElementById('printFNumber')?.value || '',
+      printExposureBias: document.getElementById('printExposureBias')?.value || '',
+      printFocalLength: document.getElementById('printFocalLength')?.value || '',
+      printDate: document.getElementById('printDate')?.value || ''
     };
   }
 
@@ -1096,7 +1187,14 @@ document.addEventListener('DOMContentLoaded', () => {
           manufacturer: document.getElementById('manufacturerSelect')?.value || '',
           filmStyle: document.getElementById('filmStyle')?.value || '',
           showSignatureQ: document.getElementById('switchSignatureQ')?.classList.contains('active') ?? true,
-          signatureColorQ: document.getElementById('qSignatureColor')?.value || '#000000'
+          signatureColorQ: document.getElementById('qSignatureColor')?.value || '#000000',
+          frameNumber: document.getElementById('frameNumber')?.value || '01',
+          printExposureMode: document.getElementById('printExposureMode')?.value || '',
+          printExposureTime: document.getElementById('printExposureTime')?.value || '',
+          printFNumber: document.getElementById('printFNumber')?.value || '',
+          printExposureBias: document.getElementById('printExposureBias')?.value || '',
+          printFocalLength: document.getElementById('printFocalLength')?.value || '',
+          printDate: document.getElementById('printDate')?.value || ''
         }
       );
     }
@@ -1109,9 +1207,11 @@ document.addEventListener('DOMContentLoaded', () => {
     applyDynamicBackground(userImage);
   });
 
-  ['customModel', 'fNumber', 'exposureTime', 'focalLength', 'iso', 'dateTime', 'signatureText', 'filmStyle'].forEach(id => {
+  ['customModel', 'fNumber', 'exposureTime', 'focalLength', 'iso', 'dateTime', 'signatureText', 'filmStyle', 'frameNumber', 'printExposureMode', 'printExposureTime', 'printFNumber', 'printExposureBias', 'printFocalLength', 'printDate'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', updateBorderContent);
   });
+  // 曝光模式下拉：change 事件确保更新
+  document.getElementById('printExposureMode')?.addEventListener('change', updateBorderContent);
   // 厂商 change：仅更新预览（第 2 行厂商+机型）
   document.getElementById('manufacturerSelect')?.addEventListener('change', () => {
     updateBorderContent();
@@ -1148,7 +1248,14 @@ document.addEventListener('DOMContentLoaded', () => {
       manufacturer: document.getElementById('manufacturerSelect')?.value || '',
       filmStyle: document.getElementById('filmStyle')?.value || '',
       showSignatureQ: document.getElementById('switchSignatureQ')?.classList.contains('active') ?? true,
-      signatureColorQ: document.getElementById('qSignatureColor')?.value || '#000000'
+      signatureColorQ: document.getElementById('qSignatureColor')?.value || '#000000',
+      frameNumber: document.getElementById('frameNumber')?.value || '01',
+      printExposureMode: document.getElementById('printExposureMode')?.value || '',
+      printExposureTime: document.getElementById('printExposureTime')?.value || '',
+      printFNumber: document.getElementById('printFNumber')?.value || '',
+      printExposureBias: document.getElementById('printExposureBias')?.value || '',
+      printFocalLength: document.getElementById('printFocalLength')?.value || '',
+      printDate: document.getElementById('printDate')?.value || ''
     };
   }
 
@@ -1174,6 +1281,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (currentStyle === 'type-e') {
         exportOptions.imageOffset = typeEPreview.getNormalizedOffset();
         exportOptions.previewSquareSize = typeEPreview.getState().squareSize;
+      } else if (currentStyle === 'type-r') {
+        // Type R 需要传递归一化拖动偏移（画面窗口裁剪）
+        exportOptions.imageOffset = typeRPreview.getNormalizedOffset();
       }
       
       const blob = await exportImage(userImage, exportOptions);
@@ -1253,6 +1363,40 @@ document.addEventListener('DOMContentLoaded', () => {
     aboutModal.addEventListener('click', (e) => {
       if (e.target === aboutModal) {
         aboutModal.classList.add('hidden');
+      }
+    });
+  }
+
+  // ========== ColorPhoto 全屏覆盖层逻辑 ==========
+  const colorphotoBtn = document.getElementById('colorphotoBtn');
+  const colorphotoOverlay = document.getElementById('colorphotoOverlay');
+  const colorphotoFrame = document.getElementById('colorphotoFrame');
+  const colorphotoBack = document.getElementById('colorphotoBack');
+
+  const closeColorphoto = () => {
+    if (colorphotoOverlay) colorphotoOverlay.classList.add('hidden');
+    document.body.style.overflow = '';
+  };
+
+  if (colorphotoBtn && colorphotoOverlay && colorphotoFrame) {
+    colorphotoBtn.addEventListener('click', () => {
+      // 首次打开懒加载，避免首页预载 ColorPhoto 资源
+      if (!colorphotoFrame.dataset.loaded) {
+        colorphotoFrame.src = 'colorphoto/index.html';
+        colorphotoFrame.dataset.loaded = '1';
+      }
+      colorphotoOverlay.classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    });
+
+    if (colorphotoBack) {
+      colorphotoBack.addEventListener('click', closeColorphoto);
+    }
+
+    // Esc 退出（仅覆盖层可见时）
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !colorphotoOverlay.classList.contains('hidden')) {
+        closeColorphoto();
       }
     });
   }

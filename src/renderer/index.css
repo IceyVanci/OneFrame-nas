@@ -31,6 +31,15 @@
   font-display: swap;
 }
 
+/* Doto 点阵字体（Type R 胶片边缘打印，Bold，仅拉丁/数字，OFL 许可） */
+@font-face {
+  font-family: 'Doto';
+  src: url('fonts/Doto-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -79,6 +88,48 @@ body {
   color: #68bbff;
   border-color: #68bbff;
   background: rgba(104, 187, 255, 0.1);
+}
+
+/* 头部右侧按钮组（ColorPhoto + 关于） */
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* ColorPhoto 全屏覆盖层（应用内 iframe 嵌入） */
+.cp-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: #0a0a0a;
+  display: flex;
+  flex-direction: column;
+}
+
+.cp-overlay.hidden {
+  display: none;
+}
+
+.cp-overlay-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 14px;
+  background: #111111;
+  border-bottom: 1px solid #222222;
+}
+
+.cp-title {
+  color: #888888;
+  font-size: 13px;
+}
+
+.cp-frame {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  display: block;
+  background: #0a0a0a;
 }
 
 /* 标签页 */

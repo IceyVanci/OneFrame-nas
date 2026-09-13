@@ -158,6 +158,55 @@ export function getFocalLength(exif) {
 }
 
 /**
+ * 获取物理焦距（不优先等效焦距），用于胶片边缘原始打印
+ * @param {Object} exif - EXIF 数据
+ * @returns {string} 如 "70mm"，无则空串
+ */
+export function getPhysicalFocalLength(exif) {
+  if (!exif || !exif.FocalLength) return '';
+  const str = String(exif.FocalLength).trim();
+  if (!str) return '';
+  return str.endsWith('mm') ? str : `${str}mm`;
+}
+
+/**
+ * 获取曝光模式标签（胶片机身风格：M / P / Av / Tv）
+ * ExposureProgram: 1=Manual, 2=Normal program, 3=Aperture priority, 4=Shutter priority
+ * @param {Object} exif - EXIF 数据
+ * @returns {string}
+ */
+export function getExposureModeLabel(exif) {
+  if (!exif) return '';
+  let program = exif.ExposureProgram;
+  if (program && typeof program === 'object') program = program.value;
+  const map = { 1: 'M', 2: 'P', 3: 'Av', 4: 'Tv' };
+  if (program !== undefined && program !== null && map[Number(program)]) {
+    return map[Number(program)];
+  }
+  // 回退：ExposureMode（1=Manual）
+  let mode = exif.ExposureMode;
+  if (mode && typeof mode === 'object') mode = mode.value;
+  if (Number(mode) === 1) return 'M';
+  return '';
+}
+
+/**
+ * 格式化曝光偏差（如 0.0Ev / +0.7Ev / -0.3Ev；Doto 无 ± 符号，故用 Ev 后缀）
+ * @param {Object} exif - EXIF 数据
+ * @returns {string}
+ */
+export function formatExposureBias(exif) {
+  if (!exif || exif.ExposureBiasValue === undefined || exif.ExposureBiasValue === null) return '';
+  let val = exif.ExposureBiasValue;
+  if (val && typeof val === 'object') val = val.value;
+  const num = Number(val);
+  if (Number.isNaN(num)) return '';
+  if (Math.abs(num) < 0.05) return '0.0Ev';
+  const sign = num > 0 ? '+' : '-';
+  return `${sign}${Math.abs(num).toFixed(1)}Ev`;
+}
+
+/**
  * 特殊字段格式化
  */
 const exifKeyFormatter = {
@@ -190,7 +239,10 @@ const exifKeyFormatter = {
     return { ImageHeight: val };
   },
   'FocalLength': (exif) => {
-    return { FocalLength: exif.FocalLength?.description?.replace(' ', '') };
+    const desc = exif.FocalLength?.description?.replace(' ', '');
+    if (desc) return { FocalLength: desc };
+    const val = exif.FocalLength?.value;
+    return val !== undefined && val !== null ? { FocalLength: `${val}mm` } : {};
   },
   'DateTimeOriginal': (exif) => {
     return { DateTimeOriginal: formatDateTime(exif.DateTimeOriginal?.description) };

@@ -1,0 +1,136 @@
+/**
+ * Type R 样式（Pentax 645N 胶片边缘打印）
+ * 布局：黑色胶片底 + 画面窗口（左侧/上下窄边、右侧宽胶片带打印参数）
+ * - 画面窗口内的照片 cover 填满，可二维拖动选择可见区域
+ * - 右侧胶片带：竖排橙色（#E5742A）7 项数据打印（序号/曝光模式/快门/光圈/曝光偏差/焦距/署名）
+ * 尺寸由 JS 通过 inline style 设置
+ */
+
+.frame-wrapper.type-r {
+  display: block !important;
+  position: relative;
+  background: #000000;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+/* 画面窗口图片：cover 填满，可拖动 */
+.frame-wrapper.type-r > img {
+  position: absolute;
+  object-fit: cover;
+  object-position: center center;
+  max-width: none;
+  max-height: none;
+  border-radius: 0;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.frame-wrapper.type-r > img:active {
+  cursor: grabbing;
+}
+
+/* 隐藏 photoFooter */
+.frame-wrapper.type-r .photo-footer {
+  display: none;
+}
+
+/* 文字/打印容器：铺满整个画布 */
+.frame-wrapper.type-r .border-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* 右侧胶片带 */
+.type-r-print {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 8%;
+  height: 100%;
+}
+
+/* 单个打印槽：固定中心（top 由 JS 内联设置），水平居中；署名占顶槽 */
+.type-r-slot {
+  position: absolute;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: center;
+  transform: translateY(-50%);
+}
+
+/* 单个打印项：竖排（逆时针 90°，字头朝右，自下而上读） */
+.type-r-item {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-family: 'Doto', 'MiSans', monospace;
+  font-weight: 700;
+  color: #E5742A;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* Type R 署名提示（仅英文） */
+.type-r-sign-hint {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #888888;
+}
+
+/* 拖动提示：显示在预览区底部居中 */
+.type-r-drag-hint {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: rgba(136, 136, 136, 0.75);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* Type R 面板：曝光模式下拉框与文本输入外观一致 */
+#typeRPrintSection .param-item select {
+  flex: 1;
+  height: 32px;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  color: #eee;
+  padding: 0;
+  margin: 0;
+  font-size: 12px;
+  min-width: 0;
+  cursor: pointer;
+}
+
+#typeRPrintSection .param-item select:focus {
+  outline: none;
+}
+
+/* Type R 面板：日期控件与文本输入外观一致（并启用深色原生控件） */
+#typeRPrintSection input[type="date"] {
+  width: 100%;
+  height: 38px;
+  background: #1a1a1a;
+  border: 1px solid #333;
+  border-radius: 6px;
+  color: #eee;
+  padding: 0 12px;
+  font-size: 13px;
+  color-scheme: dark;
+}
+
+#typeRPrintSection input[type="date"]:focus {
+  outline: none;
+  border-color: #68bbff;
+}
