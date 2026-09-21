@@ -23,17 +23,10 @@ let state = {
  * @param {HTMLElement} elements.borderContent - borderContent 元素
  */
 export function init(elements) {
-  console.log('[TypeB] init called', elements);
   state.img = elements.img;
   state.frameWrapper = elements.frameWrapper;
   state.photoFooter = elements.photoFooter;
   state.borderContent = elements.borderContent;
-  console.log('[TypeB] state after init:', { 
-    img: !!state.img, 
-    frameWrapper: !!state.frameWrapper, 
-    photoFooter: !!state.photoFooter,
-    borderContent: !!state.borderContent
-  });
 }
 
 /**
@@ -175,10 +168,8 @@ export function updatePreview(squareSize, margin, imgDimensions = {}) {
  * @param {Object} settings - 显示设置
  */
 export function updateContentPreview(settings) {
-  console.log('[TypeB] updateContentPreview called');
   
   if (!state.borderContent) {
-    console.log('[TypeB] borderContent is null!');
     return;
   }
   
@@ -200,13 +191,7 @@ export function updateContentPreview(settings) {
     previewImgWidth
   } = settings;
   
-  console.log('[TypeB] settings:', { squareSize, margin, previewImgWidth, dateTime, showTime, focalLength, fNumber, exposureTime, iso, customModel, showModel });
   
-  console.log('[TypeB] borderContent before setting:', {
-    left: state.borderContent.style.left,
-    width: state.borderContent.style.width,
-    innerHTML: state.borderContent.innerHTML.substring(0, 100)
-  });
   
   // 清除旧的 mainContainer（它在 frameWrapper 中）
   const oldMainContainer = state.frameWrapper?.querySelector('.type-b-main-container');
@@ -412,17 +397,10 @@ export function updateContentPreview(settings) {
  * @param {Object} displaySettings - 显示设置
  */
 export function update(imgSettings, displaySettings) {
-  console.log('[TypeB] update called', { imgSettings, displaySettings });
   const { squareSize, margin } = calcSize(imgSettings);
-  console.log('[TypeB] calcSize result:', { squareSize, margin });
   
   // 更新容器
   updateFrameWrapper(squareSize);
-  console.log('[TypeB] frameWrapper classList:', state.frameWrapper?.classList.toString());
-  console.log('[TypeB] frameWrapper style:', {
-    width: state.frameWrapper?.style.width,
-    height: state.frameWrapper?.style.height
-  });
   
   // 更新图片预览（传入图片原始尺寸）
   const { previewImgWidth } = updatePreview(squareSize, margin, {
@@ -433,7 +411,6 @@ export function update(imgSettings, displaySettings) {
   // 更新内容预览（传入 previewImgWidth 用于居中计算）
   updateContentPreview({ ...displaySettings, squareSize, margin, previewImgWidth });
   
-  console.log('[TypeB] update complete, borderContent innerHTML length:', state.borderContent?.innerHTML.length);
 }
 
 /**

@@ -50,13 +50,6 @@ function drawText(ctx, font, text, x, y, fontSize, options = {}) {
  */
 async function drawBorderContent(ctx, imgWidth, imgHeight, borderHeight, settings, fonts) {
   // 调试日志
-  console.log('=== drawBorderContent ===');
-  console.log('imgWidth:', imgWidth, 'borderHeight:', borderHeight);
-  console.log('showModel:', settings.showModel, 'customModel:', settings.customModel);
-  console.log('showParams:', settings.showParams, 'fNumber:', settings.fNumber, 'exposureTime:', settings.exposureTime, 'iso:', settings.iso);
-  console.log('signatureText:', settings.signatureText);
-  console.log('showTime:', settings.showTime, 'dateTime:', settings.dateTime);
-  console.log('========================');
   
   const borderTop = imgHeight;
   const textColor = borderColorIsLight(settings.borderColor) ? '#000000' : '#ffffff';
@@ -451,8 +444,6 @@ export async function renderImage(img, options) {
   }
 
   // 导出为 DataURL
-  console.log('Canvas 尺寸:', canvas.width, canvas.height);
-  console.log('原始图片尺寸:', img.naturalWidth, img.naturalHeight);
   return canvas.toDataURL('image/jpeg', quality);
 }
 

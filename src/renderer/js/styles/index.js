@@ -158,68 +158,9 @@ export function getExport(styleId) {
   return styles[styleId]?.export || styles['type-a'].export;
 }
 
-/**
- * 获取完整样式配置
- * @param {string} styleId - 样式 ID
- * @returns {StyleModule} 样式配置
- */
-export function getStyle(styleId) {
-  return styles[styleId] || styles['type-a'];
-}
-
-/**
- * 获取所有样式列表
- * @returns {Array<{id: string, preview: Object, export: Object}>} 样式列表
- */
-export function getAllStyles() {
-  return Object.keys(styles).map(id => ({
-    id,
-    ...styles[id]
-  }));
-}
-
-// 重新导出 Type B Preview（供 app.js 直接使用）
+// 重新导出 app.js 直接使用的 Preview 模块
 export { typeBPreview } from './type-B-preview.js';
-
-// 重新导出 Type A Preview（供 editor.js 使用）
-export { typeAPreview } from './type-A-preview.js';
-
-// 重新导出 Type C Preview
-export { typeCPreview } from './type-C-preview.js';
-
-// 重新导出 Type D Preview
-export { typeDPreview } from './type-D-preview.js';
-
-// 重新导出 Type E Preview
 export { typeEPreview } from './type-E-preview.js';
-
-// 重新导出 Type F Preview
-export { typeFPreview } from './type-F-preview.js';
-
-// 重新导出 Type G Preview
-export { typeGPreview } from './type-G-preview.js';
-
-export { typeHPreview } from './type-H-preview.js';
-
-export { typeIPreview } from './type-I-preview.js';
-
-export { typeJPreview } from './type-J-preview.js';
-
-export { typeKPreview } from './type-K-preview.js';
-
-export { typeLPreview } from './type-L-preview.js';
-export { typeMPreview } from './type-M-preview.js';
-
-export { typeNPreview } from './type-N-preview.js';
-
-export { typeOPreview } from './type-O-preview.js';
-
-export { typePPreview } from './type-P-preview.js';
-
-export { typeQPreview } from './type-Q-preview.js';
-
 export { typeRPreview } from './type-R-preview.js';
-
 export { typeSPreview } from './type-S-preview.js';
-
 export { typeTPreview } from './type-T-preview.js';

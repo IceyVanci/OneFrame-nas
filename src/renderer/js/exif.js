@@ -279,7 +279,6 @@ export async function getExif(file) {
       }
     }
 
-    console.log('EXIF loaded:', result);
     return result;
   } catch (e) {
     console.error('Failed to load EXIF:', e);

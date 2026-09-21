@@ -1,7 +1,7 @@
 ﻿// OneFrame 主程序
 import { getExif, formatDateTime, getFocalLength, getPhysicalFocalLength, getExposureModeLabel, formatExposureBias } from './exif.js';
 import { getModelName, getAllLogos, getLogoFilename, getMakeName } from './logo-utils.js';
-import { getStyle, getPreview, typeBPreview, typeEPreview, typeFPreview, typeRPreview, typeSPreview, typeTPreview } from './styles/index.js';
+import { getPreview, typeBPreview, typeEPreview, typeRPreview, typeSPreview, typeTPreview } from './styles/index.js';
 import { configureEditPanel as configureTypeF } from './components/type-F-editor-panel.js';
 import { configureEditPanel as configureTypeG } from './components/type-G-editor-panel.js';
 import { configureEditPanel as configureTypeH } from './components/type-H-editor-panel.js';

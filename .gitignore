@@ -37,6 +37,7 @@ implementation_plan.md
 CODE_REVIEW_FIX_PLAN.md
 MOBILE_SCALING_FIX_PLAN.md
 V1.16-NAS_IMPLEMENTATION_PLAN.md
+REFACTOR_PLAN.md
 
 # Packaged Docker images
 *.tar
