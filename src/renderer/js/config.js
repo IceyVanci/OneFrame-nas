@@ -5,7 +5,7 @@
 
 /**
  * 导出命名模式：
- * 0 = 默认模式：{图片名}-OneFrame.jpg
+ * 0 = 默认模式：{图片名}OneFrame.jpg
  * 1 = 预览图模式：{图片名}-TypeA-sample.jpg
  */
 export const EXPORT_NAMING_MODE = 0;

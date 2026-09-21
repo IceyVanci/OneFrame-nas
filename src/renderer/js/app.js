@@ -1,7 +1,7 @@
 ﻿// OneFrame 主程序
 import { getExif, formatDateTime, getFocalLength, getPhysicalFocalLength, getExposureModeLabel, formatExposureBias } from './exif.js';
 import { getModelName, getAllLogos, getLogoFilename, getMakeName } from './logo-utils.js';
-import { getStyle, getPreview, typeBPreview, typeEPreview, typeFPreview, typeRPreview } from './styles/index.js';
+import { getStyle, getPreview, typeBPreview, typeEPreview, typeFPreview, typeRPreview, typeSPreview, typeTPreview } from './styles/index.js';
 import { configureEditPanel as configureTypeF } from './components/type-F-editor-panel.js';
 import { configureEditPanel as configureTypeG } from './components/type-G-editor-panel.js';
 import { configureEditPanel as configureTypeH } from './components/type-H-editor-panel.js';
@@ -15,6 +15,8 @@ import { configureEditPanel as configureTypeO } from './components/type-O-editor
 import { configureEditPanel as configureTypeP } from './components/type-P-editor-panel.js';
 import { configureEditPanel as configureTypeQ } from './components/type-Q-editor-panel.js';
 import { configureEditPanel as configureTypeR } from './components/type-R-editor-panel.js';
+import { configureEditPanel as configureTypeS } from './components/type-S-editor-panel.js';
+import { configureEditPanel as configureTypeT } from './components/type-T-editor-panel.js';
 import { exportImage } from './exporter.js';
 import { initHomepageThumbnails } from './thumbnail-selector.js';
 import { EXPORT_NAMING_MODE } from './config.js';
@@ -194,7 +196,9 @@ document.addEventListener('DOMContentLoaded', () => {
   let typeOCachedSize = null;  // Type O 图框尺寸缓存
   let typePCachedSize = null;  // Type P 图框尺寸缓存
   let typeQCachedSize = null;  // Type Q 图框尺寸缓存
-  let typeRCachedSize = null;  // Type R 图框尺寸缓存
+  let typeRCachedSize = null;
+let typeSCachedSize = null;
+let typeTCachedSize = null;  // Type R 图框尺寸缓存
 
   // Type O 胶片数据 { version, manufacturers, films }
   let filmsData = { version: 3, manufacturers: [], films: {} };
@@ -306,7 +310,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateBorderContent();
   }
 
-  async function loadImageWithExif(file) {
+  async function loadImageWithExif(file, options = {}) {
     const loadId = ++imageLoadSequence;
 
     if (currentStyle === 'type-b') {
@@ -332,15 +336,23 @@ document.addEventListener('DOMContentLoaded', () => {
     typePCachedSize = null;  // 清除 Type P 图框缓存
     typeQCachedSize = null;  // 清除 Type Q 图框缓存
     typeRCachedSize = null;  // 清除 Type R 图框缓存
+    typeSCachedSize = null;
+    typeTCachedSize = null;
     // 释放旧的 Object URL 内存
     if (userImage.src && userImage.src.startsWith('blob:')) {
       URL.revokeObjectURL(userImage.src);
     }
+    const preservedTopFields = options.preserveTopLines ? captureTopLineFields() : null;
     resetForm();
+    restoreTopLineFields(preservedTopFields);
     if (currentStyle === 'type-e') {
       typeEPreview.resetImageOffset();
     } else if (currentStyle === 'type-r') {
       typeRPreview.resetImageOffset();
+    } else if (currentStyle === 'type-s') {
+      typeSPreview.resetImageOffset();
+    } else if (currentStyle === 'type-t') {
+      typeTPreview.resetImageOffset();
     }
     userImage.src = URL.createObjectURL(file);
     try {
@@ -356,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
     return true;
   }
 
-  async function loadImageInElectron(imagePath) {
+  async function loadImageInElectron(imagePath, options = {}) {
     const loadId = ++imageLoadSequence;
 
     if (currentStyle === 'type-b') {
@@ -382,6 +394,8 @@ document.addEventListener('DOMContentLoaded', () => {
     typePCachedSize = null;  // 清除 Type P 图框缓存
     typeQCachedSize = null;  // 清除 Type Q 图框缓存
     typeRCachedSize = null;  // 清除 Type R 图框缓存
+    typeSCachedSize = null;
+    typeTCachedSize = null;
     let nextExif = {};
     let fallbackDateTimeValue = '';
     try {
@@ -407,11 +421,17 @@ document.addEventListener('DOMContentLoaded', () => {
     if (loadId !== imageLoadSequence) return false;
 
     currentExif = nextExif;
+    const preservedTopFields = options.preserveTopLines ? captureTopLineFields() : null;
     resetForm();
+    restoreTopLineFields(preservedTopFields);
     if (currentStyle === 'type-e') {
       typeEPreview.resetImageOffset();
     } else if (currentStyle === 'type-r') {
       typeRPreview.resetImageOffset();
+    } else if (currentStyle === 'type-s') {
+      typeSPreview.resetImageOffset();
+    } else if (currentStyle === 'type-t') {
+      typeTPreview.resetImageOffset();
     }
     updateExifDisplay();
     if (!currentExif.DateTimeOriginal && fallbackDateTimeValue) {
@@ -496,6 +516,62 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     }
+    // Type S：预填右下参数与日期（全部可手输覆盖）
+    if (currentStyle === 'type-s') {
+      const isoSInput = document.getElementById('isoS');
+      if (isoSInput && currentExif.ISOSpeedRatings) isoSInput.value = currentExif.ISOSpeedRatings;
+      const focalSInput = document.getElementById('focalS');
+      if (focalSInput) {
+        const pf = getPhysicalFocalLength(currentExif);
+        if (pf) focalSInput.value = pf;
+      }
+      const fNumSInput = document.getElementById('fNumberS');
+      if (fNumSInput && currentExif.FNumber) {
+        fNumSInput.value = typeof currentExif.FNumber === 'string'
+          ? currentExif.FNumber.replace(/^f\s*\/?\s*/i, '').replace(/^F/, '')
+          : currentExif.FNumber;
+      }
+      const shutterSInput = document.getElementById('shutterS');
+      if (shutterSInput && currentExif.ExposureTime) shutterSInput.value = currentExif.ExposureTime;
+      const dateSInput = document.getElementById('dateS');
+      if (dateSInput) {
+        const m = String(currentExif.DateTimeOriginal || '').match(/(\d{4})[-:/](\d{2})[-:/](\d{2})/);
+        if (m) {
+          dateSInput.value = `${m[1]}-${m[2]}-${m[3]}`;
+        } else if (!dateSInput.value) {
+          const now = new Date();
+          dateSInput.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        }
+      }
+    }
+    // Type T：预填右下参数与日期（全部可手输覆盖）
+    if (currentStyle === 'type-t') {
+      const isoTInput = document.getElementById('isoT');
+      if (isoTInput && currentExif.ISOSpeedRatings) isoTInput.value = currentExif.ISOSpeedRatings;
+      const focalTInput = document.getElementById('focalT');
+      if (focalTInput) {
+        const pf = getPhysicalFocalLength(currentExif);
+        if (pf) focalTInput.value = pf;
+      }
+      const fNumTInput = document.getElementById('fNumberT');
+      if (fNumTInput && currentExif.FNumber) {
+        fNumTInput.value = typeof currentExif.FNumber === 'string'
+          ? currentExif.FNumber.replace(/^f\s*\/?\s*/i, '').replace(/^F/, '')
+          : currentExif.FNumber;
+      }
+      const shutterTInput = document.getElementById('shutterT');
+      if (shutterTInput && currentExif.ExposureTime) shutterTInput.value = currentExif.ExposureTime;
+      const dateTInput = document.getElementById('dateT');
+      if (dateTInput) {
+        const m = String(currentExif.DateTimeOriginal || '').match(/(\d{4})[-:/](\d{2})[-:/](\d{2})/);
+        if (m) {
+          dateTInput.value = `${m[1]}-${m[2]}-${m[3]}`;
+        } else if (!dateTInput.value) {
+          const now = new Date();
+          dateTInput.value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        }
+      }
+    }
   }
 
   styleCards.forEach(card => {
@@ -528,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 监听窗口大小变化，重新计算预览布局
     window.addEventListener('resize', updateBorder);
     const borderColorSection = document.querySelector('.edit-section:has(#borderColor)');
-    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f' || currentStyle === 'type-g' || currentStyle === 'type-h' || currentStyle === 'type-i' || currentStyle === 'type-j' || currentStyle === 'type-k' || currentStyle === 'type-l' || currentStyle === 'type-m' || currentStyle === 'type-n' || currentStyle === 'type-p' || currentStyle === 'type-q' || currentStyle === 'type-r') ? 'none' : 'block';
+    if (borderColorSection) borderColorSection.style.display = (currentStyle === 'type-b' || currentStyle === 'type-e' || currentStyle === 'type-f' || currentStyle === 'type-g' || currentStyle === 'type-h' || currentStyle === 'type-i' || currentStyle === 'type-j' || currentStyle === 'type-k' || currentStyle === 'type-l' || currentStyle === 'type-m' || currentStyle === 'type-n' || currentStyle === 'type-p' || currentStyle === 'type-q' || currentStyle === 'type-r' || currentStyle === 'type-s' || currentStyle === 'type-t') ? 'none' : 'block';
     
     // 调用对应样式的面板配置模块
     const panelConfigurers = {
@@ -541,7 +617,9 @@ document.addEventListener('DOMContentLoaded', () => {
       'type-o': configureTypeO,
       'type-p': configureTypeP,
       'type-q': configureTypeQ,
-      'type-r': configureTypeR
+      'type-r': configureTypeR,
+      'type-s': configureTypeS,
+      'type-t': configureTypeT
     };
     panelConfigurers[currentStyle]?.();
     
@@ -588,6 +666,30 @@ document.addEventListener('DOMContentLoaded', () => {
     location.reload();
   }
 
+  // Type S/T：重选图片时保留左上第一行与 PHOTO BY 的手输内容
+  function captureTopLineFields() {
+    const groups = {
+      'type-s': ['topLineS', 'photoByS'],
+      'type-t': ['topLineT', 'photoByT']
+    };
+    const ids = groups[currentStyle];
+    if (!ids) return null;
+    const saved = {};
+    ids.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) saved[id] = el.value;
+    });
+    return saved;
+  }
+
+  function restoreTopLineFields(saved) {
+    if (!saved) return;
+    Object.keys(saved).forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = saved[id];
+    });
+  }
+
   function resetForm() {
     selectedLogo = null;
     logoPreview.innerHTML = '';
@@ -604,6 +706,16 @@ document.addEventListener('DOMContentLoaded', () => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
+    // Type S 文字与右下参数：清空（随后由 EXIF 预填）
+    ['topLineS', 'photoByS', 'dateS', 'isoS', 'focalS', 'fNumberS', 'shutterS'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+    // Type T 文字与右下参数：清空（随后由 EXIF 预填）
+    ['topLineT', 'photoByT', 'dateT', 'isoT', 'focalT', 'fNumberT', 'shutterT'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
     const manufacturerSelect = document.getElementById('manufacturerSelect');
     if (manufacturerSelect) manufacturerSelect.value = '';
     const filmBrandSelect = document.getElementById('filmBrand');
@@ -617,12 +729,12 @@ document.addEventListener('DOMContentLoaded', () => {
   btnReselect.addEventListener('click', async () => {
     if (window.electronAPI) {
       const imagePath = await window.electronAPI.selectImage();
-      if (imagePath) await loadImageInElectron(imagePath);
+      if (imagePath) await loadImageInElectron(imagePath, { preserveTopLines: true });
     } else {
       const input = document.createElement('input');
       input.type = 'file';
       input.accept = 'image/*';
-      input.onchange = async (e) => { if (e.target.files[0]) await loadImageWithExif(e.target.files[0]); };
+      input.onchange = async (e) => { if (e.target.files[0]) await loadImageWithExif(e.target.files[0], { preserveTopLines: true }); };
       input.click();
     }
   });
@@ -1100,6 +1212,68 @@ document.addEventListener('DOMContentLoaded', () => {
       });
       frameWrapper.style.transform = 'none';
       updateBorderContent();
+    } else if (currentStyle === 'type-s') {
+      // 使用 Type S Preview 模块（两个比例开关：画布 / 图片区域）
+      const frameWrapper = document.getElementById('frameWrapper');
+      const borderContent = document.getElementById('borderContent');
+      preview.init({
+        img: userImage,
+        frameWrapper: frameWrapper,
+        photoFooter: photoFooter,
+        borderContent: borderContent
+      });
+      if (!typeSCachedSize) {
+        typeSCachedSize = preview.calcSize({
+          naturalWidth: userImage.naturalWidth,
+          naturalHeight: userImage.naturalHeight,
+          canvasRatioS: document.getElementById('canvasRatioS')?.value || '1:1'
+        });
+      }
+      const { squareSize: sCanvasW, canvasHeight: sCanvasH } = typeSCachedSize;
+      const sPreviewArea = frameWrapper?.parentElement;
+      const sAvailW = (sPreviewArea?.clientWidth || 500) * 0.96;
+      const sAvailH = (sPreviewArea?.clientHeight || 600) * 0.96;
+      const sDisplayScale = Math.min(sAvailW / sCanvasW, sAvailH / sCanvasH, 1);
+      const sDisplayW = Math.round(sCanvasW * sDisplayScale);
+      const sDisplayH = Math.round(sCanvasH * sDisplayScale);
+      preview.updateFrameWrapper(sDisplayW, sDisplayH);
+      preview.updatePreview(sDisplayW, sDisplayH, {
+        naturalWidth: userImage.naturalWidth,
+        naturalHeight: userImage.naturalHeight
+      });
+      frameWrapper.style.transform = 'none';
+      updateBorderContent();
+    } else if (currentStyle === 'type-t') {
+      // 使用 Type T Preview 模块（满幅无边框，照片比例可切换）
+      const frameWrapper = document.getElementById('frameWrapper');
+      const borderContent = document.getElementById('borderContent');
+      preview.init({
+        img: userImage,
+        frameWrapper: frameWrapper,
+        photoFooter: photoFooter,
+        borderContent: borderContent
+      });
+      if (!typeTCachedSize) {
+        typeTCachedSize = preview.calcSize({
+          naturalWidth: userImage.naturalWidth,
+          naturalHeight: userImage.naturalHeight,
+          ratioT: document.getElementById('ratioT')?.value || '1:1'
+        });
+      }
+      const { squareSize: tCanvasW, canvasHeight: tCanvasH } = typeTCachedSize;
+      const tPreviewArea = frameWrapper?.parentElement;
+      const tAvailW = (tPreviewArea?.clientWidth || 500) * 0.96;
+      const tAvailH = (tPreviewArea?.clientHeight || 600) * 0.96;
+      const tDisplayScale = Math.min(tAvailW / tCanvasW, tAvailH / tCanvasH, 1);
+      const tDisplayW = Math.round(tCanvasW * tDisplayScale);
+      const tDisplayH = Math.round(tCanvasH * tDisplayScale);
+      preview.updateFrameWrapper(tDisplayW, tDisplayH);
+      preview.updatePreview(tDisplayW, tDisplayH, {
+        naturalWidth: userImage.naturalWidth,
+        naturalHeight: userImage.naturalHeight
+      });
+      frameWrapper.style.transform = 'none';
+      updateBorderContent();
     } else {
       // 使用对应样式 Preview 模块
       const frameWrapper = document.getElementById('frameWrapper');
@@ -1149,7 +1323,25 @@ document.addEventListener('DOMContentLoaded', () => {
       printFNumber: document.getElementById('printFNumber')?.value || '',
       printExposureBias: document.getElementById('printExposureBias')?.value || '',
       printFocalLength: document.getElementById('printFocalLength')?.value || '',
-      printDate: document.getElementById('printDate')?.value || ''
+      printDate: document.getElementById('printDate')?.value || '',
+      canvasRatioS: document.getElementById('canvasRatioS')?.value || '1:1',
+      topLineS: document.getElementById('topLineS')?.value || '',
+      photoByS: document.getElementById('photoByS')?.value || '',
+      dateS: document.getElementById('dateS')?.value || '',
+      isoS: document.getElementById('isoS')?.value || '',
+      focalS: document.getElementById('focalS')?.value || '',
+      fNumberS: document.getElementById('fNumberS')?.value || '',
+      shutterS: document.getElementById('shutterS')?.value || '',
+      textColorS: document.getElementById('typeSColor')?.value || 'dominant',
+      ratioT: document.getElementById('ratioT')?.value || '1:1',
+      topLineT: document.getElementById('topLineT')?.value || '',
+      photoByT: document.getElementById('photoByT')?.value || '',
+      dateT: document.getElementById('dateT')?.value || '',
+      isoT: document.getElementById('isoT')?.value || '',
+      focalT: document.getElementById('focalT')?.value || '',
+      fNumberT: document.getElementById('fNumberT')?.value || '',
+      shutterT: document.getElementById('shutterT')?.value || '',
+      textColorT: document.getElementById('typeTColor')?.value || '#ffffff'
     };
   }
 
@@ -1194,7 +1386,25 @@ document.addEventListener('DOMContentLoaded', () => {
           printFNumber: document.getElementById('printFNumber')?.value || '',
           printExposureBias: document.getElementById('printExposureBias')?.value || '',
           printFocalLength: document.getElementById('printFocalLength')?.value || '',
-          printDate: document.getElementById('printDate')?.value || ''
+          printDate: document.getElementById('printDate')?.value || '',
+          canvasRatioS: document.getElementById('canvasRatioS')?.value || '1:1',
+          topLineS: document.getElementById('topLineS')?.value || '',
+          photoByS: document.getElementById('photoByS')?.value || '',
+          dateS: document.getElementById('dateS')?.value || '',
+          isoS: document.getElementById('isoS')?.value || '',
+          focalS: document.getElementById('focalS')?.value || '',
+          fNumberS: document.getElementById('fNumberS')?.value || '',
+          shutterS: document.getElementById('shutterS')?.value || '',
+          textColorS: document.getElementById('typeSColor')?.value || 'dominant',
+          ratioT: document.getElementById('ratioT')?.value || '1:1',
+          topLineT: document.getElementById('topLineT')?.value || '',
+          photoByT: document.getElementById('photoByT')?.value || '',
+          dateT: document.getElementById('dateT')?.value || '',
+          isoT: document.getElementById('isoT')?.value || '',
+          focalT: document.getElementById('focalT')?.value || '',
+          fNumberT: document.getElementById('fNumberT')?.value || '',
+          shutterT: document.getElementById('shutterT')?.value || '',
+          textColorT: document.getElementById('typeTColor')?.value || '#ffffff'
         }
       );
     }
@@ -1207,11 +1417,224 @@ document.addEventListener('DOMContentLoaded', () => {
     applyDynamicBackground(userImage);
   });
 
-  ['customModel', 'fNumber', 'exposureTime', 'focalLength', 'iso', 'dateTime', 'signatureText', 'filmStyle', 'frameNumber', 'printExposureMode', 'printExposureTime', 'printFNumber', 'printExposureBias', 'printFocalLength', 'printDate'].forEach(id => {
+  ['customModel', 'fNumber', 'exposureTime', 'focalLength', 'iso', 'dateTime', 'signatureText', 'filmStyle', 'frameNumber', 'printExposureMode', 'printExposureTime', 'printFNumber', 'printExposureBias', 'printFocalLength', 'printDate', 'topLineS', 'photoByS', 'dateS', 'isoS', 'focalS', 'fNumberS', 'shutterS', 'topLineT', 'photoByT', 'dateT', 'isoT', 'focalT', 'fNumberT', 'shutterT'].forEach(id => {
     document.getElementById(id)?.addEventListener('input', updateBorderContent);
   });
   // 曝光模式下拉：change 事件确保更新
   document.getElementById('printExposureMode')?.addEventListener('change', updateBorderContent);
+
+  // ========== Type S 控件 ==========
+  // 画布比例切换：清除尺寸缓存并重新布局
+  document.getElementById('canvasRatioS')?.addEventListener('change', () => {
+    typeSCachedSize = null;
+    typeTCachedSize = null;
+    updateBorder();
+  });
+
+  // 文字颜色预设（主色 / 黑 / 自定义）
+  document.getElementById('typeSColorPresets')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-scolor]');
+    if (!btn) return;
+    const val = btn.dataset.scolor;
+    document.querySelectorAll('#typeSColorPresets .color-preset').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const hidden = document.getElementById('typeSColor');
+    const picker = document.getElementById('typeSColorPicker');
+    if (val === 'custom') {
+      if (hidden) hidden.value = picker?.value || '#000000';
+    } else {
+      if (hidden) hidden.value = val;
+      if (val !== 'dominant' && picker) picker.value = val;
+    }
+    updateBorderContent();
+  });
+
+  // 原生选色器
+  document.getElementById('typeSColorPicker')?.addEventListener('input', (e) => {
+    const hidden = document.getElementById('typeSColor');
+    if (hidden) hidden.value = e.target.value;
+    document.querySelectorAll('#typeSColorPresets .color-preset').forEach(b => {
+      b.classList.toggle('active', b.dataset.scolor === 'custom');
+    });
+    updateBorderContent();
+  });
+
+  // 点选图片取色
+  let typeSPicking = false;
+  const typeSPickBtn = document.getElementById('typeSPickBtn');
+  const stopTypeSPick = () => {
+    typeSPicking = false;
+    typeSPickBtn?.classList.remove('active');
+    if (userImage) userImage.style.cursor = '';
+  };
+  typeSPickBtn?.addEventListener('click', () => {
+    typeSPicking = !typeSPicking;
+    typeSPickBtn.classList.toggle('active', typeSPicking);
+    if (userImage) userImage.style.cursor = typeSPicking ? 'crosshair' : '';
+  });
+  userImage.addEventListener('click', (e) => {
+    if (!typeSPicking || currentStyle !== 'type-s') return;
+    const hex = sampleTypeSColor(e);
+    if (hex) {
+      const hidden = document.getElementById('typeSColor');
+      if (hidden) hidden.value = hex;
+      const picker = document.getElementById('typeSColorPicker');
+      if (picker) picker.value = hex;
+      document.querySelectorAll('#typeSColorPresets .color-preset').forEach(b => {
+        b.classList.toggle('active', b.dataset.scolor === 'custom');
+      });
+      updateBorderContent();
+    }
+    stopTypeSPick();
+  });
+
+  /**
+   * 从点击位置采样图片像素颜色（考虑 cover 裁剪与拖动偏移）
+   * @param {MouseEvent} e
+   * @returns {string|null} #rrggbb
+   */
+  function sampleTypeSColor(e) {
+    if (!userImage.complete || !userImage.naturalWidth) return null;
+    const st = typeSPreview.getState();
+    const rect = st.photoRect;
+    if (!rect || !rect.w || !rect.h) return null;
+    const nW = userImage.naturalWidth;
+    const nH = userImage.naturalHeight;
+    const imgRatio = nW / nH;
+    const winRatio = rect.w / rect.h;
+    let drawnW, drawnH;
+    if (imgRatio > winRatio) {
+      drawnH = rect.h;
+      drawnW = rect.h * imgRatio;
+    } else {
+      drawnW = rect.w;
+      drawnH = rect.w / imgRatio;
+    }
+    const pctX = (50 + (st.offset?.x || 0) * 50) / 100;
+    const pctY = (50 + (st.offset?.y || 0) * 50) / 100;
+    const srcLeft = (drawnW - rect.w) * pctX;
+    const srcTop = (drawnH - rect.h) * pctY;
+    const natX = Math.round((e.offsetX + srcLeft) * (nW / drawnW));
+    const natY = Math.round((e.offsetY + srcTop) * (nH / drawnH));
+    if (natX < 0 || natY < 0 || natX >= nW || natY >= nH) return null;
+    try {
+      const c = document.createElement('canvas');
+      c.width = 1;
+      c.height = 1;
+      const cx = c.getContext('2d', { willReadFrequently: true });
+      cx.drawImage(userImage, -natX, -natY);
+      const d = cx.getImageData(0, 0, 1, 1).data;
+      return '#' + [d[0], d[1], d[2]].map(v => v.toString(16).padStart(2, '0')).join('');
+    } catch (err) {
+      return null;
+    }
+  }
+
+  // ========== Type T 控件 ==========
+  // 照片比例切换：清除尺寸缓存并重新布局
+  document.getElementById('ratioT')?.addEventListener('change', () => {
+    typeTCachedSize = null;
+    updateBorder();
+  });
+
+  // 文字颜色预设（白 / 主色 / 自定义）
+  document.getElementById('typeTColorPresets')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-tcolor]');
+    if (!btn) return;
+    const val = btn.dataset.tcolor;
+    document.querySelectorAll('#typeTColorPresets .color-preset').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const hidden = document.getElementById('typeTColor');
+    const picker = document.getElementById('typeTColorPicker');
+    if (val === 'custom') {
+      if (hidden) hidden.value = picker?.value || '#ffffff';
+    } else {
+      if (hidden) hidden.value = val;
+      if (val !== 'dominant' && picker) picker.value = val;
+    }
+    updateBorderContent();
+  });
+
+  // 原生选色器
+  document.getElementById('typeTColorPicker')?.addEventListener('input', (e) => {
+    const hidden = document.getElementById('typeTColor');
+    if (hidden) hidden.value = e.target.value;
+    document.querySelectorAll('#typeTColorPresets .color-preset').forEach(b => {
+      b.classList.toggle('active', b.dataset.tcolor === 'custom');
+    });
+    updateBorderContent();
+  });
+
+  // 点选图片取色
+  let typeTPicking = false;
+  const typeTPickBtn = document.getElementById('typeTPickBtn');
+  const stopTypeTPick = () => {
+    typeTPicking = false;
+    typeTPickBtn?.classList.remove('active');
+    if (userImage) userImage.style.cursor = '';
+  };
+  typeTPickBtn?.addEventListener('click', () => {
+    typeTPicking = !typeTPicking;
+    typeTPickBtn.classList.toggle('active', typeTPicking);
+    if (userImage) userImage.style.cursor = typeTPicking ? 'crosshair' : '';
+  });
+  userImage.addEventListener('click', (e) => {
+    if (!typeTPicking || currentStyle !== 'type-t') return;
+    const hex = sampleTypeTColor(e);
+    if (hex) {
+      const hidden = document.getElementById('typeTColor');
+      if (hidden) hidden.value = hex;
+      const picker = document.getElementById('typeTColorPicker');
+      if (picker) picker.value = hex;
+      document.querySelectorAll('#typeTColorPresets .color-preset').forEach(b => {
+        b.classList.toggle('active', b.dataset.tcolor === 'custom');
+      });
+      updateBorderContent();
+    }
+    stopTypeTPick();
+  });
+
+  /**
+   * 从点击位置采样图片像素颜色（考虑 cover 裁剪与拖动偏移）
+   * @param {MouseEvent} e
+   * @returns {string|null} #rrggbb
+   */
+  function sampleTypeTColor(e) {
+    if (!userImage.complete || !userImage.naturalWidth) return null;
+    const st = typeTPreview.getState();
+    const rect = st.photoRect;
+    if (!rect || !rect.w || !rect.h) return null;
+    const nW = userImage.naturalWidth;
+    const nH = userImage.naturalHeight;
+    const imgRatio = nW / nH;
+    const winRatio = rect.w / rect.h;
+    let drawnW, drawnH;
+    if (imgRatio > winRatio) {
+      drawnH = rect.h;
+      drawnW = rect.h * imgRatio;
+    } else {
+      drawnW = rect.w;
+      drawnH = rect.w / imgRatio;
+    }
+    const pctX = (50 + (st.offset?.x || 0) * 50) / 100;
+    const pctY = (50 + (st.offset?.y || 0) * 50) / 100;
+    const srcLeft = (drawnW - rect.w) * pctX;
+    const srcTop = (drawnH - rect.h) * pctY;
+    const natX = Math.round((e.offsetX + srcLeft) * (nW / drawnW));
+    const natY = Math.round((e.offsetY + srcTop) * (nH / drawnH));
+    if (natX < 0 || natY < 0 || natX >= nW || natY >= nH) return null;
+    try {
+      const c = document.createElement('canvas');
+      c.width = 1;
+      c.height = 1;
+      const cx = c.getContext('2d', { willReadFrequently: true });
+      cx.drawImage(userImage, -natX, -natY);
+      const d = cx.getImageData(0, 0, 1, 1).data;
+      return '#' + [d[0], d[1], d[2]].map(v => v.toString(16).padStart(2, '0')).join('');
+    } catch (err) {
+      return null;
+    }
+  }
   // 厂商 change：仅更新预览（第 2 行厂商+机型）
   document.getElementById('manufacturerSelect')?.addEventListener('change', () => {
     updateBorderContent();
@@ -1255,7 +1678,25 @@ document.addEventListener('DOMContentLoaded', () => {
       printFNumber: document.getElementById('printFNumber')?.value || '',
       printExposureBias: document.getElementById('printExposureBias')?.value || '',
       printFocalLength: document.getElementById('printFocalLength')?.value || '',
-      printDate: document.getElementById('printDate')?.value || ''
+      printDate: document.getElementById('printDate')?.value || '',
+      canvasRatioS: document.getElementById('canvasRatioS')?.value || '1:1',
+      topLineS: document.getElementById('topLineS')?.value || '',
+      photoByS: document.getElementById('photoByS')?.value || '',
+      dateS: document.getElementById('dateS')?.value || '',
+      isoS: document.getElementById('isoS')?.value || '',
+      focalS: document.getElementById('focalS')?.value || '',
+      fNumberS: document.getElementById('fNumberS')?.value || '',
+      shutterS: document.getElementById('shutterS')?.value || '',
+      textColorS: document.getElementById('typeSColor')?.value || 'dominant',
+      ratioT: document.getElementById('ratioT')?.value || '1:1',
+      topLineT: document.getElementById('topLineT')?.value || '',
+      photoByT: document.getElementById('photoByT')?.value || '',
+      dateT: document.getElementById('dateT')?.value || '',
+      isoT: document.getElementById('isoT')?.value || '',
+      focalT: document.getElementById('focalT')?.value || '',
+      fNumberT: document.getElementById('fNumberT')?.value || '',
+      shutterT: document.getElementById('shutterT')?.value || '',
+      textColorT: document.getElementById('typeTColor')?.value || '#ffffff'
     };
   }
 
@@ -1284,6 +1725,12 @@ document.addEventListener('DOMContentLoaded', () => {
       } else if (currentStyle === 'type-r') {
         // Type R 需要传递归一化拖动偏移（画面窗口裁剪）
         exportOptions.imageOffset = typeRPreview.getNormalizedOffset();
+      } else if (currentStyle === 'type-s') {
+        // Type S 需要传递归一化拖动偏移（照片区裁剪）
+        exportOptions.imageOffset = typeSPreview.getNormalizedOffset();
+      } else if (currentStyle === 'type-t') {
+        // Type T 需要传递归一化拖动偏移（满幅照片裁剪）
+        exportOptions.imageOffset = typeTPreview.getNormalizedOffset();
       }
       
       const blob = await exportImage(userImage, exportOptions);
@@ -1291,17 +1738,17 @@ document.addEventListener('DOMContentLoaded', () => {
 
       if (window.electronAPI) {
         // Electron 环境
-        let exportFilename = 'output-OneFrame.jpg';
+        let exportFilename = 'outputOneFrame.jpg';
         if (currentImagePath) {
           const nameWithoutExt = currentImagePath.replace(/\\/g, '/').split('/').pop().replace(/\.[^.]+$/, '');
           exportFilename = EXPORT_NAMING_MODE === 1
             ? `${nameWithoutExt}-${styleTypeName}-sample.jpg`
-            : `${nameWithoutExt}-OneFrame.jpg`;
+            : `${nameWithoutExt}OneFrame.jpg`;
         } else if (currentFile?.name) {
           const baseName = currentFile.name.replace(/\.[^.]+$/, '');
           exportFilename = EXPORT_NAMING_MODE === 1
             ? `${baseName}-${styleTypeName}-sample.jpg`
-            : `${baseName}-OneFrame.jpg`;
+            : `${baseName}OneFrame.jpg`;
         }
         const savePath = await window.electronAPI.saveImage(exportFilename);
         if (savePath) {
@@ -1315,7 +1762,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const baseName = currentFile?.name?.replace(/\.[^.]+$/, '') || 'output';
         const exportFilename = EXPORT_NAMING_MODE === 1
           ? `${baseName}-${styleTypeName}-sample.jpg`
-          : `${baseName}-OneFrame.jpg`;
+          : `${baseName}OneFrame.jpg`;
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;

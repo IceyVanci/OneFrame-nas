@@ -36,8 +36,8 @@ function shuffle(array) {
 function buildStyleThumbnailMeta(card) {
   const styleId = card.dataset.style;
   if (!styleId) return null;
-  // Type O / P / Q / R 不参与随机缩略图（不占用独立样本位）
-  if (styleId === 'type-o' || styleId === 'type-p' || styleId === 'type-q' || styleId === 'type-r') return null;
+  // Type O / P / Q / R / S / T 不参与随机缩略图（不占用独立样本位）
+  if (styleId === 'type-o' || styleId === 'type-p' || styleId === 'type-q' || styleId === 'type-r' || styleId === 'type-s' || styleId === 'type-t') return null;
 
   const img = card.querySelector('.preview-image');
   let basePath = '';
@@ -176,7 +176,7 @@ export async function initHomepageThumbnails(styleCards, options = {}) {
     const img = card.querySelector('.preview-image');
     if (!img) continue;
     let path = assignments.get(styleId);
-    // 未参与随机缩略图的样式（如 Type O / P / Q / R）：使用自身 data-fallback-src 固定显示
+    // 未参与随机缩略图的样式（如 Type O / P / Q / R / S / T）：使用自身 data-fallback-src 固定显示
     if (!path) path = img.getAttribute('data-fallback-src');
     if (!path) continue;
     img.classList.add('loading');

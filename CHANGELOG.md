@@ -1,5 +1,54 @@
 # OneFrame NAS Edition 更新日志
 
+## v1.20 (2026-09-21)
+
+### 🎨 新特性
+
+#### 新增 Type S 样式（留白排版 · 参考图）
+- 第 19 种边框样式；白色画布，照片恒为画布宽 82% 的正方形并**水平垂直居中**
+- **画布比例可切换**：`1:1` / `1:1.35`（竖），`canvasWidth = 原图短边 / 0.82`
+- 照片 `cover` 填满照片区，可**二维拖动**选择显示区域（归一化偏移，导出端同一偏移裁剪）
+- 左上两行文字：第一行（默认空）+「PHOTO BY {handle}」；右侧**竖排日期**（YYYYMMDD）+ 倒三角标记，垂直居中；右下参数行 `ISO | {focal}mm | F/{f} | {shutter}s`
+- **文字颜色默认取图片主色**（dominant），支持黑 / 琥珀 `#E5742A` / 自定义（原生选色器 + **点选图片取色**）
+- 编辑面板：画布比例 + 第一行/PHOTO BY/日期 + 右下四参数 + 文字颜色；其余隐藏
+
+#### 新增 Type T 样式（满幅无边框 · 参考图）
+- 第 20 种边框样式；照片**铺满整张画布（无白边）**，画布 = 照片比例，可切换 `1:1` / `1:1.35`（竖）
+- 文字布局与 Type S 一致（左上两行 / 右侧竖排日期+倒三角 / 右下参数），**文字带淡阴影**保证压在照片上可读
+- **文字颜色默认白色**，支持图片主色 / 琥珀 `#E5742A` / 自定义（选色器 + 点选图片取色）
+- 编辑面板：照片比例 + 第一行/PHOTO BY/日期 + 右下四参数 + 文字颜色；其余隐藏
+
+#### 首页缩略图
+- Type S / T **不参与随机缩略图**，固定显示自身样本（`Sample/04474-TypeS-sample_compressed.jpeg` / `Sample/04510-TypeT-sample_compressed.jpeg`），与 Type O/P/Q/R 一致回退
+- `thumbnail-selector.js` 从随机缩略图排除列表中追加 Type S / T
+
+### 📁 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `src/renderer/css/type-S.css` | Type S 样式 |
+| `src/renderer/css/type-T.css` | Type T 样式 |
+| `src/renderer/js/styles/type-S-preview.js` | Type S 预览模块 |
+| `src/renderer/js/styles/type-S-export.js` | Type S 导出模块 |
+| `src/renderer/js/styles/type-T-preview.js` | Type T 预览模块 |
+| `src/renderer/js/styles/type-T-export.js` | Type T 导出模块 |
+| `src/renderer/js/components/type-S-editor-panel.js` | Type S 编辑面板配置 |
+| `src/renderer/js/components/type-T-editor-panel.js` | Type T 编辑面板配置 |
+| `src/renderer/Sample/04474-TypeS-sample_compressed.jpeg` | Type S 预览样本 |
+| `src/renderer/Sample/04510-TypeT-sample_compressed.jpeg` | Type T 预览样本 |
+| `docs/V1.20-NAS_CHANGES.md` | v1.20 变更说明 |
+| `docs/release-v1.20-nas.md` | v1.20 Release 文档 |
+
+### 🔧 修改文件
+
+- `src/renderer/index.html` — type-S.css/type-T.css 链接 + 第 19/20 个样式卡片 + `#typeSSection`/`#typeTSection` 编辑区 + 版本号 v1.20
+- `src/renderer/js/app.js` — Type S/T 预览分支、尺寸缓存、面板注册、updateBorder 分支、EXIF 预填、颜色预设与点选取色、导出偏移
+- `src/renderer/js/styles/index.js` — 注册 Type S / Type T
+- `src/renderer/js/exporter.js` — 注册 Type S / Type T 导出
+- `src/renderer/js/thumbnail-selector.js` — Type S/T 静态样本回退（移除随机占位）
+
+---
+
 ## v1.18 (2026-09-12)
 
 ### 🎨 新特性

@@ -22,6 +22,8 @@ import { typeOExport } from './styles/type-O-export.js';
 import { typePExport } from './styles/type-P-export.js';
 import { typeQExport } from './styles/type-Q-export.js';
 import { typeRExport } from './styles/type-R-export.js';
+import { typeSExport } from './styles/type-S-export.js';
+import { typeTExport } from './styles/type-T-export.js';
 
 // 导出样式映射
 const exportStyles = {
@@ -42,7 +44,9 @@ const exportStyles = {
   'type-o': typeOExport,
   'type-p': typePExport,
   'type-q': typeQExport,
-  'type-r': typeRExport
+  'type-r': typeRExport,
+  'type-s': typeSExport,
+  'type-t': typeTExport
 };
 /**
  * 获取导出渲染函数

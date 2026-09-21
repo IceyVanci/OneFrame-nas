@@ -4,7 +4,7 @@
 
 本项目是 [OneFrame](https://github.com/IceyVanci/OneFrame) 的 NAS/Docker 移植版本，从 Electron 桌面应用迁移为纯前端 Web 应用，通过 Docker 容器化部署在 NAS 上，局域网内设备可通过浏览器访问。
 
-![Version](https://img.shields.io/badge/version-1.18--nas-blue.svg)
+![Version](https://img.shields.io/badge/version-1.20--nas-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Docker](https://img.shields.io/badge/Docker-nginx:alpine-2496ED.svg)
 
@@ -18,7 +18,7 @@
 - 自动读取拍摄时间和设备型号
 
 ### 🎨 边框样式
-支持 17 种边框样式：
+支持 20 种边框样式：
 - **Type A**：白色下边框 - 可调节边框高度（5%-30%），完整编辑面板
 - **Type B**：黑色下边框 - 正方形画布，图片居左，右侧显示参数和 Logo
 - **Type C**：横向布局 - Logo 在左侧，参数在右侧，纵向图片自动缩放字体
@@ -36,6 +36,9 @@
 - **Type O**：胶片参数+机身大字+底部水印 - 胶片品牌/型号下拉+手输，厂商+机型手动输入，黑色署名水印，纵向白边更窄
 - **Type P**：参数布局 - 机型 Semibold + 品牌 Logo + 参数胶囊（快门/ISO/焦距/光圈），照片按原图比例完整显示无裁切
 - **Type Q**：简洁布局 - 四边 2.5% 边框自动取图片主色，署名 "Foto by" 叠照片内右下角，署名颜色黑/白/主色可选
+- **Type R**：胶片边缘打印 - Pentax 645N 风格黑色胶片底 + 画面窗口 + 右侧竖排橙色参数打印，画布锁定 645 单帧比例
+- **Type S**：留白排版 - 白色画布 + 居中正方形照片（82%）+ 左上两行文字 + 右侧竖排日期与倒三角标记 + 右下参数，比例 1:1 / 1:1.35
+- **Type T**：满幅无边框 - 照片铺满整张画布 + 左上两行文字 + 右侧竖排日期与倒三角标记 + 右下参数，文字带淡阴影，比例 1:1 / 1:1.35
 
 ### 📝 边框信息编辑
 - Logo 显示开关
@@ -149,7 +152,7 @@ docker compose up --build -d
 
 ### 1. 选择边框样式
 打开浏览器访问应用后，点击首页的样式卡片。
-所有 17 种样式（Type A-Q）同时显示在首页图片墙中
+所有 20 种样式（Type A-T）同时显示在首页图片墙中
 
 ### 2. 选择图片
 选择样式后，系统会弹出文件选择器，选择要处理的图片。
@@ -239,8 +242,10 @@ docker compose up --build
 - [docs/AI_PROJECT_GUIDE.md](./docs/AI_PROJECT_GUIDE.md) - AI 项目认知指南
 - [docs/function_analysis.md](./docs/function_analysis.md) - 函数分析文档
 - [docs/migration-guide.md](./docs/migration-guide.md) - Electron → Docker 移植指南
-- [docs/V1.17-NAS_CHANGES.md](./docs/V1.17-NAS_CHANGES.md) - v1.17 新增样式（Type O 胶片参数+机身大字+底部水印）
-- [docs/release-v1.17-nas.md](./docs/release-v1.17-nas.md) - v1.17 Release 说明
+- [docs/V1.20-NAS_CHANGES.md](./docs/V1.20-NAS_CHANGES.md) - v1.20 新增样式（Type S 留白排版 + Type T 满幅无边框）
+- [docs/release-v1.20-nas.md](./docs/release-v1.20-nas.md) - v1.20 Release 说明
+- [docs/V1.19-NAS_CHANGES.md](./docs/V1.19-NAS_CHANGES.md) - v1.19 新增样式（Type R 胶片边缘打印 + 动态等距排版）
+- [docs/release-v1.19-nas.md](./docs/release-v1.19-nas.md) - v1.19 Release 说明
 - [docs/V1.18-NAS_CHANGES.md](./docs/V1.18-NAS_CHANGES.md) - v1.18 新增样式（Type P 参数布局 + Type Q 简洁布局）
 - [docs/release-v1.18-nas.md](./docs/release-v1.18-nas.md) - v1.18 Release 说明
 - [docs/V1.15-NAS_CHANGES.md](./docs/V1.15-NAS_CHANGES.md) - v1.15 同步变更（Type N 上下对称边框）
