@@ -40,45 +40,138 @@ export function calcBorderSize(imgWidth, imgHeight, borderPercent) {
 }
 
 /**
- * 更新 frameWrapper 样式
- * @param {HTMLElement} frameWrapper - frameWrapper 元素
+ * 计算设计画布尺寸（统一接口，P2 填满式：画布=图片+底栏）
+ * @param {Object} settings - 设置
+ * @param {number} settings.borderPercent - 边框百分比
+ * @returns {{canvasWidth: number, canvasHeight: number}|null} 设计像素尺寸；图片未加载时返回 null
  */
-export function updateFrameWrapper(frameWrapper) {
-  if (!frameWrapper) return;
-  
-  // 移除所有类型类名后再添加当前类型
-  frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e', 'type-f');
-  frameWrapper.classList.add('type-c');
+export function calcSize(settings) {
+  const w = state.img ? state.img.naturalWidth : 0;
+  const h = state.img ? state.img.naturalHeight : 0;
+  if (!w || !h) return null;
+  const borderPercent = settings && Number.isFinite(settings.borderPercent) ? settings.borderPercent : 12;
+  const borderHeight = Math.round(Math.min(w, h) * (borderPercent / 100));
+  return { canvasWidth: w, canvasHeight: h + borderHeight };
 }
 
 /**
- * 更新 DOM 预览
- * @param {HTMLElement} img - 用户图片元素
- * @param {HTMLElement} photoFooter - 底部边框元素
- * @param {Object} options - 配置选项
- * @param {string} options.borderColor - 边框颜色
- * @param {number} options.borderHeight - 边框高度（像素）
- * @param {HTMLElement} options.borderHeightLabel - 边框高度标签元素
- * @param {string} options.aspectRatio - 比例设置
+ * 更新 frameWrapper 样式（统一接口，P2 填满式）
+ * @param {number} displayWidth - 画布显示宽度（像素，已取整）
+ * @param {number} [displayHeight] - 画布显示总高度（填满式下高度由内容决定，仅统一接口签名）
  */
-export function updatePreview(img, photoFooter, options) {
-  const { borderColor, borderHeight, borderHeightLabel, aspectRatio } = options;
-  
+export function updateFrameWrapper(displayWidth, displayHeight) {
+  const frameWrapper = state.frameWrapper;
+  if (!frameWrapper) return;
+
+  // 移除所有类型类名后再添加当前类型
+  frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e', 'type-f');
+  frameWrapper.classList.add('type-c');
+
+  // P2：显式画布宽度（高度由内容即"图片+底栏"决定，垂直居中由 .preview-area flex 负责）
+  frameWrapper.style.width = `${displayWidth}px`;
+
+  // ===== [LEGACY C e0bd5e5] 旧实现（仅切换类名，宽度由 flex/CSS 决定），P2 填满式前保留用于回滚 =====
+  // export function updateFrameWrapper(frameWrapper) {
+  //   if (!frameWrapper) return;
+  //
+  //   // 移除所有类型类名后再添加当前类型
+  //   frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e', 'type-f');
+  //   frameWrapper.classList.add('type-c');
+  // }
+  // ===== [LEGACY END] =====
+}
+
+/**
+ * 更新 DOM 预览（统一接口，P2 填满式）
+ * @param {number} displayWidth - 画布显示宽度（像素，已取整）
+ * @param {number} displayHeight - 画布显示总高度（图片+底栏，像素，已取整）
+ * @param {Object} imgDims - 图片自然尺寸 { naturalWidth, naturalHeight }
+ * @param {Object} settings - 样式设置
+ * @param {string} settings.borderColor - 边框颜色
+ * @param {number} settings.borderPercent - 边框百分比
+ * @param {HTMLElement} settings.borderHeightLabel - 边框高度标签元素
+ * @param {string} settings.aspectRatio - 比例设置
+ */
+export function updatePreview(displayWidth, displayHeight, imgDims, settings) {
+  const img = state.img;
+  const photoFooter = state.photoFooter;
+  if (!img || !photoFooter) return;
+
+  const { borderColor, borderPercent, borderHeightLabel, aspectRatio } = settings || {};
+
+  // P2：由画布显示宽度换算图片显示高度（保持自然比例，取整误差 ≤1px）
+  const displayScale = imgDims && imgDims.naturalWidth ? displayWidth / imgDims.naturalWidth : 1;
+  const imgDisplayHeight = imgDims && imgDims.naturalHeight
+    ? Math.round(imgDims.naturalHeight * displayScale)
+    : displayHeight;
+
+  img.style.width = `${displayWidth}px`;
+  img.style.height = `${imgDisplayHeight}px`;
+
+  const isLandscape = displayWidth > imgDisplayHeight;
+
+  // P2：边框内容字号按显示尺寸缩放（镜像导出 base/900；竖图额外 ×0.7），CSS 子元素以 em 相对该基准
+  if (state.borderContent) {
+    const contentBase = isLandscape ? displayWidth : imgDisplayHeight;
+    const fontScale = isLandscape ? 1 : 0.7;
+    state.borderContent.style.fontSize = `${Math.round(12 * contentBase / 900 * fontScale)}px`;
+  }
+
+  const shortSide = Math.min(displayWidth, imgDisplayHeight);
+  const borderHeight = Math.round(shortSide * (borderPercent / 100));
+
   photoFooter.style.backgroundColor = borderColor;
   photoFooter.style.height = `${borderHeight}px`;
   photoFooter.style.width = '100%';
-  
-  const isLandscape = img.clientWidth > img.clientHeight;
-  const shortSide = Math.min(img.clientWidth, img.clientHeight);
-  
+
   if (!isLandscape) {
     photoFooter.style.width = `${shortSide}px`;
   }
-  
+
   if (borderHeightLabel) {
     borderHeightLabel.textContent = `${borderHeight / shortSide * 100}%`;
   }
-  
+
+  // 处理比例设置
+  if (aspectRatio === 'original') {
+    const offset = Math.round(borderHeight / 4);
+    const cropPercent = (borderHeight / 2) / imgDisplayHeight * 100;
+    img.style.clipPath = `inset(${cropPercent}% 0)`;
+    img.style.transform = `translateY(${offset}px)`;
+    photoFooter.style.transform = `translateY(-${offset}px)`;
+  } else {
+    img.style.clipPath = 'none';
+    img.style.transform = 'none';
+    photoFooter.style.transform = 'none';
+  }
+
+  // 更新 borderContent 位置，使其只在 photoFooter 内显示
+  updateBorderContentPosition(photoFooter, img, { aspectRatio });
+
+  // 保存图片方向到 state 中，供 updateContentPreview 使用
+  state.isPortrait = !isLandscape;
+}
+
+// ===== [LEGACY C e0bd5e5] 旧实现（CSS 隐式尺寸 + 测量渲染值），P2 填满式前保留用于回滚 =====
+/*
+export function updatePreview(img, photoFooter, options) {
+  const { borderColor, borderHeight, borderHeightLabel, aspectRatio } = options;
+
+  photoFooter.style.backgroundColor = borderColor;
+  photoFooter.style.height = `${borderHeight}px`;
+  photoFooter.style.width = '100%';
+
+  const isLandscape = img.clientWidth > img.clientHeight;
+  const shortSide = Math.min(img.clientWidth, img.clientHeight);
+
+  if (!isLandscape) {
+    photoFooter.style.width = `${shortSide}px`;
+  }
+
+  if (borderHeightLabel) {
+    borderHeightLabel.textContent = `${borderHeight / shortSide * 100}%`;
+  }
+
   // 处理比例设置
   if (aspectRatio === 'original') {
     const offset = Math.round(borderHeight / 4);
@@ -91,13 +184,15 @@ export function updatePreview(img, photoFooter, options) {
     img.style.transform = 'none';
     photoFooter.style.transform = 'none';
   }
-  
+
   // 更新 borderContent 位置，使其只在 photoFooter 内显示
   updateBorderContentPosition(photoFooter, img, { aspectRatio });
-  
+
   // 保存图片方向到 state 中，供 updateContentPreview 使用
   state.isPortrait = !isLandscape;
 }
+*/
+// ===== [LEGACY END] =====
 
 /**
  * 更新边框内容位置
@@ -152,10 +247,12 @@ export function updateContentPreview(elements, settings) {
   const isLight = borderColor === '#ffffff' || borderColor === '#fff';
   const textColor = isLight ? '#000' : '#fff';
   
-  // 纵向图片时字体大小减小 30%
-  const isPortrait = state.isPortrait;
-  const baseFontSize = 12;
-  const fontSize = isPortrait ? Math.round(baseFontSize * 0.7) : baseFontSize;
+  // ===== [LEGACY C e0bd5e5] 旧实现：固定行内字号（12px，竖图×0.7），依赖旧 ≤900px 画布；P2 改由 borderContent 基准字号 + CSS em =====
+  // // 纵向图片时字体大小减小 30%
+  // const isPortrait = state.isPortrait;
+  // const baseFontSize = 12;
+  // const fontSize = isPortrait ? Math.round(baseFontSize * 0.7) : baseFontSize;
+  // ===== [LEGACY END] =====
   
   // Logo
   if (selectedLogo && showLogo) {
@@ -199,7 +296,7 @@ export function updateContentPreview(elements, settings) {
     borderModel.style.color = textColor;
     borderModel.style.fontFamily = "'MiSans', 'Segoe UI', sans-serif";
     borderModel.style.fontWeight = '500';
-    borderModel.style.fontSize = `${fontSize}px`;
+    // borderModel.style.fontSize = `${fontSize}px`;  // [LEGACY C e0bd5e5] P2 改由容器基准字号 × CSS em
   } else {
     borderModel.textContent = '';
   }
@@ -218,7 +315,7 @@ export function updateContentPreview(elements, settings) {
     borderParams.style.color = textColor;
     borderParams.style.fontFamily = "'MiSans', 'Segoe UI', sans-serif";
     borderParams.style.fontWeight = 'normal';
-    borderParams.style.fontSize = `${fontSize}px`;
+    // borderParams.style.fontSize = `${fontSize}px`;  // [LEGACY C e0bd5e5] P2 改由容器基准字号 × CSS em
   } else {
     borderParams.textContent = '';
   }
@@ -232,7 +329,7 @@ export function updateContentPreview(elements, settings) {
     borderSignature.style.color = textColor;
     borderSignature.style.fontFamily = "'MiSans', 'Segoe UI', sans-serif";
     borderSignature.style.fontWeight = '600';
-    borderSignature.style.fontSize = `${fontSize}px`;
+    // borderSignature.style.fontSize = `${fontSize}px`;  // [LEGACY C e0bd5e5] P2 改由容器基准字号 × CSS em
   } else {
     borderSignature.textContent = '';
   }
@@ -244,7 +341,7 @@ export function updateContentPreview(elements, settings) {
     borderTime.style.color = textColor;
     borderTime.style.fontFamily = "'MiSans', 'Segoe UI', sans-serif";
     borderTime.style.fontWeight = 'normal';
-    borderTime.style.fontSize = `${fontSize}px`;
+    // borderTime.style.fontSize = `${fontSize}px`;  // [LEGACY C e0bd5e5] P2 改由容器基准字号 × CSS em
   } else {
     borderTime.textContent = '';
   }
@@ -284,6 +381,7 @@ export function reset() {
   if (state.borderContent) {
     // 重置动态设置的样式，保留 CSS 定义的 position: absolute
     state.borderContent.style.bottom = '';
+    state.borderContent.style.fontSize = ''; // P2：清除基准字号
     state.borderContent.style.left = '';
     state.borderContent.style.width = '';
     state.borderContent.style.height = '';
@@ -333,6 +431,7 @@ export const typeCPreview = {
   id: 'type-c',
   name: 'Type C Preview',
   init,
+  calcSize,
   calcBorderSize,
   updateFrameWrapper,
   updatePreview,

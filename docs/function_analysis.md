@@ -1,5 +1,7 @@
 # OneFrame NAS Edition 函数分析文档
 
+> 注意：本分析基于早期版本（Type A–N），部分函数与结构已有变化（如预览统一缩放、缓存机制）；最新完整说明见 [docs/README.md](./README.md)。
+>
 > 本文档基于 OneFrame NAS 版本（Docker/Web），反映从 Electron 移植后的实际代码状态。
 > 原始项目：[OneFrame](https://github.com/IceyVanci/OneFrame)（Electron 桌面应用）
 

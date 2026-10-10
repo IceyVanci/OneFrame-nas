@@ -2,10 +2,6 @@
 node_modules/
 *.tgz
 
-# Archived docs (moved to docs/)
-docs/CHANGELOG_v1.01-nas_ARCHIVE.md
-docs/implementation_plan_ARCHIVE.md
-
 # Redundant docker ignore
 docker/.dockerignore
 
@@ -38,6 +34,7 @@ CODE_REVIEW_FIX_PLAN.md
 MOBILE_SCALING_FIX_PLAN.md
 V1.16-NAS_IMPLEMENTATION_PLAN.md
 REFACTOR_PLAN.md
+PREVIEW_SCALE_PLAN.md
 
 # Packaged Docker images
 *.tar

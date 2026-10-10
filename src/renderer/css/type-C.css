@@ -61,7 +61,7 @@
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  gap: 2px;
+  gap: 0.1667em; /* P2：原 2px（=2/12em），随基础字号缩放 */
 }
 
 /* 中间：Logo (中心在横向 65% 处，宽度 12.5%) */
@@ -94,7 +94,7 @@
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
-  gap: 2px;
+  gap: 0.1667em; /* P2：原 2px（=2/12em），随基础字号缩放 */
   width: 100%;
 }
 
@@ -103,9 +103,9 @@
   display: none;
 }
 
-/* 文字样式 - 基础字号 */
+/* 文字样式 - 基础字号（P2：原 12px；现 1em 由 border-content 行内字号缩放，镜像导出 base/900×fontScale） */
 .frame-wrapper.type-c .border-text {
-  font-size: 12px;
+  font-size: 1em;
   font-weight: normal;
   white-space: nowrap;
 }
@@ -128,8 +128,20 @@
   font-weight: normal;
 }
 
-/* 焦距 - 大号字体 Medium (已隐藏) */
+/* 焦距 - 大号字体 Medium (已隐藏)（P2：原 24px；现 2em 随基础字号缩放） */
 .frame-wrapper.type-c .border-focal-text {
-  font-size: 24px;
+  font-size: 2em;
   font-weight: 500;
+}
+
+/* Type C（P2 填满式）：解除旧预览上限，改用与 F-T 一致的填满式适配（JS 显式尺寸 + 统一 0.96 fit） */
+.frame-wrapper.type-c {
+  max-width: none !important;
+  max-height: none !important;
+}
+
+/* P2：仅命中直系子元素（主图 userImage），避免泛匹配到 border-content 内的 logo img 导致按原始尺寸渲染 */
+.frame-wrapper.type-c > img {
+  max-width: none !important;
+  max-height: none !important;
 }

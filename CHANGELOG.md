@@ -1,5 +1,41 @@
 # OneFrame NAS Edition 更新日志
 
+## v1.21 (2026-10-10)
+
+### 🎨 预览缩放统一（20 样式）
+
+#### 统一「填满式」缩放机制
+- 20 种样式预览画布统一为同一套适配代码（新增 `src/renderer/js/styles/preview-scale.js`）：设计画布按预览区 **96% 等比适配**，画布完整可见、垂直居中、随窗口自适应，小图不上采样
+- **Type A–E**：移除旧的 900px / 80vh 上限，改为填满式大画布（与 F–T 观感一致）
+- **Type F–T**：接入统一机制，几何逐像素与旧版一致（0px 差异）
+- 移动端/窄窗下文字与内容随画布等比缩放（A/C/D 底栏文字由固定 px 改为 em 相对基准字号，修复移动端字号偏大）
+
+#### Type B 改进
+- 预览补齐照片圆角（与导出同比例，随画布缩放）
+- 修复 B → 其他样式切换时参数容器残留
+
+#### 工程说明
+- A–T 预览统一为单一分派路径；F–T 设计尺寸缓存改由 `previewDesignCache`（Map）管理
+- 旧实现以 `[LEGACY]` 注释保留用于回滚，将在下一版本更新统一清理
+
+### 📚 文档重组
+- 新增 `docs/README.md`：当前版本完整项目说明（架构 / 样式系统 / 统一缩放机制 / 开发指南）
+- 历史版本记录（v1.08–v1.21）迁入 `docs/changelogs/`（新增索引），更早归档见 `docs/archive/`
+- `README.md` 相关文档索引同步更新
+
+### ⚠️ 已知问题
+- Type E 拖动提示在窄窗/移动端会挤压画布导致右侧内容裁切（显示问题，不影响导出；计划下一版本修复）
+
+### 📁 新增文件
+
+| 文件 | 说明 |
+|------|------|
+| `src/renderer/js/styles/preview-scale.js` | 统一预览缩放模块（fitCanvasToPreview） |
+| `docs/README.md` | 当前版本完整项目说明 |
+| `docs/changelogs/README.md` | 历史版本记录索引 |
+| `docs/changelogs/release-v1.21-nas.md` | v1.21 Release 说明 |
+| `docs/changelogs/V1.21-NAS_CHANGES.md` | v1.21 详细变更（P1–P4 分阶段明细与验证数据） |
+
 ## v1.20 (2026-09-21)
 
 ### 🎨 新特性

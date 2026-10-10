@@ -74,7 +74,7 @@
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
-  gap: 2px;
+  gap: 0.1667em; /* P1 修订二：原 2px（=2/12em），随基础字号缩放 */
   width: 100%;
   padding-right: 5%;
 }
@@ -96,12 +96,12 @@
   flex-direction: column;
   align-items: flex-end;
   justify-content: center;
-  gap: 2px;
+  gap: 0.1667em; /* P1 修订二：原 2px（=2/12em），随基础字号缩放 */
 }
 
-/* 文字样式 - 基础字号 */
+/* 文字样式 - 基础字号（P1 修订二：原 12px；现 1em 由 border-content 行内字号缩放，镜像导出 base/900） */
 .border-text {
-  font-size: 12px;
+  font-size: 1em;
   font-weight: normal;
   white-space: nowrap;
 }
@@ -124,8 +124,20 @@
   font-weight: normal;
 }
 
-/* 焦距 - 大号字体 Medium */
+/* 焦距 - 大号字体 Medium（P1 修订二：原 24px；现 2em 随基础字号缩放） */
 .border-focal-text {
-  font-size: 24px;
+  font-size: 2em;
   font-weight: 500;
+}
+
+/* Type A（P1 修订）：解除旧预览上限，改用与 F-T 一致的填满式适配（JS 显式尺寸 + 统一 0.96 fit） */
+.frame-wrapper.type-a {
+  max-width: none !important;
+  max-height: none !important;
+}
+
+/* P1 修订二：仅命中直系子元素（主图 userImage），避免泛匹配到 border-content 内的 logo img 导致其按原始尺寸渲染 */
+.frame-wrapper.type-a > img {
+  max-width: none !important;
+  max-height: none !important;
 }

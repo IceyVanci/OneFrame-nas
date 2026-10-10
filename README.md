@@ -4,7 +4,7 @@
 
 本项目是 [OneFrame](https://github.com/IceyVanci/OneFrame) 的 NAS/Docker 移植版本，从 Electron 桌面应用迁移为纯前端 Web 应用，通过 Docker 容器化部署在 NAS 上，局域网内设备可通过浏览器访问。
 
-![Version](https://img.shields.io/badge/version-1.20--nas-blue.svg)
+![Version](https://img.shields.io/badge/version-1.21--nas-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
 ![Docker](https://img.shields.io/badge/Docker-nginx:alpine-2496ED.svg)
 
@@ -106,7 +106,7 @@ docker compose up --build -d
 ```bash
 # 下载镜像文件（在 Release 页面下载 .tar 文件）
 # 导入镜像
-docker load -i oneframe-web-v1.13-nas.tar
+docker load -i oneframe-web-v1.21-nas.tar
 
 # 运行容器
 docker run -d -p 8888:80 --name oneframe-web --restart unless-stopped oneframe-nas-oneframe:latest
@@ -238,34 +238,15 @@ docker compose up --build
 
 ## 📚 相关文档
 
-- [CHANGELOG.md](./CHANGELOG.md) - 更新日志
-- [docs/AI_PROJECT_GUIDE.md](./docs/AI_PROJECT_GUIDE.md) - AI 项目认知指南
-- [docs/function_analysis.md](./docs/function_analysis.md) - 函数分析文档
+- [docs/README.md](./docs/README.md) - **项目完整说明**（架构 / 20 样式 / 统一预览缩放机制 / 开发指南）
+- [CHANGELOG.md](./CHANGELOG.md) - 全版本更新日志
+- [docs/changelogs/](./docs/changelogs/) - 历史版本记录（v1.08–v1.21：Release 说明 + 详细变更）
+- [docs/archive/](./docs/archive/) - 更早版本归档（v1.00–v1.09 记录与历史报告）
+- [docs/release-v1.21-nas.md](./docs/changelogs/release-v1.21-nas.md) - v1.21 Release 说明（预览画布缩放统一）
+- [docs/V1.21-NAS_CHANGES.md](./docs/changelogs/V1.21-NAS_CHANGES.md) - v1.21 详细变更（P1–P4 分阶段明细与验证数据）
 - [docs/migration-guide.md](./docs/migration-guide.md) - Electron → Docker 移植指南
-- [docs/V1.20-NAS_CHANGES.md](./docs/V1.20-NAS_CHANGES.md) - v1.20 新增样式（Type S 留白排版 + Type T 满幅无边框）
-- [docs/release-v1.20-nas.md](./docs/release-v1.20-nas.md) - v1.20 Release 说明
-- [docs/V1.19-NAS_CHANGES.md](./docs/V1.19-NAS_CHANGES.md) - v1.19 新增样式（Type R 胶片边缘打印 + 动态等距排版）
-- [docs/release-v1.19-nas.md](./docs/release-v1.19-nas.md) - v1.19 Release 说明
-- [docs/V1.18-NAS_CHANGES.md](./docs/V1.18-NAS_CHANGES.md) - v1.18 新增样式（Type P 参数布局 + Type Q 简洁布局）
-- [docs/release-v1.18-nas.md](./docs/release-v1.18-nas.md) - v1.18 Release 说明
-- [docs/V1.15-NAS_CHANGES.md](./docs/V1.15-NAS_CHANGES.md) - v1.15 同步变更（Type N 上下对称边框）
-- [docs/release-v1.15-nas.md](./docs/release-v1.15-nas.md) - v1.15 Release 说明
-- [docs/V1.16-NAS_CHANGES.md](./docs/V1.16-NAS_CHANGES.md) - v1.16 修复变更（导出开关/Type E/B 一致性/字体重构/TypeN 清单）
-- [docs/release-v1.16-nas.md](./docs/release-v1.16-nas.md) - v1.16 Release 说明
-- [docs/V1.14-NAS_CHANGES.md](./docs/V1.14-NAS_CHANGES.md) - v1.14 同步变更（样本压缩+导出命名+Manifest自动化）
-- [docs/release-v1.14-nas.md](./docs/release-v1.14-nas.md) - v1.14 Release 说明
-- [docs/V1.13-NAS_CHANGES.md](./docs/V1.13-NAS_CHANGES.md) - v1.13 同步变更（缩略图随机选取 + 焦距单位修复）
-- [docs/V1.12-NAS_CHANGES.md](./docs/V1.12-NAS_CHANGES.md) - v1.12 同步变更（Type E 拖动/导出/EXIF 修复）
-- [docs/V1.11-NAS_CHANGES.md](./docs/V1.11-NAS_CHANGES.md) - v1.11 同步变更（Type M + 圆角 + 模糊修复）
-- [docs/V1.10-NAS_CHANGES.md](./docs/V1.10-NAS_CHANGES.md) - v1.10 同步变更（编辑器动态背景色）
-- [docs/V1.09-NAS_CHANGES.md](./docs/V1.09-NAS_CHANGES.md) - v1.09 同步变更（图片墙重构+文件名大写化）
-- [docs/V1.08-NAS_CHANGES.md](./docs/V1.08-NAS_CHANGES.md) - v1.08 同步变更（Type K/L）
-- [docs/V1.07-NAS_CHANGES.md](./docs/V1.07-NAS_CHANGES.md) - v1.07 同步变更（Type I/J）
-- [docs/V1.06-NAS_CHANGES.md](./docs/V1.06-NAS_CHANGES.md) - v1.06 同步变更（Type H）
-- [docs/release-v1.06-nas.md](./docs/release-v1.06-nas.md) - v1.06 Release 说明
-- [docs/V1.05-NAS_CHANGES.md](./docs/V1.05-NAS_CHANGES.md) - v1.05 同步变更（Type F/E/G）
-- [docs/V1.04_CHANGES.md](./docs/V1.04_CHANGES.md) - v1.04 Type F 缩放修复
-- [docs/V1.03-NAS_CHANGES.md](./docs/V1.03-NAS_CHANGES.md) - v1.03 Type F 同步
+- [docs/AI_PROJECT_GUIDE.md](./docs/AI_PROJECT_GUIDE.md) - AI 项目认知指南（v1.16 时代，部分过时）
+- [docs/function_analysis.md](./docs/function_analysis.md) - 函数分析文档（早期版本，部分过时）
 
 ---
 

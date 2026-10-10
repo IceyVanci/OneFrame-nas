@@ -89,12 +89,20 @@ function clamp(value, min, max) {
 }
 
 /**
- * 计算尺寸
- * @param {Object} settings - 设置
- * @param {number} settings.naturalHeight - 图片原始高度
- * @param {number} settings.naturalWidth - 图片原始宽度
- * @returns {Object} { squareSize, margin, canvasHeight }
+ * 计算设计画布尺寸（统一接口，P3 填满式：3:2 纵向画布，宽 = 图片短边，高 = 1.5×短边）
+ * @param {Object} [settings] - 设置（统一接口签名；E 由 state.img 读取自然尺寸）
+ * @returns {{canvasWidth: number, canvasHeight: number}|null} 设计像素尺寸；图片未加载时返回 null
  */
+export function calcSize(settings) {
+  const w = state.img ? state.img.naturalWidth : 0;
+  const h = state.img ? state.img.naturalHeight : 0;
+  const shortEdge = Math.min(w, h);
+  if (!shortEdge) return null;
+  return { canvasWidth: shortEdge, canvasHeight: Math.round(shortEdge * 1.5) };
+}
+
+// ===== [LEGACY E e0bd5e5] 旧实现（内部完成 0.96 适配并返回 squareSize/margin/canvasHeight），P3 统一 fit 前保留用于回滚 =====
+/*
 export function calcSize(settings) {
   const { naturalHeight, naturalWidth } = settings;
 
@@ -125,45 +133,68 @@ export function calcSize(settings) {
 
   return { squareSize, margin, canvasHeight };
 }
+*/
+// ===== [LEGACY END] =====
 
 /**
- * 设置 frameWrapper 为 3:2 矩形
- * @param {number} squareSize - 正方形边长
+ * 更新 frameWrapper 样式（统一接口，P3 填满式：3:2 纵向画布）
+ * @param {number} displayWidth - 画布显示宽度（= 图片显示方形边长，已取整）
+ * @param {number} displayHeight - 画布显示总高度（= round(设计高×scale)，已取整）
  */
-export function updateFrameWrapper(squareSize) {
+export function updateFrameWrapper(displayWidth, displayHeight) {
   if (!state.frameWrapper) return;
-
 
   // 移除所有类型类名后再添加当前类型
   state.frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e', 'type-f');
   state.frameWrapper.classList.add('type-e');
 
-  // 设置尺寸为 3:2
-  const canvasHeight = Math.round(squareSize * 1.5);
-  state.frameWrapper.style.width = `${squareSize}px`;
-  state.frameWrapper.style.height = `${canvasHeight}px`;
+  // P3：显式画布尺寸（宽=方形边长，高=统一 fit 结果）
+  state.frameWrapper.style.width = `${displayWidth}px`;
+  state.frameWrapper.style.height = `${displayHeight}px`;
 
   // 动态设置基准字号，CSS 中的 em 单位会相对于此值缩放
-  // 基准 480px 对应 24px，随 squareSize 等比缩放
+  // 基准 480px 对应 24px，随显示方形（= 画布宽）等比缩放（镜像导出 24×画布宽/480）
   if (state.borderContent) {
-    const baseFontSize = Math.max(8, Math.round(24 * squareSize / 480));
+    const baseFontSize = Math.max(8, Math.round(24 * displayWidth / 480));
     state.borderContent.style.fontSize = `${baseFontSize}px`;
   }
 
+  // ===== [LEGACY E e0bd5e5] 旧实现（仅接收 squareSize，内部推导画布高/字号），P3 前保留用于回滚 =====
+  // export function updateFrameWrapper(squareSize) {
+  //   if (!state.frameWrapper) return;
+  //
+  //   // 移除所有类型类名后再添加当前类型
+  //   state.frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e', 'type-f');
+  //   state.frameWrapper.classList.add('type-e');
+  //
+  //   // 设置尺寸为 3:2
+  //   const canvasHeight = Math.round(squareSize * 1.5);
+  //   state.frameWrapper.style.width = `${squareSize}px`;
+  //   state.frameWrapper.style.height = `${canvasHeight}px`;
+  //
+  //   // 动态设置基准字号，CSS 中的 em 单位会相对于此值缩放
+  //   // 基准 480px 对应 24px，随 squareSize 等比缩放
+  //   if (state.borderContent) {
+  //     const baseFontSize = Math.max(8, Math.round(24 * squareSize / 480));
+  //     state.borderContent.style.fontSize = `${baseFontSize}px`;
+  //   }
+  //
+  // }
+  // ===== [LEGACY END] =====
 }
 
 /**
- * 更新 DOM 预览
+ * 更新 DOM 预览（统一接口，P3 填满式）
  * 布局：顶部 1:1 正方形显示图片，底部白色区域
- * @param {number} squareSize - 正方形边长
- * @param {number} margin - 边距
+ * @param {number} displayWidth - 画布显示宽度（= 图片显示方形边长，已取整）
+ * @param {number} displayHeight - 画布显示总高度（已取整；底栏高由显示尺寸推导）
  * @param {Object} imgDimensions - 图片原始尺寸 { naturalWidth, naturalHeight }
+ * @param {Object} [settings] - 样式设置（统一接口签名；E 不使用）
  */
-export function updatePreview(squareSize, margin, imgDimensions = {}) {
+export function updatePreview(displayWidth, displayHeight, imgDimensions = {}, settings = {}) {
   if (!state.img || !state.photoFooter) {
     return;
   }
-
 
   // 保存原始尺寸用于 resize 时重算
   if (imgDimensions.naturalWidth && imgDimensions.naturalHeight) {
@@ -171,8 +202,19 @@ export function updatePreview(squareSize, margin, imgDimensions = {}) {
   }
 
   const { naturalWidth = 0, naturalHeight = 0 } = imgDimensions;
-  const canvasHeight = Math.round(squareSize * 1.5);
+  const squareSize = displayWidth;
+  const canvasHeight = displayHeight;
   const footerHeight = canvasHeight - squareSize;
+
+  // ===== [LEGACY E e0bd5e5] 旧签名/推导（内部由 squareSize 推导画布高），P3 前保留用于回滚 =====
+  // export function updatePreview(squareSize, margin, imgDimensions = {}) {
+  //   if (!state.img || !state.photoFooter) {
+  //     return;
+  //   }
+  //   ...
+  //   const canvasHeight = Math.round(squareSize * 1.5);
+  //   const footerHeight = canvasHeight - squareSize;
+  // ===== [LEGACY END] =====
 
   state.squareSize = squareSize;
   state.canvasHeight = canvasHeight;
