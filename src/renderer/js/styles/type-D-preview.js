@@ -28,18 +28,6 @@ export function init(elements) {
 }
 
 /**
- * 计算边框尺寸
- * @param {number} imgWidth - 图片宽度
- * @param {number} imgHeight - 图片高度
- * @param {number} borderPercent - 边框百分比
- * @returns {number} 边框高度（像素）
- */
-export function calcBorderSize(imgWidth, imgHeight, borderPercent) {
-  const shortSide = Math.min(imgWidth, imgHeight);
-  return Math.round(shortSide * (borderPercent / 100));
-}
-
-/**
  * 计算设计画布尺寸（统一接口，P2 填满式：画布=图片+底栏）
  * @param {Object} settings - 设置
  * @param {number} settings.borderPercent - 边框百分比
@@ -70,15 +58,6 @@ export function updateFrameWrapper(displayWidth, displayHeight) {
   // P2：显式画布宽度（高度由内容即"图片+底栏"决定，垂直居中由 .preview-area flex 负责）
   frameWrapper.style.width = `${displayWidth}px`;
 
-  // ===== [LEGACY D e0bd5e5] 旧实现（仅切换类名，宽度由 flex/CSS 决定），P2 填满式前保留用于回滚 =====
-  // export function updateFrameWrapper(frameWrapper) {
-  //   if (!frameWrapper) return;
-  //
-  //   // 移除所有类型类名后再添加当前类型
-  //   frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e', 'type-f');
-  //   frameWrapper.classList.add('type-d');
-  // }
-  // ===== [LEGACY END] =====
 }
 
 /**
@@ -152,47 +131,6 @@ export function updatePreview(displayWidth, displayHeight, imgDims, settings) {
   state.isPortrait = !isLandscape;
 }
 
-// ===== [LEGACY D e0bd5e5] 旧实现（CSS 隐式尺寸 + 测量渲染值），P2 填满式前保留用于回滚 =====
-/*
-export function updatePreview(img, photoFooter, options) {
-  const { borderColor, borderHeight, borderHeightLabel, aspectRatio } = options;
-
-  photoFooter.style.backgroundColor = borderColor;
-  photoFooter.style.height = `${borderHeight}px`;
-  photoFooter.style.width = '100%';
-
-  const isLandscape = img.clientWidth > img.clientHeight;
-  const shortSide = Math.min(img.clientWidth, img.clientHeight);
-
-  if (!isLandscape) {
-    photoFooter.style.width = `${shortSide}px`;
-  }
-
-  if (borderHeightLabel) {
-    borderHeightLabel.textContent = `${borderHeight / shortSide * 100}%`;
-  }
-
-  // 处理比例设置
-  if (aspectRatio === 'original') {
-    const offset = Math.round(borderHeight / 4);
-    const cropPercent = (borderHeight / 2) / img.clientHeight * 100;
-    img.style.clipPath = `inset(${cropPercent}% 0)`;
-    img.style.transform = `translateY(${offset}px)`;
-    photoFooter.style.transform = `translateY(-${offset}px)`;
-  } else {
-    img.style.clipPath = 'none';
-    img.style.transform = 'none';
-    photoFooter.style.transform = 'none';
-  }
-
-  // 更新 borderContent 位置，使其只在 photoFooter 内显示
-  updateBorderContentPosition(photoFooter, img, { aspectRatio });
-
-  // 保存图片方向到 state 中，供 updateContentPreview 使用
-  state.isPortrait = !isLandscape;
-}
-*/
-// ===== [LEGACY END] =====
 
 /**
  * 更新边框内容位置
@@ -247,12 +185,6 @@ export function updateContentPreview(elements, settings) {
   const isLight = borderColor === '#ffffff' || borderColor === '#fff';
   const textColor = isLight ? '#000' : '#fff';
   
-  // ===== [LEGACY D e0bd5e5] 旧实现：固定行内字号（12px，竖图×0.85），依赖旧 ≤900px 画布；P2 改由 borderContent 基准字号 + CSS em =====
-  // // 纵向图片字体缩小 0.85 倍
-  // const isPortrait = state.isPortrait;
-  // const fontScale = isPortrait ? 0.85 : 1;
-  // const fontSize = Math.round(12 * fontScale);
-  // ===== [LEGACY END] =====
   
   // Logo
   if (selectedLogo && showLogo) {
@@ -301,7 +233,6 @@ export function updateContentPreview(elements, settings) {
     borderTime.style.color = textColor;
     borderTime.style.fontFamily = "'MiSans', 'Segoe UI', sans-serif";
     borderTime.style.fontWeight = 'normal';
-    // borderTime.style.fontSize = `${fontSize}px`;  // [LEGACY D e0bd5e5] P2 改由容器基准字号 × CSS em
   } else {
     borderTime.textContent = '';
   }
@@ -312,7 +243,6 @@ export function updateContentPreview(elements, settings) {
     borderModel.style.color = textColor;
     borderModel.style.fontFamily = "'MiSans', 'Segoe UI', sans-serif";
     borderModel.style.fontWeight = '500';
-    // borderModel.style.fontSize = `${fontSize}px`;  // [LEGACY D e0bd5e5] P2 改由容器基准字号 × CSS em
   } else {
     borderModel.textContent = '';
   }
@@ -334,7 +264,6 @@ export function updateContentPreview(elements, settings) {
     borderParams.style.color = textColor;
     borderParams.style.fontFamily = "'MiSans', 'Segoe UI', sans-serif";
     borderParams.style.fontWeight = 'normal';
-    // borderParams.style.fontSize = `${fontSize}px`;  // [LEGACY D e0bd5e5] P2 改由容器基准字号 × CSS em
   } else {
     borderParams.textContent = '';
   }
@@ -345,7 +274,6 @@ export function updateContentPreview(elements, settings) {
     borderSignature.style.color = textColor;
     borderSignature.style.fontFamily = "'MiSans', 'Segoe UI', sans-serif";
     borderSignature.style.fontWeight = '600';
-    // borderSignature.style.fontSize = `${fontSize}px`;  // [LEGACY D e0bd5e5] P2 改由容器基准字号 × CSS em
   } else {
     borderSignature.textContent = '';
   }
@@ -436,7 +364,6 @@ export const typeDPreview = {
   name: 'Type D Preview',
   init,
   calcSize,
-  calcBorderSize,
   updateFrameWrapper,
   updatePreview,
   updateContentPreview,

@@ -155,7 +155,7 @@ updatePreview(displayWidth, displayHeight, imgDims, settings)
 updateContentPreview(elements, settings)        // 渲染文字/Logo（早已统一）
 reset()                                         // 还原默认结构与类名（保留元素引用）
 ```
-`app.js updateBorder()` 中 A–T 走**同一分支**（约 `app.js:1321`），逐样式差异全部收敛到各自模块的 `calcSize/updatePreview`。
+`app.js updateBorder()` 中 A–T 走**同一分支**（单一分派路径），逐样式差异全部收敛到各自模块的 `calcSize/updatePreview`。
 
 ### 5.3 各样式设计画布（摘要）
 | 样式 | 设计画布公式（原图像素） |
@@ -174,8 +174,8 @@ F–T 的 `calcSize` 结果缓存在 `previewDesignCache`（Map，键=样式 ID�
 - **S/T 比例切换时** `delete('type-s')` / `delete('type-t')`（保留旧版「切 S 同时清 T」语义）
 - A–E 不缓存（含 `borderPercent` 等实时参数）
 
-### 5.5 旧实现保留策略（下版本清理）
-改造过程中所有被替换的旧实现均以 `// ===== [LEGACY …] =====` 注释保留在文件内（app.js 各样式旧分支与缓存变量块、`preview-scale.js` 的 `computeLegacyCssAvail`、A/C/D/B/E 预览模块的旧 `calcSize/updateFrameWrapper/updatePreview` 等），用于回滚。**计划在下一版本更新中统一清理**（含死代码：`shortSide`、`typeBPreview` 死导入、`calcBorderSize`×3、`setOriginalDimensions`、E 拖动提示挤压修复等）。
+### 5.5 旧实现清理（2026-10-10 完成）
+v1.21 改造期间用于回滚的 `[LEGACY …]` 注释块与相关死代码已全部删除（app.js 各旧分支/缓存变量块、`preview-scale.js` 的 legacy 适配、A/C/D/B/E 预览模块旧实现等，共约 1000 行；另清理死代码 `shortSide`、`typeBPreview` 死导入、`calcBorderSize`×3、`setOriginalDimensions`、`getDisplaySettings` 等）。当前源码即唯一实现，无历史注释残留。
 
 ### 5.6 验证方法（本项目实践）
 - 改造前采集**基线矩阵**（多视口 × 竖/横图 × 各样式），改造后逐字段严格对比：迁移类样式要求 **0px**（F–T），E 允许 **≤1px**
@@ -221,7 +221,7 @@ F–T 的 `calcSize` 结果缓存在 `previewDesignCache`（Map，键=样式 ID�
 - `mobile.js` 按 UA 注入 `<html class="is-mobile">`，另有 `@media (max-width:768px) and (pointer:coarse)` 兜底
 - 编辑器底部操作栏 + 抽屉面板（70vh，下滑关闭），触摸控件加大
 - 填满式预览下，移动端画布与文字随窗口等比缩小（A/C/D 的 em 字号缩放已随 v1.21 修复）
-- **已知问题（待下版本修复）**：E 的拖动提示 `.type-e-drag-hint` 是 flex 兄弟元素，窄窗/移动端会挤压画布导致右侧内容裁切
+- E 拖动提示 `.type-e-drag-hint` 为**绝对定位浮层**（预览区右侧垂直居中，不参与 flex 布局），不会挤压画布；移动端仅剩 fit 可用区含 padding 的少量收缩（见「已知坑位」）
 
 ---
 
@@ -248,14 +248,14 @@ Logo SVG 放入 `src/renderer/logos/`（命名 `{厂商名}.svg`），在 `js/lo
 
 1. **CSS 作用域**：各样式选择器必须限定 `.frame-wrapper.type-x`；覆盖全局 `.frame-wrapper img` 时使用 `> img`（仅主图，避免误伤底栏内的 logo）。
 2. **字号缩放**：填满式下预览文字用 em 相对容器基准字号（A/C/D `round(12×显示长边/900)`、E `round(24×显示方形/480)` 等），必须镜像导出公式；小画布下限 `max(8, …)`。
-3. **fit 公式**：`min(可用区×0.96/设计尺寸, 1)`；可用区取 `previewArea.clientWidth`（含 padding，窄屏存在约 1 个 padding 的轻微外溢，待评估修正）。
+3. **fit 公式**：`min(可用区×0.96/设计尺寸, 1)`；可用区取 `previewArea.clientWidth`（含 padding，窄屏存在约 1 个 padding 的轻微外溢，属已知行为、保持现状）。
 4. **设计尺寸缓存**：F–T 缓存于 `previewDesignCache`；换图必须 `clear()`，比例类参数（S/T）切换必须 `delete` 对应键。
 5. **显示开关两端一致**：showLogo/showModel/showParams/showTime/showSignature 等必须预览与导出一致处理。
 6. **字体**：新导出模块若用 fillText 必须 `await ensureCssFontsReady()`；不要重复 `opentype.load`。
 7. **圆角**：统一 `roundedRectPath`。
 8. **manifest**：新增样本按命名规范自动入清单，勿改硬编码列表。
-9. **Type B 仅接受竖图**（横图 alert 拒绝）；**E 拖动提示挤压**待下版本修复。
-10. **LEGACY 注释**：文件内 `[LEGACY …]` 块为回滚保留的旧实现，修改时勿混淆；下版本更新统一清理。
+9. **Type B 仅接受竖图**（横图 alert 拒绝）。
+10. **E 拖动提示**：`.type-e-drag-hint` 为绝对定位浮层（右侧垂直居中），调整时勿改回 flex 流内（会挤压画布）。
 
 ---
 

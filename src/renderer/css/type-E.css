@@ -139,12 +139,16 @@
   color: #888888;
 }
 
-/* 拖动提示文字 - 位于画布外部 */
+/* 拖动提示文字 - 位于预览区右侧（绝对定位，不参与 flex 布局，避免挤压画布） */
 .type-e-drag-hint {
   display: block;
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 96px;
   text-align: center;
   font-size: 10px;
   color: rgba(136, 136, 136, 0.6);
   pointer-events: none;
-  margin-top: 4px;
 }

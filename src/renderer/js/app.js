@@ -1,11 +1,8 @@
 ﻿// OneFrame 主程序
 import { getExif, formatDateTime, getFocalLength, getPhysicalFocalLength, getExposureModeLabel, formatExposureBias } from './exif.js';
 import { getModelName, getAllLogos, getLogoFilename, getMakeName } from './logo-utils.js';
-import { getPreview, typeBPreview, typeEPreview, typeRPreview, typeSPreview, typeTPreview } from './styles/index.js';
+import { getPreview, typeEPreview, typeRPreview, typeSPreview, typeTPreview } from './styles/index.js';
 import { fitCanvasToPreview } from './styles/preview-scale.js';
-// ===== [LEGACY A P1] computeLegacyCssAvail：legacy-css 适配（已废弃），改填满式前保留用于回滚 =====
-// import { computeLegacyCssAvail } from './styles/preview-scale.js';
-// ===== [LEGACY END] =====
 import { configureEditPanel as configureTypeF } from './components/type-F-editor-panel.js';
 import { configureEditPanel as configureTypeG } from './components/type-G-editor-panel.js';
 import { configureEditPanel as configureTypeH } from './components/type-H-editor-panel.js';
@@ -188,23 +185,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const signatureText = document.getElementById('signatureText');
 
   let selectedLogo = null;
-  // ===== [LEGACY F–T cache e0bd5e5] 旧逐样式设计尺寸缓存变量（P4 已由 previewDesignCache Map 替代），保留用于回滚；U3 统一清理 =====
-  // let typeFCachedSize = null;  // Type F 图框尺寸缓存
-  // let typeGCachedSize = null;  // Type G 图框尺寸缓存
-  // let typeHCachedSize = null;  // Type H 图框尺寸缓存
-  // let typeICachedSize = null;  // Type I 图框尺寸缓存
-  // let typeJCachedSize = null;  // Type J 图框尺寸缓存
-  // let typeKCachedSize = null;  // Type K 图框尺寸缓存
-  // let typeLCachedSize = null;  // Type L 图框尺寸缓存
-  // let typeMCachedSize = null;  // Type M 图框尺寸缓存
-  // let typeNCachedSize = null;  // Type N 图框尺寸缓存
-  // let typeOCachedSize = null;  // Type O 图框尺寸缓存
-  // let typePCachedSize = null;  // Type P 图框尺寸缓存
-  // let typeQCachedSize = null;  // Type Q 图框尺寸缓存
-  // let typeRCachedSize = null;
-// let typeSCachedSize = null;
-// let typeTCachedSize = null;  // Type R 图框尺寸缓存
-  // ===== [LEGACY END] =====
 
   // P4：设计画布缓存 Map（F–T 迁移后统一由此缓存；图片加载与 S/T 比例切换时失效）
   const previewDesignCache = new Map();
@@ -332,23 +312,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     currentFile = file;
     currentImagePath = null;
-    // ===== [LEGACY F–T cache e0bd5e5] 旧逐样式缓存清空（P4 已由 previewDesignCache.clear() 替代），保留用于回滚；U3 统一清理 =====
-    // typeFCachedSize = null;  // 清除 Type F 图框缓存
-    // typeGCachedSize = null;  // 清除 Type G 图框缓存
-    // typeHCachedSize = null;  // 清除 Type H 图框缓存
-    // typeICachedSize = null;  // 清除 Type I 图框缓存
-    // typeJCachedSize = null;  // 清除 Type J 图框缓存
-    // typeKCachedSize = null;  // 清除 Type K 图框缓存
-    // typeLCachedSize = null;  // 清除 Type L 图框缓存
-    // typeMCachedSize = null;  // 清除 Type M 图框缓存
-    // typeNCachedSize = null;  // 清除 Type N 图框缓存
-    // typeOCachedSize = null;  // 清除 Type O 图框缓存
-    // typePCachedSize = null;  // 清除 Type P 图框缓存
-    // typeQCachedSize = null;  // 清除 Type Q 图框缓存
-    // typeRCachedSize = null;  // 清除 Type R 图框缓存
-    // typeSCachedSize = null;
-    // typeTCachedSize = null;
-    // ===== [LEGACY END] =====
     previewDesignCache.clear();  // P4：清空设计画布缓存（F–T）
     // 释放旧的 Object URL 内存
     if (userImage.src && userImage.src.startsWith('blob:')) {
@@ -393,23 +356,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     currentImagePath = imagePath;
     currentFile = null;
-    // ===== [LEGACY F–T cache e0bd5e5] 旧逐样式缓存清空（P4 已由 previewDesignCache.clear() 替代），保留用于回滚；U3 统一清理 =====
-    // typeFCachedSize = null;  // 清除 Type F 图框缓存
-    // typeGCachedSize = null;  // 清除 Type G 图框缓存
-    // typeHCachedSize = null;  // 清除 Type H 图框缓存
-    // typeICachedSize = null;  // 清除 Type I 图框缓存
-    // typeJCachedSize = null;  // 清除 Type J 图框缓存
-    // typeKCachedSize = null;  // 清除 Type K 图框缓存
-    // typeLCachedSize = null;  // 清除 Type L 图框缓存
-    // typeMCachedSize = null;  // 清除 Type M 图框缓存
-    // typeNCachedSize = null;  // 清除 Type N 图框缓存
-    // typeOCachedSize = null;  // 清除 Type O 图框缓存
-    // typePCachedSize = null;  // 清除 Type P 图框缓存
-    // typeQCachedSize = null;  // 清除 Type Q 图框缓存
-    // typeRCachedSize = null;  // 清除 Type R 图框缓存
-    // typeSCachedSize = null;
-    // typeTCachedSize = null;
-    // ===== [LEGACY END] =====
     previewDesignCache.clear();  // P4：清空设计画布缓存（F–T）
     let nextExif = {};
     let fallbackDateTimeValue = '';
@@ -816,513 +762,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // P3 修订：清除 Type B 设置的照片圆角（B 在自身 updatePreview 中重新设置；避免 B→其他样式行内残留）
     userImage.style.borderRadius = '';
     const preview = getPreview(currentStyle || 'type-a');
-    const shortSide = Math.min(userImage.clientWidth, userImage.clientHeight);
-    const borderPercent = parseInt(borderHeight.value) || 12;
 
-    // ===== [LEGACY B e0bd5e5] 旧特判路径（B 已并入统一路径，见下方 type-a/b/c/d 分支），保留用于回滚 =====
-    // if (currentStyle === 'type-b') {
-    //   // 使用 Type B Preview 模块
-    //   typeBPreview.init({
-    //     img: userImage,
-    //     frameWrapper: document.getElementById('frameWrapper'),
-    //     photoFooter: photoFooter,
-    //     borderContent: document.getElementById('borderContent')
-    //   });
-    //   typeBPreview.update({ naturalHeight: userImage.naturalHeight, naturalWidth: userImage.naturalWidth }, getDisplaySettings());
-    // } else
-    // ===== [LEGACY E e0bd5e5] 旧特判路径（E 已并入统一路径，见下方 type-a/b/c/d/e 分支），保留用于回滚 =====
-    // } else if (currentStyle === 'type-e') {
-    //   // 使用 Type E Preview 模块（与 Type B 一致的 API）
-    //   const frameWrapper = document.getElementById('frameWrapper');
-    //   const borderContent = document.getElementById('borderContent');
-    //   preview.init({
-    //     img: userImage,
-    //     frameWrapper: frameWrapper,
-    //     photoFooter: photoFooter,
-    //     borderContent: borderContent
-    //   });
-    //   preview.reset();
-    //
-    //   // 计算尺寸
-    //   const { squareSize, margin, canvasHeight } = preview.calcSize({
-    //     naturalWidth: userImage.naturalWidth,
-    //     naturalHeight: userImage.naturalHeight
-    //   });
-    //
-    //   preview.updateFrameWrapper(squareSize);
-    //   preview.updatePreview(squareSize, margin, {
-    //     naturalWidth: userImage.naturalWidth,
-    //     naturalHeight: userImage.naturalHeight
-    //   });
-    //   updateBorderContent();
-    // }
-    // ===== [LEGACY END] =====
-    // ===== [LEGACY F–J e0bd5e5] 旧逐样式分支（F/G/H/I/J 已并入统一路径），保留用于回滚；U3 统一清理 =====
-    // ----- [LEGACY F e0bd5e5] Type F 旧分支 -----
-    // if (currentStyle === 'type-f') {
-      // // 使用 Type F Preview 模块
-      // const frameWrapper = document.getElementById('frameWrapper');
-      // const borderContent = document.getElementById('borderContent');
-      // preview.init({
-        // img: userImage,
-        // frameWrapper: frameWrapper,
-        // photoFooter: photoFooter,
-        // borderContent: borderContent
-      // });
-      // // 只在首次加载或切换图片时计算原始画布尺寸
-      // if (!typeFCachedSize) {
-        // typeFCachedSize = preview.calcSize({
-          // naturalWidth: userImage.naturalWidth,
-          // naturalHeight: userImage.naturalHeight
-        // });
-      // }
-      // const { squareSize: canvasW, canvasHeight: canvasH } = typeFCachedSize;
-      // // 根据当前预览区域大小计算显示尺寸
-      // const previewArea = frameWrapper?.parentElement;
-      // const availW = (previewArea?.clientWidth || 500) * 0.96;
-      // const availH = (previewArea?.clientHeight || 600) * 0.96;
-      // const displayScale = Math.min(availW / canvasW, availH / canvasH, 1);
-      // const displayW = Math.round(canvasW * displayScale);
-      // const displayH = Math.round(canvasH * displayScale);
-      // // 设置 frameWrapper 为显示尺寸（与预览区域匹配）
-      // preview.updateFrameWrapper(displayW, displayH);
-      // preview.updatePreview(displayW, displayH, {
-        // naturalWidth: userImage.naturalWidth,
-        // naturalHeight: userImage.naturalHeight
-      // });
-      // frameWrapper.style.transform = 'none';
-      // updateBorderContent();
-    // ----- [LEGACY G e0bd5e5] Type G 旧分支 -----
-    // } else if (currentStyle === 'type-g') {
-      // // 使用 Type G Preview 模块（与 Type F 相同的缩放逻辑）
-      // const frameWrapper = document.getElementById('frameWrapper');
-      // const borderContent = document.getElementById('borderContent');
-      // preview.init({
-        // img: userImage,
-        // frameWrapper: frameWrapper,
-        // photoFooter: photoFooter,
-        // borderContent: borderContent
-      // });
-      // // 只在首次加载或切换图片时计算原始画布尺寸
-      // if (!typeGCachedSize) {
-        // typeGCachedSize = preview.calcSize({
-          // naturalWidth: userImage.naturalWidth,
-          // naturalHeight: userImage.naturalHeight
-        // });
-      // }
-      // const { squareSize: gCanvasW, canvasHeight: gCanvasH } = typeGCachedSize;
-      // // 根据当前预览区域大小计算显示尺寸
-      // const gPreviewArea = frameWrapper?.parentElement;
-      // const gAvailW = (gPreviewArea?.clientWidth || 500) * 0.96;
-      // const gAvailH = (gPreviewArea?.clientHeight || 600) * 0.96;
-      // const gDisplayScale = Math.min(gAvailW / gCanvasW, gAvailH / gCanvasH, 1);
-      // const gDisplayW = Math.round(gCanvasW * gDisplayScale);
-      // const gDisplayH = Math.round(gCanvasH * gDisplayScale);
-      // // 设置 frameWrapper 为显示尺寸（与预览区域匹配）
-      // preview.updateFrameWrapper(gDisplayW, gDisplayH);
-      // preview.updatePreview(gDisplayW, gDisplayH, {
-        // naturalWidth: userImage.naturalWidth,
-        // naturalHeight: userImage.naturalHeight
-      // });
-      // frameWrapper.style.transform = 'none';
-      // updateBorderContent();
-    // ----- [LEGACY H e0bd5e5] Type H 旧分支 -----
-    // } else if (currentStyle === 'type-h') {
-      // // 使用 Type H Preview 模块
-      // const frameWrapper = document.getElementById('frameWrapper');
-      // const borderContent = document.getElementById('borderContent');
-      // preview.init({
-        // img: userImage,
-        // frameWrapper: frameWrapper,
-        // photoFooter: photoFooter,
-        // borderContent: borderContent
-      // });
-      // if (!typeHCachedSize) {
-        // typeHCachedSize = preview.calcSize({
-          // naturalWidth: userImage.naturalWidth,
-          // naturalHeight: userImage.naturalHeight
-        // });
-      // }
-      // const { squareSize: hCanvasW, canvasHeight: hCanvasH } = typeHCachedSize;
-      // const hPreviewArea = frameWrapper?.parentElement;
-      // const hAvailW = (hPreviewArea?.clientWidth || 500) * 0.96;
-      // const hAvailH = (hPreviewArea?.clientHeight || 600) * 0.96;
-      // const hDisplayScale = Math.min(hAvailW / hCanvasW, hAvailH / hCanvasH, 1);
-      // const hDisplayW = Math.round(hCanvasW * hDisplayScale);
-      // const hDisplayH = Math.round(hCanvasH * hDisplayScale);
-      // preview.updateFrameWrapper(hDisplayW, hDisplayH);
-      // preview.updatePreview(hDisplayW, hDisplayH, {
-        // naturalWidth: userImage.naturalWidth,
-        // naturalHeight: userImage.naturalHeight
-      // });
-      // frameWrapper.style.transform = 'none';
-      // updateBorderContent();
-    // ----- [LEGACY I e0bd5e5] Type I 旧分支 -----
-    // } else if (currentStyle === 'type-i') {
-      // // 使用 Type I Preview 模块（与 Type H 相同的缩放逻辑）
-      // const frameWrapper = document.getElementById('frameWrapper');
-      // const borderContent = document.getElementById('borderContent');
-      // preview.init({
-        // img: userImage,
-        // frameWrapper: frameWrapper,
-        // photoFooter: photoFooter,
-        // borderContent: borderContent
-      // });
-      // if (!typeICachedSize) {
-        // typeICachedSize = preview.calcSize({
-          // naturalWidth: userImage.naturalWidth,
-          // naturalHeight: userImage.naturalHeight
-        // });
-      // }
-      // const { squareSize: iCanvasW, canvasHeight: iCanvasH } = typeICachedSize;
-      // const iPreviewArea = frameWrapper?.parentElement;
-      // const iAvailW = (iPreviewArea?.clientWidth || 500) * 0.96;
-      // const iAvailH = (iPreviewArea?.clientHeight || 600) * 0.96;
-      // const iDisplayScale = Math.min(iAvailW / iCanvasW, iAvailH / iCanvasH, 1);
-      // const iDisplayW = Math.round(iCanvasW * iDisplayScale);
-      // const iDisplayH = Math.round(iCanvasH * iDisplayScale);
-      // preview.updateFrameWrapper(iDisplayW, iDisplayH);
-      // preview.updatePreview(iDisplayW, iDisplayH, {
-        // naturalWidth: userImage.naturalWidth,
-        // naturalHeight: userImage.naturalHeight
-      // });
-      // frameWrapper.style.transform = 'none';
-      // updateBorderContent();
-    // ----- [LEGACY J e0bd5e5] Type J 旧分支 -----
-    // } else if (currentStyle === 'type-j') {
-      // // 使用 Type J Preview 模块（与 Type H 相同的缩放逻辑）
-      // const frameWrapper = document.getElementById('frameWrapper');
-      // const borderContent = document.getElementById('borderContent');
-      // preview.init({
-        // img: userImage,
-        // frameWrapper: frameWrapper,
-        // photoFooter: photoFooter,
-        // borderContent: borderContent
-      // });
-      // if (!typeJCachedSize) {
-        // typeJCachedSize = preview.calcSize({
-          // naturalWidth: userImage.naturalWidth,
-          // naturalHeight: userImage.naturalHeight
-        // });
-      // }
-      // const { squareSize: jCanvasW, canvasHeight: jCanvasH } = typeJCachedSize;
-      // const jPreviewArea = frameWrapper?.parentElement;
-      // const jAvailW = (jPreviewArea?.clientWidth || 500) * 0.96;
-      // const jAvailH = (jPreviewArea?.clientHeight || 600) * 0.96;
-      // const jDisplayScale = Math.min(jAvailW / jCanvasW, jAvailH / jCanvasH, 1);
-      // const jDisplayW = Math.round(jCanvasW * jDisplayScale);
-      // const jDisplayH = Math.round(jCanvasH * jDisplayScale);
-      // preview.updateFrameWrapper(jDisplayW, jDisplayH);
-      // preview.updatePreview(jDisplayW, jDisplayH, {
-        // naturalWidth: userImage.naturalWidth,
-        // naturalHeight: userImage.naturalHeight
-      // });
-      // frameWrapper.style.transform = 'none';
-      // updateBorderContent();
-    // } else if (currentStyle === 'type-k') {
-    // ===== [LEGACY END] =====
-    // 批1（P4）：if 链续接；原连接行 “} else if (currentStyle === 'type-k') {” 已在上方 legacy 块中注释保留
-    // ===== [LEGACY K–O e0bd5e5] 旧逐样式分支（K/L/M/N/O 已并入统一路径），保留用于回滚；U3 统一清理 =====
-    // ----- [LEGACY K e0bd5e5] Type K 旧分支 -----
-    // if (currentStyle === 'type-k') {
-      // // 使用 Type K Preview 模块（与 Type H 相同的缩放逻辑）
-      // const frameWrapper = document.getElementById('frameWrapper');
-      // const borderContent = document.getElementById('borderContent');
-      // preview.init({
-        // img: userImage,
-        // frameWrapper: frameWrapper,
-        // photoFooter: photoFooter,
-        // borderContent: borderContent
-      // });
-      // if (!typeKCachedSize) {
-        // typeKCachedSize = preview.calcSize({
-          // naturalWidth: userImage.naturalWidth,
-          // naturalHeight: userImage.naturalHeight
-        // });
-      // }
-      // const { squareSize: kCanvasW, canvasHeight: kCanvasH } = typeKCachedSize;
-      // const kPreviewArea = frameWrapper?.parentElement;
-      // const kAvailW = (kPreviewArea?.clientWidth || 500) * 0.96;
-      // const kAvailH = (kPreviewArea?.clientHeight || 600) * 0.96;
-      // const kDisplayScale = Math.min(kAvailW / kCanvasW, kAvailH / kCanvasH, 1);
-      // const kDisplayW = Math.round(kCanvasW * kDisplayScale);
-      // const kDisplayH = Math.round(kCanvasH * kDisplayScale);
-      // preview.updateFrameWrapper(kDisplayW, kDisplayH);
-      // preview.updatePreview(kDisplayW, kDisplayH, {
-        // naturalWidth: userImage.naturalWidth,
-        // naturalHeight: userImage.naturalHeight
-      // });
-      // frameWrapper.style.transform = 'none';
-      // updateBorderContent();
-    // ----- [LEGACY L e0bd5e5] Type L 旧分支 -----
-    // } else if (currentStyle === 'type-l') {
-      // // 使用 Type L Preview 模块（与 Type G 相同的缩放逻辑）
-      // const frameWrapper = document.getElementById('frameWrapper');
-      // const borderContent = document.getElementById('borderContent');
-      // preview.init({
-        // img: userImage,
-        // frameWrapper: frameWrapper,
-        // photoFooter: photoFooter,
-        // borderContent: borderContent
-      // });
-      // if (!typeLCachedSize) {
-        // typeLCachedSize = preview.calcSize({
-          // naturalWidth: userImage.naturalWidth,
-          // naturalHeight: userImage.naturalHeight
-        // });
-      // }
-      // const { squareSize: lCanvasW, canvasHeight: lCanvasH } = typeLCachedSize;
-      // const lPreviewArea = frameWrapper?.parentElement;
-      // const lAvailW = (lPreviewArea?.clientWidth || 500) * 0.96;
-      // const lAvailH = (lPreviewArea?.clientHeight || 600) * 0.96;
-      // const lDisplayScale = Math.min(lAvailW / lCanvasW, lAvailH / lCanvasH, 1);
-      // const lDisplayW = Math.round(lCanvasW * lDisplayScale);
-      // const lDisplayH = Math.round(lCanvasH * lDisplayScale);
-      // preview.updateFrameWrapper(lDisplayW, lDisplayH);
-      // preview.updatePreview(lDisplayW, lDisplayH, {
-        // naturalWidth: userImage.naturalWidth,
-        // naturalHeight: userImage.naturalHeight
-      // });
-      // frameWrapper.style.transform = 'none';
-      // updateBorderContent();
-    // ----- [LEGACY M e0bd5e5] Type M 旧分支 -----
-    // } else if (currentStyle === 'type-m') {
-      // const frameWrapper = document.getElementById('frameWrapper');
-      // const borderContent = document.getElementById('borderContent');
-      // preview.init({img: userImage, frameWrapper, photoFooter, borderContent});
-      // preview.reset();
-      // if (!typeMCachedSize) { typeMCachedSize = preview.calcSize({naturalWidth: userImage.naturalWidth, naturalHeight: userImage.naturalHeight}); }
-      // const { squareSize: mW, canvasHeight: mH } = typeMCachedSize;
-      // const mPA = frameWrapper?.parentElement; const mA = Math.min((mPA?.clientWidth||500)*0.96/mW, (mPA?.clientHeight||600)*0.96/mH, 1);
-      // const mDW = Math.round(mW*mA); const mDH = Math.round(mH*mA);
-      // preview.updateFrameWrapper(mDW, mDH); preview.updatePreview(mDW, mDH, {naturalWidth: userImage.naturalWidth, naturalHeight: userImage.naturalHeight});
-      // frameWrapper.style.transform = 'none'; updateBorderContent();
-    // ----- [LEGACY N e0bd5e5] Type N 旧分支 -----
-    // } else if (currentStyle === 'type-n') {
-      // // 使用 Type N Preview 模块（与 Type G 相同的缩放逻辑）
-      // const frameWrapper = document.getElementById('frameWrapper');
-      // const borderContent = document.getElementById('borderContent');
-      // preview.init({
-        // img: userImage,
-        // frameWrapper: frameWrapper,
-        // photoFooter: photoFooter,
-        // borderContent: borderContent
-      // });
-      // if (!typeNCachedSize) {
-        // typeNCachedSize = preview.calcSize({
-          // naturalWidth: userImage.naturalWidth,
-          // naturalHeight: userImage.naturalHeight
-        // });
-      // }
-      // const { squareSize: nCanvasW, canvasHeight: nCanvasH } = typeNCachedSize;
-      // const nPreviewArea = frameWrapper?.parentElement;
-      // const nAvailW = (nPreviewArea?.clientWidth || 500) * 0.96;
-      // const nAvailH = (nPreviewArea?.clientHeight || 600) * 0.96;
-      // const nDisplayScale = Math.min(nAvailW / nCanvasW, nAvailH / nCanvasH, 1);
-      // const nDisplayW = Math.round(nCanvasW * nDisplayScale);
-      // const nDisplayH = Math.round(nCanvasH * nDisplayScale);
-      // preview.updateFrameWrapper(nDisplayW, nDisplayH);
-      // preview.updatePreview(nDisplayW, nDisplayH, {
-        // naturalWidth: userImage.naturalWidth,
-        // naturalHeight: userImage.naturalHeight
-      // });
-      // frameWrapper.style.transform = 'none';
-      // updateBorderContent();
-    // ----- [LEGACY O e0bd5e5] Type O 旧分支 -----
-    // } else if (currentStyle === 'type-o') {
-      // // 使用 Type O Preview 模块（与 Type N 相同的缩放逻辑）
-      // const frameWrapper = document.getElementById('frameWrapper');
-      // const borderContent = document.getElementById('borderContent');
-      // preview.init({
-        // img: userImage,
-        // frameWrapper: frameWrapper,
-        // photoFooter: photoFooter,
-        // borderContent: borderContent
-      // });
-      // if (!typeOCachedSize) {
-        // typeOCachedSize = preview.calcSize({
-          // naturalWidth: userImage.naturalWidth,
-          // naturalHeight: userImage.naturalHeight
-        // });
-      // }
-      // const { squareSize: oCanvasW, canvasHeight: oCanvasH } = typeOCachedSize;
-      // const oPreviewArea = frameWrapper?.parentElement;
-      // const oAvailW = (oPreviewArea?.clientWidth || 500) * 0.96;
-      // const oAvailH = (oPreviewArea?.clientHeight || 600) * 0.96;
-      // const oDisplayScale = Math.min(oAvailW / oCanvasW, oAvailH / oCanvasH, 1);
-      // const oDisplayW = Math.round(oCanvasW * oDisplayScale);
-      // const oDisplayH = Math.round(oCanvasH * oDisplayScale);
-      // preview.updateFrameWrapper(oDisplayW, oDisplayH);
-      // preview.updatePreview(oDisplayW, oDisplayH, {
-        // naturalWidth: userImage.naturalWidth,
-        // naturalHeight: userImage.naturalHeight
-      // });
-      // frameWrapper.style.transform = 'none';
-      // updateBorderContent();
-    // } else if (currentStyle === 'type-p') {
-    // ===== [LEGACY END] =====
-    // 批2（P4）：if 链续接；原连接行 “} else if (currentStyle === 'type-p') {” 已在上方 legacy 块中注释保留
-    // ===== [LEGACY P–T e0bd5e5] 旧逐样式分支（P/Q/R/S/T 已并入统一路径），保留用于回滚；U3 统一清理 =====
-    // ----- [LEGACY P e0bd5e5] Type P 旧分支 -----
-    // if (currentStyle === 'type-p') {
-      // // 使用 Type P Preview 模块（与 Type O 相同的缩放逻辑）
-      // const frameWrapper = document.getElementById('frameWrapper');
-      // const borderContent = document.getElementById('borderContent');
-      // preview.init({
-        // img: userImage,
-        // frameWrapper: frameWrapper,
-        // photoFooter: photoFooter,
-        // borderContent: borderContent
-      // });
-      // if (!typePCachedSize) {
-        // typePCachedSize = preview.calcSize({
-          // naturalWidth: userImage.naturalWidth,
-          // naturalHeight: userImage.naturalHeight
-        // });
-      // }
-      // const { squareSize: pCanvasW, canvasHeight: pCanvasH } = typePCachedSize;
-      // const pPreviewArea = frameWrapper?.parentElement;
-      // const pAvailW = (pPreviewArea?.clientWidth || 500) * 0.96;
-      // const pAvailH = (pPreviewArea?.clientHeight || 600) * 0.96;
-      // const pDisplayScale = Math.min(pAvailW / pCanvasW, pAvailH / pCanvasH, 1);
-      // const pDisplayW = Math.round(pCanvasW * pDisplayScale);
-      // const pDisplayH = Math.round(pCanvasH * pDisplayScale);
-      // preview.updateFrameWrapper(pDisplayW, pDisplayH);
-      // preview.updatePreview(pDisplayW, pDisplayH, {
-        // naturalWidth: userImage.naturalWidth,
-        // naturalHeight: userImage.naturalHeight
-      // });
-      // frameWrapper.style.transform = 'none';
-      // updateBorderContent();
-    // ----- [LEGACY Q e0bd5e5] Type Q 旧分支 -----
-    // } else if (currentStyle === 'type-q') {
-      // // 使用 Type Q Preview 模块（与 Type O 相同的缩放逻辑，边框底色 = 图片主色）
-      // const frameWrapper = document.getElementById('frameWrapper');
-      // const borderContent = document.getElementById('borderContent');
-      // preview.init({
-        // img: userImage,
-        // frameWrapper: frameWrapper,
-        // photoFooter: photoFooter,
-        // borderContent: borderContent
-      // });
-      // if (!typeQCachedSize) {
-        // typeQCachedSize = preview.calcSize({
-          // naturalWidth: userImage.naturalWidth,
-          // naturalHeight: userImage.naturalHeight
-        // });
-      // }
-      // const { squareSize: qCanvasW, canvasHeight: qCanvasH } = typeQCachedSize;
-      // const qPreviewArea = frameWrapper?.parentElement;
-      // const qAvailW = (qPreviewArea?.clientWidth || 500) * 0.96;
-      // const qAvailH = (qPreviewArea?.clientHeight || 600) * 0.96;
-      // const qDisplayScale = Math.min(qAvailW / qCanvasW, qAvailH / qCanvasH, 1);
-      // const qDisplayW = Math.round(qCanvasW * qDisplayScale);
-      // const qDisplayH = Math.round(qCanvasH * qDisplayScale);
-      // preview.updateFrameWrapper(qDisplayW, qDisplayH);
-      // preview.updatePreview(qDisplayW, qDisplayH, {
-        // naturalWidth: userImage.naturalWidth,
-        // naturalHeight: userImage.naturalHeight
-      // });
-      // frameWrapper.style.transform = 'none';
-      // updateBorderContent();
-    // ----- [LEGACY R e0bd5e5] Type R 旧分支 -----
-    // } else if (currentStyle === 'type-r') {
-      // // 使用 Type R Preview 模块（与 Type Q 相同的缩放逻辑）
-      // const frameWrapper = document.getElementById('frameWrapper');
-      // const borderContent = document.getElementById('borderContent');
-      // preview.init({
-        // img: userImage,
-        // frameWrapper: frameWrapper,
-        // photoFooter: photoFooter,
-        // borderContent: borderContent
-      // });
-      // if (!typeRCachedSize) {
-        // typeRCachedSize = preview.calcSize({
-          // naturalWidth: userImage.naturalWidth,
-          // naturalHeight: userImage.naturalHeight
-        // });
-      // }
-      // const { squareSize: rCanvasW, canvasHeight: rCanvasH } = typeRCachedSize;
-      // const rPreviewArea = frameWrapper?.parentElement;
-      // const rAvailW = (rPreviewArea?.clientWidth || 500) * 0.96;
-      // const rAvailH = (rPreviewArea?.clientHeight || 600) * 0.96;
-      // const rDisplayScale = Math.min(rAvailW / rCanvasW, rAvailH / rCanvasH, 1);
-      // const rDisplayW = Math.round(rCanvasW * rDisplayScale);
-      // const rDisplayH = Math.round(rCanvasH * rDisplayScale);
-      // preview.updateFrameWrapper(rDisplayW, rDisplayH);
-      // preview.updatePreview(rDisplayW, rDisplayH, {
-        // naturalWidth: userImage.naturalWidth,
-        // naturalHeight: userImage.naturalHeight
-      // });
-      // frameWrapper.style.transform = 'none';
-      // updateBorderContent();
-    // ----- [LEGACY S e0bd5e5] Type S 旧分支 -----
-    // } else if (currentStyle === 'type-s') {
-      // // 使用 Type S Preview 模块（两个比例开关：画布 / 图片区域）
-      // const frameWrapper = document.getElementById('frameWrapper');
-      // const borderContent = document.getElementById('borderContent');
-      // preview.init({
-        // img: userImage,
-        // frameWrapper: frameWrapper,
-        // photoFooter: photoFooter,
-        // borderContent: borderContent
-      // });
-      // if (!typeSCachedSize) {
-        // typeSCachedSize = preview.calcSize({
-          // naturalWidth: userImage.naturalWidth,
-          // naturalHeight: userImage.naturalHeight,
-          // canvasRatioS: document.getElementById('canvasRatioS')?.value || '1:1'
-        // });
-      // }
-      // const { squareSize: sCanvasW, canvasHeight: sCanvasH } = typeSCachedSize;
-      // const sPreviewArea = frameWrapper?.parentElement;
-      // const sAvailW = (sPreviewArea?.clientWidth || 500) * 0.96;
-      // const sAvailH = (sPreviewArea?.clientHeight || 600) * 0.96;
-      // const sDisplayScale = Math.min(sAvailW / sCanvasW, sAvailH / sCanvasH, 1);
-      // const sDisplayW = Math.round(sCanvasW * sDisplayScale);
-      // const sDisplayH = Math.round(sCanvasH * sDisplayScale);
-      // preview.updateFrameWrapper(sDisplayW, sDisplayH);
-      // preview.updatePreview(sDisplayW, sDisplayH, {
-        // naturalWidth: userImage.naturalWidth,
-        // naturalHeight: userImage.naturalHeight
-      // });
-      // frameWrapper.style.transform = 'none';
-      // updateBorderContent();
-    // ----- [LEGACY T e0bd5e5] Type T 旧分支 -----
-    // } else if (currentStyle === 'type-t') {
-      // // 使用 Type T Preview 模块（满幅无边框，照片比例可切换）
-      // const frameWrapper = document.getElementById('frameWrapper');
-      // const borderContent = document.getElementById('borderContent');
-      // preview.init({
-        // img: userImage,
-        // frameWrapper: frameWrapper,
-        // photoFooter: photoFooter,
-        // borderContent: borderContent
-      // });
-      // if (!typeTCachedSize) {
-        // typeTCachedSize = preview.calcSize({
-          // naturalWidth: userImage.naturalWidth,
-          // naturalHeight: userImage.naturalHeight,
-          // ratioT: document.getElementById('ratioT')?.value || '1:1'
-        // });
-      // }
-      // const { squareSize: tCanvasW, canvasHeight: tCanvasH } = typeTCachedSize;
-      // const tPreviewArea = frameWrapper?.parentElement;
-      // const tAvailW = (tPreviewArea?.clientWidth || 500) * 0.96;
-      // const tAvailH = (tPreviewArea?.clientHeight || 600) * 0.96;
-      // const tDisplayScale = Math.min(tAvailW / tCanvasW, tAvailH / tCanvasH, 1);
-      // const tDisplayW = Math.round(tCanvasW * tDisplayScale);
-      // const tDisplayH = Math.round(tCanvasH * tDisplayScale);
-      // preview.updateFrameWrapper(tDisplayW, tDisplayH);
-      // preview.updatePreview(tDisplayW, tDisplayH, {
-        // naturalWidth: userImage.naturalWidth,
-        // naturalHeight: userImage.naturalHeight
-      // });
-      // frameWrapper.style.transform = 'none';
-      // updateBorderContent();
-    // } else if (currentStyle === 'type-a' || currentStyle === 'type-b' || currentStyle === 'type-c' || currentStyle === 'type-d' || currentStyle === 'type-e' ||
-    // ===== [LEGACY END] =====
-    // 批3（P4）：if 链续接；原统一路径前缀行 “} else if (currentStyle === 'type-a' …)” 已在上方 legacy 块中注释保留
     if (currentStyle === 'type-a' || currentStyle === 'type-b' || currentStyle === 'type-c' || currentStyle === 'type-d' || currentStyle === 'type-e' ||
                currentStyle === 'type-f' || currentStyle === 'type-g' || currentStyle === 'type-h' || currentStyle === 'type-i' || currentStyle === 'type-j' ||
                currentStyle === 'type-k' || currentStyle === 'type-l' || currentStyle === 'type-m' || currentStyle === 'type-n' || currentStyle === 'type-o' ||
@@ -1369,15 +809,6 @@ document.addEventListener('DOMContentLoaded', () => {
           designHeight,
           previewArea
         );
-        // ===== [LEGACY A P1] legacy-css 适配版本（0px 复刻旧 CSS 尺寸），改填满式前保留用于回滚 =====
-        // const { width: displayWidth, height: displayHeight } = fitCanvasToPreview(
-        //   design.canvasWidth,
-        //   design.canvasHeight,
-        //   previewArea,
-        //   { avail: computeLegacyCssAvail(previewArea, frameWrapper) }
-        // );
-        // preview.updateFrameWrapper();
-        // ===== [LEGACY END] =====
         preview.updateFrameWrapper(displayWidth, displayHeight);
         preview.updatePreview(displayWidth, displayHeight, {
           naturalWidth: userImage.naturalWidth,
@@ -1390,87 +821,13 @@ document.addEventListener('DOMContentLoaded', () => {
         });
       }
       updateBorderContent();
-    } else {
-      // ===== [LEGACY P2] 旧共享路径：A/C/D 已全部迁出（P1/P2 统一路径），此分支暂不可达；保留至 U3 统一清理 =====
-      // 使用对应样式 Preview 模块
-      const frameWrapper = document.getElementById('frameWrapper');
-      const borderContent = document.getElementById('borderContent');
-      // 先 init 设置 state，再 reset 重置 HTML 结构
-      preview.init({
-        img: userImage,
-        frameWrapper: frameWrapper,
-        photoFooter: photoFooter,
-        borderContent: borderContent
-      });
-      preview.reset();
-      preview.updateFrameWrapper(frameWrapper);
-      const footerHeight = Math.round(shortSide * (borderPercent / 100));
-      preview.updatePreview(userImage, photoFooter, {
-        borderColor: borderColor.value,
-        borderHeight: footerHeight,
-        borderHeightLabel,
-        aspectRatio: document.getElementById('aspectRatio')?.value || 'default'
-      });
-      updateBorderContent();
     }
   }
   
-  function getDisplaySettings() {
-    return {
-      selectedLogo,
-      showLogo: document.getElementById('switchLogo')?.classList.contains('active'),
-      showModel: document.getElementById('switchModel')?.classList.contains('active'),
-      customModel: customModel?.value || '',
-      showParams: document.getElementById('switchParams')?.classList.contains('active'),
-      fNumber: fNumber?.value || '',
-      exposureTime: exposureTime?.value || '',
-      focalLength: focalLength?.value || '',
-      iso: iso?.value || '',
-      showTime: document.getElementById('switchTime')?.classList.contains('active'),
-      dateTime: dateTime?.value || '',
-      signatureText: signatureText?.value || '',
-      textColor: document.getElementById('textColor')?.value || '#000000',
-      manufacturer: document.getElementById('manufacturerSelect')?.value || '',
-      filmStyle: document.getElementById('filmStyle')?.value || '',
-      showSignatureQ: document.getElementById('switchSignatureQ')?.classList.contains('active') ?? true,
-      signatureColorQ: document.getElementById('qSignatureColor')?.value || '#000000',
-      frameNumber: document.getElementById('frameNumber')?.value || '01',
-      printExposureMode: document.getElementById('printExposureMode')?.value || '',
-      printExposureTime: document.getElementById('printExposureTime')?.value || '',
-      printFNumber: document.getElementById('printFNumber')?.value || '',
-      printExposureBias: document.getElementById('printExposureBias')?.value || '',
-      printFocalLength: document.getElementById('printFocalLength')?.value || '',
-      printDate: document.getElementById('printDate')?.value || '',
-      canvasRatioS: document.getElementById('canvasRatioS')?.value || '1:1',
-      topLineS: document.getElementById('topLineS')?.value || '',
-      photoByS: document.getElementById('photoByS')?.value || '',
-      dateS: document.getElementById('dateS')?.value || '',
-      isoS: document.getElementById('isoS')?.value || '',
-      focalS: document.getElementById('focalS')?.value || '',
-      fNumberS: document.getElementById('fNumberS')?.value || '',
-      shutterS: document.getElementById('shutterS')?.value || '',
-      textColorS: document.getElementById('typeSColor')?.value || 'dominant',
-      ratioT: document.getElementById('ratioT')?.value || '1:1',
-      topLineT: document.getElementById('topLineT')?.value || '',
-      photoByT: document.getElementById('photoByT')?.value || '',
-      dateT: document.getElementById('dateT')?.value || '',
-      isoT: document.getElementById('isoT')?.value || '',
-      focalT: document.getElementById('focalT')?.value || '',
-      fNumberT: document.getElementById('fNumberT')?.value || '',
-      shutterT: document.getElementById('shutterT')?.value || '',
-      textColorT: document.getElementById('typeTColor')?.value || '#ffffff'
-    };
-  }
-
   async function updateBorderContent() {
     const preview = getPreview(currentStyle || 'type-a');
     // P3：统一清理 Type B 残留容器（修复 B→其他样式泄漏；B 自身随后经统一路径重建）
     document.querySelector('.type-b-main-container')?.remove();
-    // ===== [LEGACY B e0bd5e5] 旧特判（B 已并入统一路径），保留用于回滚 =====
-    // if (currentStyle === 'type-b') {
-    //   // Type B 使用模块更新（已在 updateBorder 中初始化）
-    //   typeBPreview.update({ naturalHeight: userImage.naturalHeight, naturalWidth: userImage.naturalWidth }, getDisplaySettings());
-    // } else {
       preview.updateContentPreview(
         {
           borderLogo: document.getElementById('borderLogo'),
@@ -1546,10 +903,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========== Type S 控件 ==========
   // 画布比例切换：清除尺寸缓存并重新布局
   document.getElementById('canvasRatioS')?.addEventListener('change', () => {
-    // ===== [LEGACY S/T cache e0bd5e5] 旧缓存变量清空（P4 已由 previewDesignCache.delete 替代），保留用于回滚；U3 统一清理 =====
-    // typeSCachedSize = null;
-    // typeTCachedSize = null;
-    // ===== [LEGACY END] =====
     previewDesignCache.delete('type-s');  // P4：S 画布比例切换 → 失效 S 设计尺寸缓存
     previewDesignCache.delete('type-t');  // 保留旧版“切 S 同时清 T 缓存”的语义
     updateBorder();
@@ -1657,9 +1010,6 @@ document.addEventListener('DOMContentLoaded', () => {
   // ========== Type T 控件 ==========
   // 照片比例切换：清除尺寸缓存并重新布局
   document.getElementById('ratioT')?.addEventListener('change', () => {
-    // ===== [LEGACY T cache e0bd5e5] 旧缓存变量清空（P4 已由 previewDesignCache.delete 替代），保留用于回滚；U3 统一清理 =====
-    // typeTCachedSize = null;
-    // ===== [LEGACY END] =====
     previewDesignCache.delete('type-t');  // P4：T 照片比例切换 → 失效 T 设计尺寸缓存
     updateBorder();
   });

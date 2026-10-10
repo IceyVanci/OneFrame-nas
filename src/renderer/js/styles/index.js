@@ -159,7 +159,6 @@ export function getExport(styleId) {
 }
 
 // 重新导出 app.js 直接使用的 Preview 模块
-export { typeBPreview } from './type-B-preview.js';
 export { typeEPreview } from './type-E-preview.js';
 export { typeRPreview } from './type-R-preview.js';
 export { typeSPreview } from './type-S-preview.js';

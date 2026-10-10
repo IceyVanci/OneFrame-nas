@@ -40,31 +40,6 @@ export function calcSize() {
   return { canvasWidth: designSquare, canvasHeight: designSquare };
 }
 
-// ===== [LEGACY B e0bd5e5] 旧实现（内部完成 0.96 适配并返回 squareSize/margin/originalSquareSize），P3 统一 fit 前保留用于回滚 =====
-/*
-export function calcSize(settings) {
-  const { naturalHeight } = settings;
-
-  // 原始尺寸（正方形边长 = 高度 × 110%）
-  const originalSquareSize = Math.round(naturalHeight * 1.1);
-
-  // 获取预览区域可用尺寸
-  const previewArea = state.frameWrapper?.parentElement;
-  const availWidth = previewArea?.clientWidth || 500;
-  const availHeight = previewArea?.clientHeight || 600;
-
-  // 计算缩放比例（留 4% 边距）
-  const maxSize = Math.min(availWidth, availHeight) * 0.96;
-  const scale = maxSize / originalSquareSize;
-
-  // 预览使用缩放尺寸
-  const squareSize = scale < 1 ? Math.round(originalSquareSize * scale) : originalSquareSize;
-  const margin = Math.round(squareSize * 0.025);
-
-  return { squareSize, margin, originalSquareSize };
-}
-*/
-// ===== [LEGACY END] =====
 
 /**
  * 更新 frameWrapper 样式（统一接口，P3 填满式）
@@ -83,19 +58,6 @@ export function updateFrameWrapper(displayWidth, displayHeight) {
   frameWrapper.style.width = `${displayWidth}px`;
   frameWrapper.style.height = `${displayWidth}px`;
 
-  // ===== [LEGACY B e0bd5e5] 旧实现（仅接收 squareSize），P3 前保留用于回滚 =====
-  // export function updateFrameWrapper(squareSize) {
-  //   if (!state.frameWrapper) return;
-  //
-  //   // 移除所有类型类名后再添加当前类型
-  //   state.frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e', 'type-f');
-  //   state.frameWrapper.classList.add('type-b');
-  //
-  //   // 设置尺寸
-  //   state.frameWrapper.style.width = `${squareSize}px`;
-  //   state.frameWrapper.style.height = `${squareSize}px`;
-  // }
-  // ===== [LEGACY END] =====
 }
 
 /**
@@ -122,11 +84,6 @@ export function updatePreview(displayWidth, displayHeight, imgDims = {}, setting
   state.renderedSquare = renderedSquare;
   state.margin = margin;
 
-  // ===== [LEGACY B e0bd5e5] 旧签名/prologue（内部自算 squareSize/margin），P3 前保留用于回滚 =====
-  // export function updatePreview(squareSize, margin, imgDimensions = {}) {
-  //   if (!state.img || !state.photoFooter) return { previewImgWidth: 0 };
-  //   const { naturalWidth = 0, naturalHeight = 0 } = imgDimensions;
-  // ===== [LEGACY END] =====
 
   // 右侧区域预留约 15% 宽度
   const rightAreaPercent = 0.15;
@@ -236,11 +193,6 @@ export function updateContentPreview(elements, settings) {
   const colWidth = Math.round(75 * contentScale);
   const colGap = Math.round(8 * contentScale);
 
-  // ===== [LEGACY B e0bd5e5] 旧签名/取值（从 settings 读取 squareSize/margin/previewImgWidth，且下方尺寸为固定 px），P3 前保留用于回滚 =====
-  // export function updateContentPreview(settings) {
-  //   ...
-  //   const { ..., squareSize, margin, previewImgWidth } = settings;
-  // ===== [LEGACY END] =====
   
   
   
@@ -342,7 +294,6 @@ export function updateContentPreview(elements, settings) {
   rowTypes.push('photoby');
   
   // P3：分隔线宽 = 两列宽 + 列间距（按画布缩放，镜像导出）
-  // [LEGACY B e0bd5e5] 原固定值：maxLabelWidth 75 / maxValueWidth 75 / gap 8 → dividerWidth 158px
   const dividerWidth = colWidth * 2 + colGap;
   
   // 创建横线的函数
@@ -438,28 +389,6 @@ export function updateContentPreview(elements, settings) {
   }
 }
 
-// ===== [LEGACY B e0bd5e5] 单体入口（已并入统一路径 app.js，P3 前保留用于回滚） =====
-/*
-更新预览（完整流程）
-参数：imgSettings { naturalHeight, naturalWidth }；displaySettings 显示设置
-export function update(imgSettings, displaySettings) {
-  const { squareSize, margin } = calcSize(imgSettings);
-
-  // 更新容器
-  updateFrameWrapper(squareSize);
-
-  // 更新图片预览（传入图片原始尺寸）
-  const { previewImgWidth } = updatePreview(squareSize, margin, {
-    naturalWidth: imgSettings.naturalWidth,
-    naturalHeight: imgSettings.naturalHeight
-  });
-
-  // 更新内容预览（传入 previewImgWidth 用于居中计算）
-  updateContentPreview({ ...displaySettings, squareSize, margin, previewImgWidth });
-
-}
-*/
-// ===== [LEGACY END] =====
 
 /**
  * 重置样式
@@ -513,16 +442,6 @@ export function reset() {
     state.borderContent.innerHTML = '';
   }
   
-  // ===== [LEGACY B e0bd5e5] 原实现在此清空全部 state 引用（会破坏 P3 统一流 init→reset→calcSize 顺序）；P3 改为仅清尺寸字段 =====
-  // state = {
-  //   img: null,
-  //   frameWrapper: null,
-  //   photoFooter: null,
-  //   borderContent: null,
-  //   settings: {},
-  //   squareSize: 0,
-  //   margin: 0
-  // };
   state.squareSize = 0;
   state.margin = 0;
   state.previewImgWidth = 0;
@@ -539,6 +458,5 @@ export const typeBPreview = {
   updateFrameWrapper,
   updatePreview,
   updateContentPreview,
-  // update,  // [LEGACY B e0bd5e5] 单体入口（已并入统一路径），保留用于回滚
   reset
 };

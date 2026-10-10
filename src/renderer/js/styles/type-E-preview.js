@@ -75,13 +75,6 @@ export function init(elements) {
 }
 
 /**
- * 设置原始图片尺寸（用于 resize 时重算）
- */
-export function setOriginalDimensions(width, height) {
-  originalImageDimensions = { naturalWidth: width, naturalHeight: height };
-}
-
-/**
  * 数值钳制工具
  */
 function clamp(value, min, max) {
@@ -101,40 +94,6 @@ export function calcSize(settings) {
   return { canvasWidth: shortEdge, canvasHeight: Math.round(shortEdge * 1.5) };
 }
 
-// ===== [LEGACY E e0bd5e5] 旧实现（内部完成 0.96 适配并返回 squareSize/margin/canvasHeight），P3 统一 fit 前保留用于回滚 =====
-/*
-export function calcSize(settings) {
-  const { naturalHeight, naturalWidth } = settings;
-
-  // 使用图片短边作为正方形边长
-  const imgShortEdge = Math.min(naturalWidth, naturalHeight);
-
-  // 获取预览区域可用尺寸
-  const previewArea = state.frameWrapper?.parentElement;
-  const availWidth = previewArea?.clientWidth || 500;
-  const availHeight = previewArea?.clientHeight || 600;
-
-  // 第一步：用短边和可用区域计算（留 4% 边距）
-  let maxSize = Math.min(availWidth, availHeight) * 0.96;
-  let scale = maxSize / imgShortEdge;
-  let squareSize = scale < 1 ? Math.round(imgShortEdge * scale) : imgShortEdge;
-
-  // 第二步：检查 canvasHeight (3:2) 是否超出可用高度，如果超出则用高度限制重新计算
-  const maxCanvasHeight = availHeight * 0.96;
-  const canvasHeightWithCurrentSquare = Math.round(squareSize * 1.5);
-  if (canvasHeightWithCurrentSquare > maxCanvasHeight) {
-    // 用可用高度重新计算 squareSize（确保 3:2 比例）
-    squareSize = Math.round(maxCanvasHeight / 1.5);
-  }
-
-  const canvasHeight = Math.round(squareSize * 1.5);
-  const margin = 0; // Type E 不需要边距
-
-
-  return { squareSize, margin, canvasHeight };
-}
-*/
-// ===== [LEGACY END] =====
 
 /**
  * 更新 frameWrapper 样式（统一接口，P3 填满式：3:2 纵向画布）
@@ -159,28 +118,6 @@ export function updateFrameWrapper(displayWidth, displayHeight) {
     state.borderContent.style.fontSize = `${baseFontSize}px`;
   }
 
-  // ===== [LEGACY E e0bd5e5] 旧实现（仅接收 squareSize，内部推导画布高/字号），P3 前保留用于回滚 =====
-  // export function updateFrameWrapper(squareSize) {
-  //   if (!state.frameWrapper) return;
-  //
-  //   // 移除所有类型类名后再添加当前类型
-  //   state.frameWrapper.classList.remove('type-a', 'type-b', 'type-c', 'type-d', 'type-e', 'type-f');
-  //   state.frameWrapper.classList.add('type-e');
-  //
-  //   // 设置尺寸为 3:2
-  //   const canvasHeight = Math.round(squareSize * 1.5);
-  //   state.frameWrapper.style.width = `${squareSize}px`;
-  //   state.frameWrapper.style.height = `${canvasHeight}px`;
-  //
-  //   // 动态设置基准字号，CSS 中的 em 单位会相对于此值缩放
-  //   // 基准 480px 对应 24px，随 squareSize 等比缩放
-  //   if (state.borderContent) {
-  //     const baseFontSize = Math.max(8, Math.round(24 * squareSize / 480));
-  //     state.borderContent.style.fontSize = `${baseFontSize}px`;
-  //   }
-  //
-  // }
-  // ===== [LEGACY END] =====
 }
 
 /**
@@ -206,15 +143,6 @@ export function updatePreview(displayWidth, displayHeight, imgDimensions = {}, s
   const canvasHeight = displayHeight;
   const footerHeight = canvasHeight - squareSize;
 
-  // ===== [LEGACY E e0bd5e5] 旧签名/推导（内部由 squareSize 推导画布高），P3 前保留用于回滚 =====
-  // export function updatePreview(squareSize, margin, imgDimensions = {}) {
-  //   if (!state.img || !state.photoFooter) {
-  //     return;
-  //   }
-  //   ...
-  //   const canvasHeight = Math.round(squareSize * 1.5);
-  //   const footerHeight = canvasHeight - squareSize;
-  // ===== [LEGACY END] =====
 
   state.squareSize = squareSize;
   state.canvasHeight = canvasHeight;
