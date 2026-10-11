@@ -8,7 +8,7 @@
 
 ## 一、项目概述
 
-**OneFrame NAS Edition** 是 [OneFrame](https://github.com/IceyVanci/OneFrame) 的 Docker/NAS 移植版本：将原始 Electron 桌面应用迁移为**纯前端 Web 应用**（零构建，原生 HTML/CSS/JS ES Module），通过 Nginx + Docker 容器化部署，局域网内设备浏览器访问。
+**OneFrame NAS Edition** 基于原始项目 [OneFrame](https://github.com/IceyVanci/OneFrame) 开发，现已作为**正式开发版本**持续演进：**纯前端 Web 应用**（零构建，原生 HTML/CSS/JS ES Module），可通过 Nginx + Docker 部署（NAS 场景），也支持 Cloudflare Pages 等静态托管，局域网内设备浏览器访问。
 
 ### 核心特性
 - **智能 EXIF 读取**：自动识别相机厂商并显示对应 Logo，提取光圈/快门/ISO/焦距/时间/机型
@@ -32,7 +32,10 @@
 
 ## 二、快速开始（部署）
 
-### 方式一：Docker Compose（推荐）
+### 方式一：Cloudflare Pages（推荐 · 免费静态托管）
+Fork 仓库 → Pages → Connect to Git → Build command 留空 → Build output directory 填 `src/renderer`。
+
+### 方式二：Docker Compose（NAS 部署）
 ```bash
 git clone https://github.com/IceyVanci/OneFrame-nas.git
 cd OneFrame-nas
@@ -40,15 +43,12 @@ docker compose up --build -d
 # 访问 http://<NAS-IP>:8888
 ```
 
-### 方式二：预编译镜像
-从 GitHub Releases 下载镜像 tar：
+### 方式三：预编译镜像
+从 GitHub Releases 下载镜像 tar（注意：发布的 tar 为各版本发布时的构建产物，**可能落后于仓库最新代码**，需要最新功能请用方式一/方式二从源码部署）：
 ```bash
 docker load -i oneframe-web-v1.21-nas.tar
 docker run -d -p 8888:80 --name oneframe-web --restart unless-stopped oneframe-nas-oneframe:latest
 ```
-
-### 方式三：Cloudflare Pages（免费静态托管）
-Fork 仓库 → Pages → Connect to Git → Build command 留空 → Build output directory 填 `src/renderer`。
 
 ### 本地开发
 ```bash
@@ -63,6 +63,9 @@ npx serve src/renderer          # 或 python -m http.server 3000 -d src/renderer
 ## 三、样式系统（Type A–T）
 
 每个样式由「CSS + 预览模块 + 导出模块 + 编辑面板配置」四件套组成，经注册表统一管理。
+
+<details>
+<summary>展开查看 Type A–T 样式清单</summary>
 
 | 样式 | 布局特点 |
 |------|----------|
@@ -86,6 +89,8 @@ npx serve src/renderer          # 或 python -m http.server 3000 -d src/renderer
 | **R** | 胶片边缘打印：Pentax 645N 风格，画布锁定 645 单帧比例，右侧竖排橙色参数 |
 | **S** | 留白排版：白色画布 + 居中方形照片（82%）+ 左侧两行文字 + 右侧竖排日期 + 右下参数；比例 1:1 / 1:1.35 |
 | **T** | 满幅无边框：照片铺满画布 + 与 S 相同的文字系统（带淡阴影）；比例 1:1 / 1:1.35 |
+
+</details>
 
 ### 编辑能力
 Logo / 拍摄参数 / 拍摄时间开关、自定义署名、边框颜色与高度、文字颜色（H/I/J/Q/S/T 等）、画布比例（S/T）、照片拖动裁剪（E/R/S/T）、图片主色取色（Q/S/T）等，按样式显示对应面板项（`js/components/type-X-editor-panel.js`）。
@@ -278,11 +283,11 @@ Logo SVG 放入 `src/renderer/logos/`（命名 `{厂商名}.svg`），在 `js/lo
 | 文档 | 说明 |
 |------|------|
 | `docs/README.md`（本文） | 当前版本完整说明 |
-| [`docs/changelogs/`](./changelogs/) | 历史版本记录（v1.08–v1.21 的 release/变更说明） |
-| [`docs/archive/`](./archive/) | 更早归档（v1.00–v1.09 记录、历史报告等） |
+| [`docs/changelogs/`](./changelogs/) | 历史版本记录（v1.00–v1.21 的 release/变更说明） |
+| [`docs/archive/`](./archive/) | 更早归档（迁移指南、历史报告、V1.04_CHANGES 等） |
 | [`CHANGELOG.md`](../CHANGELOG.md) | 全版本更新日志 |
 | [`README.md`](../README.md) | 仓库首页（简介/部署/使用） |
-| [`migration-guide.md`](./migration-guide.md) | Electron → Docker 移植方法论（通用参考） |
-| [`AI_PROJECT_GUIDE.md`](./AI_PROJECT_GUIDE.md) | 旧版 AI 认知指南（v1.16 时代，部分过时） |
-| [`function_analysis.md`](./function_analysis.md) | 旧版函数分析（A–N 时代，部分过时） |
-| [`preview-scaling-report.md`](./preview-scaling-report.md) | 历史分析报告（2026-07，问题已由 v1.21 解决） |
+| [`archive/migration-guide.md`](./archive/migration-guide.md) | Electron → Docker 移植方法论（通用参考） |
+| [`AI_PROJECT_GUIDE.md`](./AI_PROJECT_GUIDE.md) | AI 项目认知指南（v1.21 现状） |
+| [`function_analysis.md`](./function_analysis.md) | 函数分析文档（v1.21 重构版：共享模块 + 20 样式） |
+| [`archive/preview-scaling-report.md`](./archive/preview-scaling-report.md) | 历史分析报告（2026-07，问题已由 v1.21 解决） |

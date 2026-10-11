@@ -1,636 +1,395 @@
 # OneFrame NAS Edition 函数分析文档
 
-> 注意：本分析基于早期版本（Type A–N），部分函数与结构已有变化（如预览统一缩放、缓存机制）；最新完整说明见 [docs/README.md](./README.md)。
->
-> 本文档基于 OneFrame NAS 版本（Docker/Web），反映从 Electron 移植后的实际代码状态。
+> 状态：基于当前源码（**v1.21 + U3 清理后**），覆盖 Type A–T 全部 20 样式。
+> 定位：函数/模块级清单（有哪些函数、哪些未使用）；架构与机制说明见 [docs/README.md](./README.md)，AI 速览见 [AI_PROJECT_GUIDE.md](./AI_PROJECT_GUIDE.md)。
+> 本文件 2026-10-11 重构：由早期「逐函数穷举（A–G 时代）」改为「共享模块详表 + 样式统一 API + 样式特有函数摘要」结构。
 > 原始项目：[OneFrame](https://github.com/IceyVanci/OneFrame)（Electron 桌面应用）
 
 ---
 
-## 📊 快速总览
+## 一、快速总览
 
-| 状态 | 数量 | 说明 |
+| 类别 | 数量 | 说明 |
 |------|------|------|
-| ✅ 设计/使用中 | 60+ | 按设计预期运行 |
-| ⚠️ 未使用/预留 | 8 | 功能已废弃或预留，未被调用 |
+| 样式 | 20 | Type A–T |
+| 预览模块 | 20 文件 | 统一 6 件套 API（E/R/S/T 有额外导出） |
+| 导出模块 | 20 文件 | 统一 `renderImage` |
+| 编辑面板 | 15 文件 + 内联 | F–T 独立组件；A–E 内联在 `app.js showEditor` |
+| 共享模块 | 11 文件 | app/exporter/exif×2/logo-utils/font-loader/canvas-utils/preview-scale/mobile/thumbnail-selector/config |
+| 未使用/预留导出 | 10 | exif.js 4 + logo-utils 6（见 §七） |
 
 ---
 
-## 📁 项目文件结构
+## 二、项目文件结构（当前）
 
 ```
 src/renderer/
-├── index.html           # 主页面
-├── index.css            # 全局样式
-├── css/
-│   ├── type-a.css       # Type A 样式（白色下边框）
-│   ├── type-b.css       # Type B 样式（正方形画布）
-│   ├── type-c.css       # Type C 样式（横向布局）
-│   ├── type-d.css       # Type D 样式（横向居中）
-│   ├── type-e.css       # Type E 样式（3:2纵向）
-│   ├── type-f.css       # Type F 样式（画中画风格）
-│   └── type-g.css       # Type G 样式（Logo+日期参数+签名画中画）
+├── index.html           # 主页面（20 样式卡片 + 编辑器 + 关于弹窗 v1.21）
+├── index.css            # 全局样式（@import type-A/B/C）
+├── films.json           # Type O 胶片品牌/型号数据
+├── sample-manifest.json # 样本清单（自动生成）
+├── css/type-{A..T}.css  # 各样式布局
 ├── js/
-│   ├── app.js           # 主逻辑入口（浏览器模式）
+│   ├── app.js           # 主逻辑入口（A–T 统一 updateBorder）
+│   ├── config.js        # EXPORT_NAMING_MODE
 │   ├── exif.js          # EXIF 读取 (exifreader)
 │   ├── exif-exporter.js # EXIF 导出 (piexifjs)
-│   ├── exporter.js      # 图片导出
-│   ├── logo-utils.js    # Logo 工具函数
-│   ├── components/
-│   │   ├── type-f-editor-panel.js  # Type F 编辑面板配置
-│   │   └── type-g-editor-panel.js  # Type G 编辑面板配置
+│   ├── exporter.js      # 导出分发（exportStyles 注册表）
+│   ├── logo-utils.js    # Logo 工具
+│   ├── mobile.js        # 移动端适配
+│   ├── thumbnail-selector.js # 首页缩略图
+│   ├── components/      # F–T 编辑面板组件（15 文件）
 │   └── styles/
-│       ├── index.js     # 样式注册表
-│       ├── type-a-preview.js / type-a-export.js
-│       ├── type-b-preview.js / type-b-export.js
-│       ├── type-c-preview.js / type-c-export.js
-│       ├── type-d-preview.js / type-d-export.js
-│       ├── type-e-preview.js / type-e-export.js
-│       ├── type-f-preview.js / type-f-export.js
-│       └── type-g-preview.js / type-g-export.js
-├── logos/               # 相机厂商 Logo (SVG)
-├── fonts/               # 字体文件 (MiSans)
-└── assets/
-    ├── piexif.js        # EXIF 处理库
-    ├── exifreader.js    # EXIF 读取库
-    ├── opentype.min.js  # 字体渲染库
-    └── font-awesome/    # 图标库（本地化）
+│       ├── index.js            # 样式注册表（20 样式）
+│       ├── preview-scale.js    # 统一填满式缩放（v1.21）
+│       ├── font-loader.js      # 字体加载
+│       ├── canvas-utils.js     # 圆角路径工具
+│       ├── type-{A..T}-preview.js
+│       └── type-{A..T}-export.js
+├── logos/  fonts/  assets/  Sample/
 ```
 
 ---
 
-## 📋 模块职责表
+## 三、共享模块逐函数
 
-### 样式相关模块
+### 3.1 app.js（主逻辑，~1260 行）
 
-| 模块 | 文件 | 职责 | 样式 |
-|------|------|------|------|
-| **预览** | `type-a-preview.js` | Type A 边框预览渲染（白色下边框） | Type A |
-| **预览** | `type-b-preview.js` | Type B 边框预览渲染（正方形画布，图片居左） | Type B |
-| **预览** | `type-c-preview.js` | Type C 边框预览渲染（横向布局） | Type C |
-| **预览** | `type-d-preview.js` | Type D 边框预览渲染（横向居中） | Type D |
-| **预览** | `type-e-preview.js` | Type E 边框预览渲染（3:2纵向，支持拖动裁剪） | Type E |
-| **预览** | `type-f-preview.js` | Type F 边框预览渲染（画中画风格，动态字号缩放） | Type F |
-| **预览** | `type-g-preview.js` | Type G 边框预览渲染（Logo+日期参数+签名画中画） | Type G |
-| **导出** | `type-a-export.js` | Type A Canvas 绘制导出 | Type A |
-| **导出** | `type-b-export.js` | Type B Canvas 绘制导出 | Type B |
-| **导出** | `type-c-export.js` | Type C Canvas 绘制导出 | Type C |
-| **导出** | `type-d-export.js` | Type D Canvas 绘制导出 | Type D |
-| **导出** | `type-e-export.js` | Type E Canvas 绘制导出 | Type E |
-| **导出** | `type-f-export.js` | Type F Canvas 绘制导出 | Type F |
-| **导出** | `type-g-export.js` | Type G Canvas 绘制导出 | Type G |
-| **编辑面板** | `type-f-editor-panel.js` | Type F 编辑面板配置（隐藏边框颜色/高度/比例/Logo） | Type F |
-| **编辑面板** | `type-g-editor-panel.js` | Type G 编辑面板配置（隐藏边框/比例/所有开关，保留 Logo 区域） | Type G |
-| **样式注册表** | `index.js` | 统一管理样式模块 | 通用 |
+模块级状态：`previewDesignCache`（Map）— F–T 设计尺寸缓存；图片加载 `clear()`，S/T 比例切换 `delete`。
 
-### 共享模块
+| 函数 | 触发时机 | 说明 |
+|------|----------|------|
+| `styleIdToTypeName(styleId)` | 辅助 | 样式 ID → 类型名（如 `type-s` → `S`） |
+| `formatDateTimeForInput(value)` | EXIF 填充 | 日期格式化为 input 可用格式 |
+| `applyDynamicBackground(img)` | 进入编辑器 | 编辑器动态背景（图片色调） |
+| `checkImageOrientation(fileOrPath)` | 导入图片 | `URL.createObjectURL` 检查横竖（B 竖图校验） |
+| `detectLogoBrightness(logoPath)` | Logo 检测 | 像素亮度分析（智能配色） |
+| `isLogoLight(logoName)` | Logo 检测 | 带缓存的亮度检测 |
+| `rebuildFilmModelOptions()` | O 品牌下拉变化 | 重建胶片型号下拉 |
+| `initFilms()` | 初始化 | fetch `films.json`（失败回退空表，不中断） |
+| `initLogoGrid()` | 初始化 | 加载 Logo 列表，`onerror` 隐藏无 SVG 品牌 |
+| `selectLogo(name)` | 点击 Logo | 更新选中状态和预览 |
+| `loadImageWithExif(file, options)` | 选择图片 | 读取 EXIF → 更新表单；B 仅竖图校验 |
+| `loadImageInElectron(imagePath, options)` | 遗留（浏览器不触发） | Electron 路径分支 |
+| `updateExifDisplay()` | EXIF 更新 | 自动填充表单（日期正则匹配等） |
+| `showEditor()` | 进入编辑器 | 面板配置：F–T 组件 + 内联规则（B/E 特殊处理） |
+| `hideEditor()` | 返回主页 | 释放 ObjectURL + `location.reload()` 彻底重置 |
+| `captureTopLineFields()` | 重选图片前 | S/T 手输字段（topLine/photoBy）暂存 |
+| `restoreTopLineFields(saved)` | 重选图片后 | 恢复 S/T 手输字段 |
+| `resetForm()` | 返回主页 | 清空表单 |
+| `updateBorder()` | 颜色/高度/比例/resize/图片 load | **A–T 统一路径**（20 样式白名单 → init/reset/calcSize/缓存/fit/updateFrameWrapper/updatePreview） |
+| `updateBorderContent()` | 内容变化 | 收集设置 → `updateContentPreview`；清理 Type B 残留容器 |
+| `sampleTypeSColor(e)` | S 取色按钮 | 图片主色采样 → S 边框色 |
+| `sampleTypeTColor(e)` | T 取色按钮 | 图片主色采样 → T 文字色 |
+| `getEditSettings()` | 导出时 | 收集编辑设置 |
+| `exportImageHandler()` | 点击导出 | `exporter.exportImage` → `<a download>` |
 
-| 模块 | 文件 | 职责 | 说明 |
-|------|------|------|------|
-| **主入口** | `app.js` | 主逻辑入口 | 纯浏览器模式，无 Electron 分支 |
-| **EXIF 读取** | `exif.js` | 读取图片 EXIF 信息 | 使用 exifreader（本地加载） |
-| **EXIF 导出** | `exif-exporter.js` | 嵌入 EXIF 到输出图 | 使用 piexifjs |
-| **图片导出** | `exporter.js` | Canvas 绘制导出 | 通用逻辑，通过 `<a download>` 下载 |
-| **Logo 工具** | `logo-utils.js` | Logo 文件和厂商映射 | 共享 |
+> 注：U3 清理已删除 `getDisplaySettings()`（孤儿）、`shortSide`/`borderPercent` 等死代码。
 
----
+### 3.2 exporter.js
 
-## 📋 机制汇总表
+| 函数 | 状态 | 说明 |
+|------|------|------|
+| `exportStyles` | ✅ | 样式 → 导出模块映射（20 样式） |
+| `getExportRenderer(styleId)` | ✅ | 获取渲染函数（缺省 type-a） |
+| `dataURLtoBlob(dataUrl)` | ✅ | DataURL → Blob |
+| `exportImage(img, options)` | ✅ | 渲染 → 读原图 EXIF → 嵌入 → Blob |
 
-### styles/index.js
+### 3.3 exif.js（exifreader）
 
-| 函数名 | 状态 | 说明 | 样式 |
-|--------|------|------|------|
-| `styles` | ✅ | 样式注册表对象 | 通用 |
-| `getPreview(styleId)` | ✅ | 获取预览模块 | 通用 |
-| `getExport(styleId)` | ✅ | 获取导出模块 | 通用 |
-| `getStyle(styleId)` | ✅ | 获取完整样式配置 | 通用 |
-| `getAllStyles()` | ✅ | 获取所有样式列表 | 通用 |
+| 函数/常量 | 状态 | 说明 |
+|-----------|------|------|
+| `getExif(file)` | ✅ | 读取 EXIF |
+| `getMakeName(make)` | ✅ | 标准化厂商名称 |
+| `getFocalLength(exif)` | ✅ | 优先等效焦距 |
+| `getPhysicalFocalLength(exif)` | ✅ | 物理焦距 |
+| `getExposureModeLabel(exif)` | ✅ | 曝光模式标签 |
+| `formatExposureBias(exif)` | ✅ | 曝光补偿格式化 |
+| `formatDateTime(dateStr)` | ✅ | `YYYY:MM:DD HH:mm:ss` → `YYYY-MM-DD HH:mm:ss` |
+| `getExifName` / `SUPPORTED_MAKES` / `exifPrimaryKeys` / `primaryExif` | ⚠️ 未使用 | 见 §七 |
 
-### styles/type-a-preview.js
+### 3.4 exif-exporter.js（piexifjs）
 
-| 函数名 | 状态 | 说明 |
-|--------|------|------|
-| `init(elements)` | ✅ | 初始化 Type A 预览 |
-| `calcBorderSize(imgWidth, imgHeight, borderPercent)` | ✅ | 计算边框尺寸 |
-| `updateFrameWrapper(frameWrapper)` | ✅ | 更新 frameWrapper 类名（完整清理 type-a~e） |
-| `updatePreview(img, footer, options)` | ✅ | 更新边框预览 |
-| `updateContentPreview(elements, settings)` | ✅ | 更新边框内容（焦距带 mm 单位） |
-| `reset()` | ✅ | 重置预览状态（完整清理类名） |
+| 函数/类 | 状态 | 说明 |
+|---------|------|------|
+| `ExifHandler`（class）/ `exifHandler`（单例） | ✅ | EXIF 处理 |
+| `readExifFromFile(file)` | ✅ | FileReader + piexif 读取 |
+| `embedExif(dataUrl, exifObj)` | ✅ | 嵌入 EXIF 到 DataURL |
+| `hasExifData(exifObj)` | ✅ | 有效性检查 |
+| `dumpExif(exifObj)` | ✅ | 转为 piexif 格式 |
 
-### styles/type-b-preview.js
+### 3.5 logo-utils.js
 
-| 函数名 | 状态 | 说明 |
-|--------|------|------|
-| `init(elements)` | ✅ | 初始化 Type B 预览 |
-| `calcSize(settings)` | ✅ | 计算正方形尺寸（含自适应缩放） |
-| `updateFrameWrapper(squareSize)` | ✅ | 设置 frameWrapper 为正方形（完整清理 type-a~e） |
-| `updatePreview(squareSize, margin, imgDimensions)` | ✅ | 更新图片和右侧区域布局 |
-| `updateContentPreview(settings)` | ✅ | 更新右侧参数和 Logo |
-| `update(imgSettings, displaySettings)` | ✅ | 完整更新流程 |
-| `reset()` | ✅ | 重置预览状态（完整清理类名，移除 mainContainer） |
+| 函数/常量 | 状态 | 说明 |
+|-----------|------|------|
+| `logoList` | ✅ | 19 家厂商列表 |
+| `getAllLogos()` | ✅ | 所有可用 Logo |
+| `getLogoFilename(make)` | ✅ | Logo 文件名 |
+| `getMakeName(make)` | ✅ | 标准化厂商名称 |
+| `getModelName(model)` | ✅ | 机型格式化（去冗余后缀） |
+| `logoSvgMap` / `getMakeLogoSvg` / `getAutoLogoFilename` / `getMakeLogoPath` / `getMakeLogo` / `replaceTextVars` | ⚠️ 未使用 | 见 §七 |
 
-### styles/type-c-preview.js
+### 3.6 styles/font-loader.js
 
-| 函数名 | 状态 | 说明 |
-|--------|------|------|
-| `init(elements)` | ✅ | 初始化 Type C 预览 |
-| `calcBorderSize(imgWidth, imgHeight, borderPercent)` | ✅ | 计算边框尺寸 |
-| `updateFrameWrapper(frameWrapper)` | ✅ | 更新 frameWrapper 类名（完整清理 type-a~e） |
-| `updatePreview(img, footer, options)` | ✅ | 更新边框预览（纵向图片自动缩放字体） |
-| `updateContentPreview(elements, settings)` | ✅ | 更新边框内容（焦距带 mm 单位） |
-| `reset()` | ✅ | 重置预览状态（完整清理类名） |
+| 函数 | 状态 | 说明 |
+|------|------|------|
+| `loadMiSansFonts()` | ✅ | opentype 加载 MiSans woff2，缓存 + Promise 去重，失败返回 null（B/E 专用） |
+| `ensureCssFontsReady()` | ✅ | 等待 CSS 字体就绪，返回 null（fillText 模块用） |
 
-### styles/type-d-preview.js
+### 3.7 styles/canvas-utils.js
 
-| 函数名 | 状态 | 说明 |
-|--------|------|------|
-| `init(elements)` | ✅ | 初始化 Type D 预览 |
-| `calcBorderSize(imgWidth, imgHeight, borderPercent)` | ✅ | 计算边框尺寸 |
-| `updateFrameWrapper(frameWrapper)` | ✅ | 更新 frameWrapper 类名（完整清理 type-a~e） |
-| `updatePreview(img, photoFooter, options)` | ✅ | 更新边框预览 |
-| `updateContentPreview(elements, settings)` | ✅ | 更新边框内容（焦距带 mm 单位） |
-| `reset()` | ✅ | 重置预览状态（完整清理类名） |
+| 函数 | 状态 | 说明 |
+|------|------|------|
+| `roundedRectPath(ctx, x, y, w, h, r)` | ✅ | 圆角路径（`ctx.roundRect` 缺失时 arcTo 降级） |
 
-### styles/type-e-preview.js (3:2 纵向，支持拖动裁剪)
+### 3.8 styles/preview-scale.js（v1.21 新增）
 
-| 函数名 | 状态 | 说明 |
-|--------|------|------|
-| `init(elements)` | ✅ | 初始化 Type E 预览，添加拖动事件监听 |
-| `setOriginalDimensions(width, height)` | ✅ | 设置原始图片尺寸 |
-| `calcSize(settings)` | ✅ | 计算尺寸（正方形 + 3:2 比例） |
-| `updateFrameWrapper(squareSize)` | ✅ | 更新 frameWrapper 为 3:2（完整清理 type-a~e） |
-| `updatePreview(squareSize, margin, imgDimensions)` | ✅ | 更新 1:1 正方形图片预览 |
-| `updateContentPreview(elements, settings)` | ✅ | 更新底部参数布局 |
-| `updateDragHint()` | ✅ | 添加/更新拖动提示文字 |
-| `startDrag(e)` | ✅ | 开始拖动 |
-| `onDrag(e)` | ✅ | 拖动中（根据图片方向限制偏移） |
-| `endDrag()` | ✅ | 结束拖动 |
-| `getMaxOffset()` | ✅ | 获取最大偏移量（拖动限制） |
-| `calculateObjectPosition()` | ✅ | 计算 object-position 值 |
-| `getImageOffset()` | ✅ | 获取图片偏移量（用于导出） |
-| `getState()` | ✅ | 获取完整 state（用于导出） |
-| `getNormalizedOffset()` | ✅ | 获取归一化偏移量（用于导出） |
-| `resetImageOffset()` | ✅ | 重置图片偏移 |
-| `reset()` | ✅ | 重置预览状态（完整清理类名，移除拖动提示） |
+| 函数 | 状态 | 说明 |
+|------|------|------|
+| `getPreviewAvail(previewArea, margin = 0.96)` | ✅ | 预览区可用宽高 |
+| `fitCanvasToPreview(canvasWidth, canvasHeight, previewArea, options)` | ✅ | `scale = min(availW/W, availH/H, 1)` → 显示尺寸（取整） |
 
-### styles/type-e-export.js
+### 3.9 mobile.js
 
-| 函数名 | 状态 | 说明 |
-|--------|------|------|
-| `loadMiSansFonts()`（font-loader.js） | ✅ | 共享 opentype 加载 MiSans 字体（woff2，Type E 测宽用） |
-| `drawBorderContentTypeE(ctx, canvasWidth, canvasHeight, settings, fonts)` | ✅ | 绘制 Type E 底部参数 |
-| `drawLogoTypeEFixed(ctx, logoName, x, bottomY, scale, yearFontSize)` | ✅ | 绘制 Logo（固定在底部） |
-| `drawLogoTypeE(ctx, logoName, x, y, scale, yearFontSize)` | ⚠️ | 已废弃，改用 drawLogoTypeEFixed |
-| `renderImage(img, options)` | ✅ | Type E Canvas 导出（3:2 纵向） |
+| 函数 | 状态 | 说明 |
+|------|------|------|
+| `detectMobile()` / `isMobile` | ✅ | UA 检测 |
+| `initMobileLayout()` | ✅ | 注入 `is-mobile` class 等 |
+| `lockBodyScroll()` / `unlockBodyScroll()` | ✅ | 滚动锁定 |
+| `initSwipeToClose()` | ✅ | 下滑关闭抽屉面板 |
 
-### styles/font-loader.js（公共字体加载，v1.16 新增）
+### 3.10 thumbnail-selector.js
 
-| 函数名 | 状态 | 说明 |
-|--------|------|------|
-| `loadMiSansFonts()` | ✅ | opentype 加载 MiSans woff2（Semibold/Medium/Normal），模块级缓存 + Promise 去重，失败返回 null 不抛出（Type B/E 专用） |
-| `ensureCssFontsReady()` | ✅ | 等待 CSS @font-face 字体就绪，返回 null 字体对象（fillText 渲染模块用） |
+| 函数 | 状态 | 说明 |
+|------|------|------|
+| `initHomepageThumbnails()` | ✅ | 读 `sample-manifest.json`，每卡片随机选不重复样本；缺失回退 `data-fallback-src` |
 
-### styles/canvas-utils.js（Canvas 工具，v1.16 新增）
+### 3.11 config.js
 
-| 函数名 | 状态 | 说明 |
-|--------|------|------|
-| `roundedRectPath(ctx, x, y, w, h, r)` | ✅ | 圆角矩形路径，兼容不支持 `ctx.roundRect` 的老浏览器（arcTo 降级） |
-
-### styles/type-f-preview.js（画中画风格，动态字号缩放）
-
-| 函数名 | 状态 | 说明 |
-|--------|------|------|
-| `init(elements)` | ✅ | 初始化 Type F 预览 |
-| `calcSize(settings)` | ✅ | 计算画布尺寸（宽度=图片宽度，高度=图片高度/0.8） |
-| `updateFrameWrapper(squareSize, canvasHeight)` | ✅ | 设置 frameWrapper 尺寸和动态字号（基准 900px 对应 14px） |
-| `updatePreview(squareSize, canvasHeight, imgDimensions)` | ✅ | 更新图片样式（由 CSS 控制布局），隐藏 photoFooter |
-| `updateContentPreview(elements, settings)` | ✅ | 更新底部文字区（绝对定位，与导出一致） |
-| `reset()` | ✅ | 重置预览状态（完整清理类名，恢复默认 HTML 结构） |
-
-### styles/type-f-export.js（画中画导出）
-
-| 函数名 | 状态 | 说明 |
-|--------|------|------|
-| `ensureCssFontsReady()`（font-loader.js） | ✅ | 等待 CSS @font-face 字体就绪（fillText 渲染） |
-| `borderColorIsLight(color)` | ✅ | 检测边框颜色亮度 |
-| `drawText(ctx, text, x, y, fontSize, options)` | ✅ | 绘制单行文字（opentype.js 路径渲染） |
-| `drawBorderContent(ctx, canvasWidth, canvasHeight, settings, fonts)` | ✅ | 绘制 Type F 底部文字区（Shot on + 参数 + 署名） |
-| `renderImage(img, options)` | ✅ | Type F Canvas 导出（画布宽度=图片宽度，高度=图片高度/0.8） |
-
-### styles/type-g-preview.js（Logo+日期参数+签名画中画）
-
-| 函数名 | 状态 | 说明 |
-|--------|------|------|
-| `init(elements)` | ✅ | 初始化 Type G 预览 |
-| `calcSize(settings)` | ✅ | 计算画布尺寸（宽度=图片宽度，高度=图片高度/0.8或0.9） |
-| `updateFrameWrapper(squareSize, canvasHeight)` | ✅ | 设置 frameWrapper 尺寸和动态字号（基准 900px 对应 14px） |
-| `updatePreview(squareSize, canvasHeight, imgDimensions)` | ✅ | 更新照片区域样式（纵向图片覆盖 CSS 默认值） |
-| `updateContentPreview(elements, settings)` | ✅ | 更新文字和 Logo 内容预览（三行居中布局） |
-| `reset()` | ✅ | 重置预览状态 |
-
-### styles/type-g-export.js（Logo+日期参数+签名导出）
-
-| 函数名 | 状态 | 说明 |
-|--------|------|------|
-| `ensureCssFontsReady()`（font-loader.js） | ✅ | 等待 CSS @font-face 字体就绪（fillText 渲染） |
-| `drawText(ctx, text, x, y, fontSize, options)` | ✅ | 使用 ctx.fillText 绘制文字 |
-| `detectLogoBrightness(logoPath)` | ✅ | 检测 logo 图片的平均亮度 |
-| `borderColorIsLight(color)` | ✅ | 判断颜色是否为浅色 |
-| `formatDateForDisplay(dateTimeStr)` | ✅ | 格式化日期 |
-| `drawBorderContent(ctx, canvasWidth, canvasHeight, settings, fonts, isPortrait)` | ✅ | 绘制底部文字内容（Logo+日期参数+签名） |
-| `drawLogoG(ctx, logoName, centerX, centerY, maxHeight)` | ✅ | 绘制 Logo（居中，按目标高度缩放） |
-| `renderImage(img, options)` | ✅ | Type G Canvas 导出 |
-
-### components/type-f-editor-panel.js（Type F 编辑面板配置）
-
-| 函数名 | 状态 | 说明 |
-|--------|------|------|
-| `configureEditPanel()` | ✅ | 配置 Type F 编辑面板（隐藏边框颜色/高度/比例/Logo，更新设备型号提示） |
-
-### components/type-g-editor-panel.js（Type G 编辑面板配置）
-
-| 函数名 | 状态 | 说明 |
-|--------|------|------|
-| `configureEditPanel()` | ✅ | 配置 Type G 编辑面板（隐藏边框/比例/所有开关，保留 Logo 区域，更新机型提示） |
-
-### app.js（浏览器模式）
-
-| 函数名 | 状态 | 触发时机 | 说明 |
-|--------|------|----------|------|
-| `checkImageOrientation(fileOrPath)` | ✅ | 导入图片 | 使用 `URL.createObjectURL()` 检查图片方向 |
-| `detectLogoBrightness(logoPath)` | ✅ | Logo 检测 | 分析像素亮度，用于智能配色 |
-| `isLogoLight(logoName)` | ✅ | Logo 检测 | 带缓存的亮度检测 |
-| `initLogoGrid()` | ✅ | 初始化 | 加载 Logo 列表，`onerror` 隐藏无 SVG 的品牌 |
-| `selectLogo(name)` | ✅ | 点击 Logo | 更新选中状态和预览 |
-| `loadImageWithExif(file)` | ✅ | 选择图片 | 读取 EXIF → 更新表单 |
-| `updateExifDisplay()` | ✅ | EXIF 更新 | 自动填充表单（日期正则匹配 `YYYY-MM-DD` 格式） |
-| `showEditor()` | ✅ | 进入编辑器 | 配置编辑面板，区分 Type B/E 特殊处理 |
-| `hideEditor()` | ✅ | 返回主页 | 重置状态，调用对应预览模块 reset |
-| `resetForm()` | ✅ | 返回主页 | 清空表单 |
-| `updateBorder()` | ✅ | 颜色/高度变化 | 更新边框（Type B/E 走独立路径） |
-| `updateBorderContent()` | ✅ | 内容变化 | 更新边框内容 |
-| `getDisplaySettings()` | ✅ | 预览更新 | 收集显示设置 |
-| `getEditSettings()` | ✅ | 导出时 | 收集编辑设置 |
-| `exportImageHandler()` | ✅ | 点击导出 | 调用 exporter → `<a download>` 下载 |
-| `filterCards(category)` | ✅ | 标签切换 | 筛选样式卡片（参数/海报） |
-
-### exporter.js
-
-| 函数名 | 状态 | 触发时机 | 说明 |
-|--------|------|----------|------|
-| `exportImage(img, options)` | ✅ | 导出按钮 | 获取渲染函数 → Canvas 绘制 → 嵌入 EXIF → Blob |
-| `getExportRenderer(styleId)` | ✅ | 导出时 | 获取对应样式渲染函数 |
-| `dataURLtoBlob(dataUrl)` | ✅ | 导出完成 | DataURL → Blob |
-
-### exif.js
-
-| 函数名 | 状态 | 触发时机 | 说明 |
-|--------|------|----------|------|
-| `getExif(file)` | ✅ | 导入图片 | 使用 `window.ExifReader` 读取 EXIF（本地加载） |
-| `getMakeName(make)` | ✅ | Logo 选择 | 标准化厂商名称 |
-| `getFocalLength(exif)` | ✅ | 焦距获取 | 优先等效焦距 |
-| `formatDateTime(dateStr)` | ✅ | 日期格式化 | `YYYY:MM:DD HH:mm:ss` → `YYYY-MM-DD HH:mm:ss` |
-| `formatValue(val)` | ✅ | 值格式化 | 提取 description/value |
-| `getExifName(key)` | ⚠️ | 未使用 | UI 不显示 EXIF 详情表 |
-| `SUPPORTED_MAKES` | ⚠️ | 未使用 | 从 logoList 获取 |
-| `exifPrimaryKeys` | ⚠️ | 未使用 | 仅定义 |
-| `primaryExif` | ⚠️ | 未使用 | UI 不显示详情 |
-
-### exif-exporter.js
-
-| 函数名 | 状态 | 触发时机 | 说明 |
-|--------|------|----------|------|
-| `readExifFromFile(file)` | ✅ | 导出时 | 使用 FileReader + piexif 读取 EXIF |
-| `embedExif(dataUrl, exifObj)` | ✅ | 导出时 | 将 EXIF 嵌入图片 DataURL |
-| `hasExifData(exifObj)` | ✅ | 导出时 | 检查 EXIF 对象是否包含有效数据 |
-| `dumpExif(exifObj)` | ✅ | 导出时 | 转换 EXIF 对象为 piexif 格式 |
-| `ExifHandler` (class) | ✅ | 内部 | EXIF 处理单例 |
-
-### logo-utils.js
-
-| 函数名 | 状态 | 触发时机 | 说明 |
-|--------|------|----------|------|
-| `getAllLogos()` | ✅ | Logo 列表 | 返回所有可用 Logo（19 个有 SVG 文件） |
-| `getLogoFilename(make)` | ✅ | Logo URL | 获取 Logo 文件名 |
-| `getModelName(model)` | ✅ | 机型格式化 | 去除冗余后缀 |
-| `getMakeName(make)` | ✅ | Logo 选择 | 标准化厂商名称 |
-| `getAutoLogoFilename(make)` | ⚠️ | 未使用 | 改用 CSS filter |
-| `getMakeLogoPath(make)` | ⚠️ | 未使用 | 改用相对路径 |
-| `getMakeLogo(exif)` | ⚠️ | 未使用 | 改用直接匹配 |
-| `logoSvgMap` | ⚠️ | 未使用 | 改用真实 SVG 文件 |
+| 导出 | 状态 | 说明 |
+|------|------|------|
+| `EXPORT_NAMING_MODE` | ✅ | 导出命名模式配置 |
 
 ---
 
-## 📈 数据流分析
+## 四、样式模块（Type A–T）
+
+### 4.1 统一预览 API（20 样式全部实现）
+
+```
+init(elements)                                  // { img, frameWrapper, photoFooter, borderContent }
+calcSize(settings)                              // 设计画布
+updateFrameWrapper(displayWidth, displayHeight) // 显示尺寸 + 基准字号
+updatePreview(displayWidth, displayHeight, imgDimensions, settings)
+updateContentPreview(elements, settings)
+reset()
+```
+
+| 样式 | calcSize 返回/设计画布 | 特有导出 |
+|------|------------------------|----------|
+| A / C / D | `{ canvasWidth, canvasHeight }` = `{ nW, nH + round(min(nW,nH)×pct/100) }` | — |
+| B | `{ canvasWidth, canvasHeight }` = 方形 `round(nH×1.1)`（仅竖图） | — |
+| E | `{ canvasWidth, canvasHeight }` = `{ 短边, round(短边×1.5) }` | `getImageOffset` `getState` `getNormalizedOffset` `resetImageOffset` |
+| F / G | `{ squareSize, canvasHeight, isPortrait }`（照片占比公式） | — |
+| H / I / J / K / M | `{ squareSize, canvasHeight, isPortrait }`（图片原始尺寸类） | — |
+| L / N / O / P / Q | `{ squareSize, canvasHeight, ... }`（模块内部公式） | — |
+| R | 645 单帧比例 | `getNormalizedOffset` `resetImageOffset` `getState` `buildPrintSlots` `computePrintLayout` |
+| S / T | `{ squareSize, canvasHeight }`（比例 1:1 / 1:1.35） | `getNormalizedOffset` `resetImageOffset` `getState` `getPhotoRect` `resolveTextColor` `buildParamsLine` `formatDateS/T` |
+
+- `app.js` 统一归一 `design.canvasWidth ?? design.squareSize` 后交给 `fitCanvasToPreview`
+- P–T 模块额外导出 `TYPE_X_LAYOUT` 布局常量（Q 为 `TYPE_Q_LAYOUT`，依此类推）
+
+### 4.2 预览模块内部辅助（摘要）
+
+| 样式 | 内部函数 |
+|------|----------|
+| A / C / D | `updateBorderContentPosition`（底栏文字定位） |
+| B | —（统一 API 内完成） |
+| E | 拖动系列：`startDrag/onDrag/endDrag/applyImageOffset/clampImageOffset/getMaxOffset/calculateObjectPosition/updateDragHint`；渲染辅助：`onLogoLoad/getDateRows/getRightParams/getRenderedImageMetrics/clamp` |
+| F–N | — |
+| O / P / Q | `escapeHtml` |
+| R | 拖动系列 + `formatPrintDate/getMeasureCtx/clamp/updateDragHint/escapeHtml` |
+| S / T | 拖动系列 + `aspectHOverW`（S）/`ratioHOverW`（T）/`escapeHtml` |
+
+### 4.3 导出模块内部辅助（摘要）
+
+| 样式 | 内部函数 |
+|------|----------|
+| A / C / D | `drawText/drawBorderContent/drawLogo/detectLogoBrightness/borderColorIsLight/formatDateForDisplay/dataURLtoBlob`（+`isLogoLightFromCache`） |
+| B | 同 A 组 + `drawBorderContentTypeB/drawLogoTypeB` |
+| E | `borderColorIsLight/formatDateForDisplay/detectLogoBrightness/drawLogo/drawBorderContentTypeE/drawLogoTypeEFixed` |
+| F / J | `drawText/drawBorderContent`（+`detectLogoBrightness/borderColorIsLight/formatDateForDisplay`） |
+| G | 同 F + `drawLogoG` |
+| H / I / K | `drawText/drawBorderContent` + `drawLogoH/drawLogoI/drawLogoK` |
+| L / M | `drawText/drawBlurredBackground/drawBorderContent` + `drawLogoL/drawLogoM` |
+| N | `drawText/drawLogoN/drawBorderContent` |
+| O | `drawText`（内容内联绘制） |
+| P | `loadLogo/pillFontPx` |
+| Q | —（renderImage 内联） |
+| R | `computeCanvas/drawPrint` |
+| S / T | `drawTexts/setLetterSpacing/hexToRgba` |
+
+> `renderImage(img, options)` 为 20 样式统一导出入口（`typeXExport` 对象一并导出）。
+
+### 4.4 编辑面板模块
+
+- **F–T（15 个组件文件）**：`components/type-X-editor-panel.js` → `configureEditPanel()`，通过 `.edit-section:has(#id)` 选择器隐藏无关分区；H/I/J/K/L/M 处理文字颜色分区，O 处理胶片分区，P/Q 处理开关，R 处理打印分区，S/T 处理取色器与比例
+- **A–E（内联）**：`app.js showEditor()` 内联规则
+  - `borderColorSection` 对 B/E/F–T 隐藏（其余显示）
+  - B：隐藏 Logo/参数/时间三个开关
+  - E：删除「原始比例」选项 + 隐藏三个开关组
+- `panelConfigurers` 映射表仅含 F–T
+
+---
+
+## 五、数据流分析
 
 ### 图片导入流程（浏览器模式）
 
 ```
 用户选择图片（<input type="file">）
-     │
-     ▼
-┌─────────────────────────────────────┐
-│       loadImageWithExif(file)       │
-│  - URL.createObjectURL(file)        │
-│  - getExif(file)                    │
-└────────────────┬────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────┐
-│            getExif(file)            │
-│  - window.ExifReader.load(file)     │
-│  - 解析 EXIF 字段                   │
-│  - formatDateTime() 格式化日期      │
-└────────────────┬────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────┐
-│         updateExifDisplay()         │
-│  - getMakeName() → 自动选择 Logo    │
-│  - getModelName() → 填充机型        │
-│  - 正则匹配 YYYY-MM-DD 格式日期     │
-└─────────────────────────────────────┘
+  → loadImageWithExif(file)
+     - URL.createObjectURL(file) 显示
+     - checkImageOrientation（B 竖图校验）
+     - getExif(file) 解析
+  → updateExifDisplay()
+     - getMakeName() → 自动选择 Logo
+     - getModelName() → 填充机型
+     - 正则匹配日期 → 填充拍摄时间
+  → showEditor()
 ```
 
-### 样式切换流程
+### 预览更新流程（A–T 统一）
 
 ```
-点击样式卡片
-     │
-     ▼
-┌─────────────────────────────────────┐
-│  currentStyle = card.dataset.style  │
-└────────────────┬────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────┐
-│    showEditor()                     │
-│  - 配置编辑面板（Type B/E 特殊处理）│
-│  - updateBorder() → 预览渲染        │
-└─────────────────────────────────────┘
-```
-
-### 边框预览更新流程
-
-```
-用户修改设置 / 图片加载
-     │
-     ▼
-┌─────────────────────────────────────┐
-│        updateBorder()               │
-│  - getPreview(currentStyle)         │
-│  - preview.init()                   │
-│  - preview.reset()                  │
-│  - preview.updateFrameWrapper()     │  ← 统一清理 type-a~e 类名
-│  - preview.updatePreview()          │
-│  - updateBorderContent()            │
-└─────────────────────────────────────┘
+用户修改设置 / resize / 图片 load
+  → updateBorder()
+     - getPreview(currentStyle)
+     - init → reset
+     - calcSize(designSettings)（F–T 走 previewDesignCache；S/T 比例参数）
+     - 归一 design.canvasWidth ?? design.squareSize
+     - fitCanvasToPreview（0.96）
+     - updateFrameWrapper(displayW, displayH)
+     - updatePreview(displayW, displayH, imgDims, settings)
+  → updateBorderContent() → updateContentPreview(elements, settings)
 ```
 
 ### 图片导出流程（浏览器模式）
 
 ```
 用户点击导出
-     │
-     ▼
-┌─────────────────────────────────────┐
-│       exportImageHandler()          │
-│  - 收集编辑设置                      │
-│  - exportImage(img, options)        │
-└────────────────┬────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────┐
-│  getExportRenderer(currentStyle)    │
-│  - renderImage(img, options)        │
-│  - Canvas 绘制 → DataURL            │
-└────────────────┬────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────┐
-│  readExifFromFile(file)             │
-│  - piexif.load() 读取原图 EXIF      │
-│  - embedExif() 嵌入到输出图          │
-└────────────────┬────────────────────┘
-                  │
-                  ▼
-┌─────────────────────────────────────┐
-│  dataURLtoBlob() → <a download>     │
-│  浏览器自动下载文件                   │
-└─────────────────────────────────────┘
+  → getEditSettings() → exportImage(img, options)
+     - getExportRenderer(styleId) → renderImage → DataURL
+     - readExifFromFile + embedExif 嵌入原图 EXIF
+  → dataURLtoBlob() → <a download> 下载
 ```
+
+### 样式特有交互
+
+- **E/R/S/T 拖动裁剪**：预览记录归一化偏移（`getNormalizedOffset`），导出端按同比例应用
+- **Q/S/T 取色**：`sampleTypeSColor`/`sampleTypeTColor` 在离屏 canvas 采样图片主色
+- **S/T 比例切换**：`canvasRatioS`/`ratioT` 变化 → 失效 `previewDesignCache` 对应键 → 重新 calcSize
+- **O 胶片下拉**：品牌变化 → `rebuildFilmModelOptions()` 重建型号列表
 
 ---
 
-## Type E 特殊布局说明
+## 六、特殊样式布局说明
 
-### Type E 画布结构
+### 6.1 Type E（3:2 纵向，支持拖动裁剪）
 
 ```
 ┌─────────────────────────────────┐
 │                                 │
-│         1:1 正方形图片            │  ← 顶部 squareSize × squareSize
+│         1:1 正方形图片            │  ← 顶部 短边 × 短边
 │       (可拖动裁剪区域)            │
-│                                 │
 ├─────────────────────────────────┤
 │  March              f/2.8       │
 │  2024            50mm 1/125   │  ← 底部白色区域
-│                   ISO 400       │    canvasHeight - squareSize
+│                   ISO 400       │
 │ [Logo]            Model          │
 │                 Signature        │
 └─────────────────────────────────┘
 
-画布尺寸：squareSize × (squareSize × 1.5)
+设计画布：短边 × round(短边 × 1.5)
 ```
 
-### Type E 布局规则
+- **基准字号**：`max(8, round(24 × 显示短边 / 480))`（容器字号）；月份 = 2× 基准（橙色年份 = 基准）；参数行 margin-top ≈ 2.333× 基准
+- **拖动**：竖图只能上下、横图只能左右，范围 = (原图长边 − 短边) / 2；提示为绝对定位浮层（右侧垂直居中）
+- **导出**：基准 `24 × 设计短边 / 480`，与预览同构
 
-| 位置 | 内容 | 样式 |
-|------|------|------|
-| 左上 | 月份（英文首字母大写） | font-size: 48px（是其他文字的 2 倍） |
-| 左上（月份下方） | 年份 | font-size: 24px, 橙色 #FF6B00 |
-| 左下 | Logo | 固定在底部，距离下边缘 5% |
-| 右上 | 光圈 + 焦距 + 快门 + ISO | 合并在一行，font-size: 18px |
-| 右上 | 机型 | font-size: 18px, 灰色 #666666 |
-| 右上 | 署名 | font-size: 18px, 浅灰 #888888 |
+### 6.2 Type B（正方形，仅竖图）
 
-### Type E 拖动机制
+- 设计方形：`round(图片高 × 1.1)`；内容（字号/列宽/分隔线）按**实际渲染方形** `frameWrapper.clientWidth / 900` 等比缩放（窄窗会被 flex 收缩，必须用渲染值而非设计值）
+- 预览照片圆角：`round(12 × 渲染方形 / 900)`；导出圆角：`round(12 × 设计方形 / 900)`（同比例）
+- 横图导入被拒绝（alert）
 
-- 纵向图片：只能上下拖动，可拖动范围 = (原始高度 - squareSize) / 2
-- 横向/方形图片：只能左右拖动，可拖动范围 = (原始宽度 - squareSize) / 2
-- 拖动提示：显示在画布外部下方，切换样式时自动清除
-
----
-
-## Type F 特殊布局说明
-
-### Type F 画布结构
+### 6.3 Type F / G（画中画）
 
 ```
 ┌──────────────────────────────────┐
 │          5% 白色留白              │
 ├──────────────────────────────────┤
-│                                  │
-│     92% 宽度 × 80% 高度           │  ← 照片展示区
-│     (object-fit: cover)          │
-│                                  │
+│     92% 宽度 × 80% 高度           │  ← 照片展示区（object-fit: cover）
 ├──────────────────────────────────┤
-│    Shot on Sony A7M4             │  ← 底部 15% 文字信息区
-│    2024/06/18 f/2.8 50mm 1/125   │     (绝对定位)
-│    ISO 400                       │
-│    © Photo by John               │
+│   底部 15% 文字信息区（绝对定位）  │
 └──────────────────────────────────┘
-
-画布尺寸：图片宽度 × (图片高度 / 0.8)
 ```
 
-### Type F 布局规则
+- **F**：三行文字（"Shot on"+品牌型号 / 参数行 / © 署名）；**G**：Logo + 日期|参数|机型 + 署名
+- **动态字号**：`max(8, round(14 × 显示宽 / 900))`；第二行 = 基准 × (12/14)；行距 = 基准 × (6/14)
+- **G 纵向自适应**：照片区 90% / 顶留白 2.5% / 文字区 7.5%（横图 80%/5%/15%）
+- v1.21 起预览缩放走统一 fit（几何与旧实现 0px 一致）
 
-| 区域 | 位置 | 内容 |
-|------|------|------|
-| 白色留白 | 顶部 5% 高度 | 纯白背景 |
-| 照片区 | top:5%, left:4%, width:92%, height:80% | 图片（object-fit: cover） |
-| 文字区 | 底部 15% 高度 | 绝对定位文字 |
-| 第一行 | 文字区居中 | "Shot on"（灰色 #888）+ 品牌型号（黑色 #000） |
-| 第二行 | 第一行下方 | 日期 光圈 焦距 快门 ISO（灰色 #888） |
-| 第三行 | 第二行下方 | © 署名（灰色 #888，可选） |
+### 6.4 Type S / T（留白排版 / 满幅）
 
-### Type F 动态字号
-
-- 基准：900px 画布宽度对应 14px 字号
-- 公式：`fontSize = 14 × displayWidth / 900`
-- 第二行/第三行字号 = 第一行 × (12/14)
-- 行间距 = baseFontSize × (6/14)
-
-### Type F 预览缩放机制（v1.04 修复）
-
-- 画布原始尺寸完全基于图片（`canvasW = naturalWidth`，`canvasH = naturalHeight / 0.8`）
-- 每次 resize 时计算 `displayScale = min(availW/canvasW, availH/canvasH, 1)`
-- 显示尺寸 = 原始尺寸 × displayScale
-- 所有元素（字号、CSS 百分比）基于显示尺寸计算，无 transform 双重缩放
-
-### Type F 编辑面板特殊配置
-
-- 隐藏：边框颜色、边框高度、比例设置、Logo 区域
-- 设备型号文本框自动包含品牌名（如 "Sony A7M4"）
-- 使用 `type-f-editor-panel.js` 独立配置模块
+- **比例**：1:1 / 1:1.35（S 用 `canvasRatioS`，T 用 `ratioT`）
+- **S**：白色画布 + 居中方形照片（82%）+ 左侧两行文字 + 右侧竖排日期 + 右下参数
+- **T**：照片铺满 + 与 S 相同文字系统（带淡阴影）
+- **文字系统**：`resolveTextColor`（黑/白/主色）、`buildParamsLine`（参数行）、`formatDateS/T`（竖排日期）
+- **取色**：`sampleTypeSColor`/`sampleTypeTColor` 采样主色 → 边框色/文字色
+- **拖动**：照片可拖动裁剪（归一化偏移导出）
 
 ---
 
-## Type G 特殊布局说明
+## 七、未使用/预留导出（10）
 
-### Type G 画布结构
+### exif.js（4）
 
-```
-┌──────────────────────────────────┐
-│          5% 白色留白              │
-├──────────────────────────────────┤
-│                                  │
-│     92% 宽度 × 80% 高度           │  ← 照片展示区
-│     (object-fit: cover)          │
-│                                  │
-├──────────────────────────────────┤
-│         [Canon Logo]             │  ← 第一行：厂商 Logo（居中）
-│   2024/06/18 | f/2.8 50mm | A7M4 │  ← 第二行：日期|参数|机型（竖线分隔）
-│         © Photo by John          │  ← 第三行：署名（居中）
-└──────────────────────────────────┘
+| 符号 | 原因 |
+|------|------|
+| `getExifName` | UI 不显示 EXIF 详情表 |
+| `SUPPORTED_MAKES` | 厂商匹配改走 logoList |
+| `exifPrimaryKeys` | 仅定义 |
+| `primaryExif` | 仅被未使用的 `getExifName` 引用 |
 
-画布尺寸：图片宽度 × (图片高度 / 0.8)
-```
+### logo-utils.js（6）
 
-### Type G 布局规则
+| 符号 | 原因 |
+|------|------|
+| `logoSvgMap` | 仅被未使用的 `getMakeLogoSvg` 引用 |
+| `getMakeLogoSvg` | 无调用方（改用真实 SVG 文件 + CSS filter） |
+| `getAutoLogoFilename` | 无调用方 |
+| `getMakeLogoPath` | 仅被未使用的 `getMakeLogo` 引用 |
+| `getMakeLogo` | 无调用方 |
+| `replaceTextVars` | 无调用方 |
 
-| 区域 | 位置 | 内容 |
-|------|------|------|
-| 白色留白 | 顶部 5% 高度 | 纯白背景 |
-| 照片区 | top:5%, left:4%, width:92%, height:80% | 图片（object-fit: cover） |
-| 文字区 | 底部 15% 高度 | 绝对定位文字 |
-| 第一行 | 文字区居中 | 厂商 Logo（居中，高度 = textAreaHeight / 6） |
-| 第二行 | 第一行下方 | 日期 | 参数 | 机型（竖线分隔，全部黑色 #000） |
-| 第三行 | 第二行下方 | © 署名（黑色 #000，可选） |
-
-### Type G 纵向图片自适应
-
-| 场景 | 照片区 | 顶部留白 | 底部文字区 | Logo 高度 |
-|------|--------|---------|-----------|----------|
-| 横向图片 | 80% | 5% | 15% | canvasHeight × 2.5% |
-| 纵向图片 | 90% | 2.5% | 7.5% | canvasHeight × 1.25% |
-
-### Type G 动态字号
-
-- 基准：900px 画布宽度对应 14px 字号
-- 公式：`fontSize = 14 × displayWidth / 900`
-- 第三行字号 = 基准 × (12/14)
-- 行间距 = baseFontSize × (6/14)
-
-### Type G 预览缩放机制
-
-与 Type F 一致：
-- 画布原始尺寸完全基于图片（`canvasW = naturalWidth`，`canvasH = naturalHeight / 0.8`）
-- 每次 resize 时计算 `displayScale = min(availW/canvasW, availH/canvasH, 1)`
-- 显示尺寸 = 原始尺寸 × displayScale
-- 所有元素（字号、CSS 百分比）基于显示尺寸计算
-
-### Type G 与 Type F 差异
-
-| 特性 | Type F | Type G |
-|------|--------|--------|
-| 第一行 | "Shot on" + 品牌型号（文字） | 厂商 Logo（图片） |
-| 第二行格式 | 日期 光圈 焦距 快门 ISO（空格分隔） | 日期\|参数\|机型（竖线分隔） |
-| 文字颜色 | 灰色 #888888 | 黑色 #000000 |
-| 机型名 | 带品牌前缀（如 "Sony A7M4"） | 仅型号（如 "A7M4"） |
-| 编辑面板 | 隐藏 Logo 区域 | 保留 Logo 区域 |
-| 开关控制 | 保留部分开关 | 隐藏所有开关（全部默认显示） |
-
-### Type G 编辑面板特殊配置
-
-- 隐藏：边框颜色、边框高度、比例设置
-- 隐藏：所有显示开关（Logo/参数/时间/署名，所有元素默认显示）
-- 保留：Logo 选择区域
-- 机型 placeholder：`型号（如 A7M4）`
+> U3 清理（2026-10-10）已删除的死代码不再列出：`drawLogoTypeE`、`setOriginalDimensions`、`getDisplaySettings`、`calcBorderSize`×3、`shortSide`、`borderPercent`、`typeBPreview` 死导入等（约 1000 行）。
 
 ---
 
-## 📊 统计
+## 八、统计
 
 | 分类 | 数量 |
 |------|------|
-| 设计/使用中 | 60+ |
-| 未使用/预留 | 8 |
-| **总计分析** | 68+ |
+| 样式（A–T） | 20 |
+| 预览 / 导出模块 | 20 + 20 |
+| 编辑面板组件文件 | 15（F–T） |
+| 共享模块 | 11 |
+| 未使用/预留导出 | 10 |
 
 ---
 
-## ⚠️ 未使用/预留函数
-
-### exif.js
-
-| 函数/常量 | 状态 | 原因 |
-|-----------|------|------|
-| `getExifName` | 未使用 | UI 不显示详情表 |
-| `SUPPORTED_MAKES` | 未使用 | 从 logoList 获取 |
-| `exifPrimaryKeys` | 未使用 | 仅定义 |
-| `primaryExif` | 未使用 | UI 不显示详情 |
-
-### logo-utils.js
-
-| 函数/常量 | 状态 | 原因 |
-|-----------|------|------|
-| `logoSvgMap` | 未使用 | 改用真实 SVG 文件 |
-| `getAutoLogoFilename` | 未使用 | 改用 CSS filter |
-| `getMakeLogoPath` | 未使用 | 改用相对路径 |
-| `getMakeLogo` | 未使用 | 改用直接匹配 |
-
-### styles/type-e-export.js
-
-| 函数 | 状态 | 原因 |
-|------|------|------|
-| `drawLogoTypeE` | 已废弃 | 改用 `drawLogoTypeEFixed` |
-
----
-
-## 📊 与原始 Electron 版本的差异
+## 九、与原始 Electron 版本的差异
 
 | 项目 | Electron 版 | NAS/Web 版 |
 |------|------------|------------|
@@ -641,5 +400,5 @@ src/renderer/
 | Logo 加载 | `electronAPI.getLogos()` | 静态 `getAllLogos()` |
 | EXIF 二进制读取 | `electronAPI.readExifBinary()` | `FileReader` + `piexif` |
 | 外部资源 | CDN 加载 | 本地 `assets/` 目录 |
-| 部署方式 | electron-builder 打包 | Docker + Nginx |
-| 编辑面板配置 | `components/type-*-editor-panel.js` | 内联在 `app.js` 的 `showEditor()` |
+| 部署方式 | electron-builder 打包 | Docker + Nginx / 静态托管 |
+| 字体 | opentype.js（全部样式） | opentype（B/E）+ CSS woff2（其余） |

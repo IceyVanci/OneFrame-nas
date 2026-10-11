@@ -2,7 +2,7 @@
 
 一款简洁优雅的图片边框添加工具，为您的照片自动添加精美的底部边框，并智能显示相机 EXIF 信息。
 
-本项目是 [OneFrame](https://github.com/IceyVanci/OneFrame) 的 NAS/Docker 移植版本，从 Electron 桌面应用迁移为纯前端 Web 应用，通过 Docker 容器化部署在 NAS 上，局域网内设备可通过浏览器访问。
+本项目基于原始项目 [OneFrame](https://github.com/IceyVanci/OneFrame) 开发，现已作为**正式开发版本**持续演进：采用纯前端 Web 应用形态（零构建），可通过 Docker 容器化部署在 NAS 上，也支持 Cloudflare Pages 等静态托管，局域网内设备可通过浏览器访问。
 
 ![Version](https://img.shields.io/badge/version-1.21--nas-blue.svg)
 ![License](https://img.shields.io/badge/license-MIT-green.svg)
@@ -19,6 +19,10 @@
 
 ### 🎨 边框样式
 支持 20 种边框样式：
+
+<details>
+<summary>展开查看 Type A–T 样式清单</summary>
+
 - **Type A**：白色下边框 - 可调节边框高度（5%-30%），完整编辑面板
 - **Type B**：黑色下边框 - 正方形画布，图片居左，右侧显示参数和 Logo
 - **Type C**：横向布局 - Logo 在左侧，参数在右侧，纵向图片自动缩放字体
@@ -39,6 +43,8 @@
 - **Type R**：胶片边缘打印 - Pentax 645N 风格黑色胶片底 + 画面窗口 + 右侧竖排橙色参数打印，画布锁定 645 单帧比例
 - **Type S**：留白排版 - 白色画布 + 居中正方形照片（82%）+ 左上两行文字 + 右侧竖排日期与倒三角标记 + 右下参数，比例 1:1 / 1:1.35
 - **Type T**：满幅无边框 - 照片铺满整张画布 + 左上两行文字 + 右侧竖排日期与倒三角标记 + 右下参数，文字带淡阴影，比例 1:1 / 1:1.35
+
+</details>
 
 ### 📝 边框信息编辑
 - Logo 显示开关
@@ -85,10 +91,20 @@ Apple、Canon、DJI、Fujifilm、Google、GoPro、Hasselblad、Leica、Lumix、N
 ## 🚀 部署
 
 ### 环境要求
-- Docker
-- Docker Compose
+- **Cloudflare Pages 方式**：仅需 GitHub 账号（浏览器操作，免费）
+- **Docker 方式**：Docker + Docker Compose
 
-### 方式一：Docker Compose（推荐）
+### 方式一：Cloudflare Pages（推荐 · 免费静态托管）
+
+1. Fork 本仓库到你的 GitHub 账号
+2. 登录 [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**
+3. 选择 Fork 的仓库，配置构建设置：
+   - **Build command**：留空
+   - **Build output directory**：`src/renderer`
+4. 点击 **Save and Deploy**
+5. 部署完成后会分配 `*.pages.dev` 域名，可在 **Custom domains** 中修改子域名或绑定自定义域名
+
+### 方式二：Docker Compose（NAS 部署）
 
 ```bash
 # 克隆项目
@@ -99,9 +115,11 @@ cd OneFrame-nas
 docker compose up --build -d
 ```
 
-### 方式二：使用预编译镜像（无需构建）
+### 方式三：使用预编译镜像（无需构建）
 
 从 [GitHub Releases](https://github.com/IceyVanci/OneFrame-nas/releases) 下载预编译镜像文件，无需本地构建：
+
+> 注意：Releases 中的 tar 为各版本发布时的构建产物，**可能落后于仓库最新代码**；需要最新功能请使用方式一/方式二从源码部署。
 
 ```bash
 # 下载镜像文件（在 Release 页面下载 .tar 文件）
@@ -111,16 +129,6 @@ docker load -i oneframe-web-v1.21-nas.tar
 # 运行容器
 docker run -d -p 8888:80 --name oneframe-web --restart unless-stopped oneframe-nas-oneframe:latest
 ```
-
-### 方式三：Cloudflare Pages（免费静态托管）
-
-1. Fork 本仓库到你的 GitHub 账号
-2. 登录 [dash.cloudflare.com](https://dash.cloudflare.com) → **Workers & Pages** → **Create** → **Pages** → **Connect to Git**
-3. 选择 Fork 的仓库，配置构建设置：
-   - **Build command**：留空
-   - **Build output directory**：`src/renderer`
-4. 点击 **Save and Deploy**
-5. 部署完成后会分配 `*.pages.dev` 域名，可在 **Custom domains** 中修改子域名或绑定自定义域名
 
 ### 访问（Docker）
 
@@ -240,13 +248,13 @@ docker compose up --build
 
 - [docs/README.md](./docs/README.md) - **项目完整说明**（架构 / 20 样式 / 统一预览缩放机制 / 开发指南）
 - [CHANGELOG.md](./CHANGELOG.md) - 全版本更新日志
-- [docs/changelogs/](./docs/changelogs/) - 历史版本记录（v1.08–v1.21：Release 说明 + 详细变更）
-- [docs/archive/](./docs/archive/) - 更早版本归档（v1.00–v1.09 记录与历史报告）
+- [docs/changelogs/](./docs/changelogs/) - 历史版本记录（v1.00–v1.21：Release 说明 + 详细变更）
+- [docs/archive/](./docs/archive/) - 更早归档（迁移指南与历史报告等）
 - [docs/release-v1.21-nas.md](./docs/changelogs/release-v1.21-nas.md) - v1.21 Release 说明（预览画布缩放统一）
 - [docs/V1.21-NAS_CHANGES.md](./docs/changelogs/V1.21-NAS_CHANGES.md) - v1.21 详细变更（P1–P4 分阶段明细与验证数据）
-- [docs/migration-guide.md](./docs/migration-guide.md) - Electron → Docker 移植指南
-- [docs/AI_PROJECT_GUIDE.md](./docs/AI_PROJECT_GUIDE.md) - AI 项目认知指南（v1.16 时代，部分过时）
-- [docs/function_analysis.md](./docs/function_analysis.md) - 函数分析文档（早期版本，部分过时）
+- [docs/archive/migration-guide.md](./docs/archive/migration-guide.md) - Electron → Docker 移植指南
+- [docs/AI_PROJECT_GUIDE.md](./docs/AI_PROJECT_GUIDE.md) - AI 项目认知指南（v1.21 现状）
+- [docs/function_analysis.md](./docs/function_analysis.md) - 函数分析文档（v1.21 重构版）
 
 ---
 
